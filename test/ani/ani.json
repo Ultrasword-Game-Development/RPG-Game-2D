@@ -1,0 +1,16 @@
+{
+    "name": "test",
+    "base_path": "test/images",
+    "pre": null,
+    "ext": null,
+    "images": [
+        "kirb.jpeg",
+        "kirb.jpeg",
+        "test1.png"
+    ],
+    "size": [
+        63,
+        63
+    ],
+    "fps": 4
+}

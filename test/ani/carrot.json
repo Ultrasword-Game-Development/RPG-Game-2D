@@ -1,0 +1,18 @@
+{
+    "name": "carrot",
+    "base_path": "test/images",
+    "image": "carrot_sheet.png",
+    "sprite_area": [
+        16,
+        16
+    ],
+    "size": [
+        63,
+        63
+    ],
+    "spacing": [
+        0,
+        0
+    ],
+    "fps": 4
+}
