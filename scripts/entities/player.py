@@ -1,9 +1,9 @@
-from engine import handler
+from engine import entity
 
 
 
-class Player(handler.PersistentObject):
+class Player(entity.Entity):
     def __init__(self):
         super().__init__()
-        self
+        
 
