@@ -37,13 +37,11 @@ class Timer:
         self.wait_time = wait_time
         self.changed = False
 
-    def update(self, dt):
-        self.st += dt
+    def update(self):
+        self.st += delta_time
         if self.st > self.wait_time:
             self.st = 0
             self.changed = True
-        
-    def is_changed(self):
-        return self.changed
+
 
 

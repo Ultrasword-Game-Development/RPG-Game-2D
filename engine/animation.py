@@ -22,7 +22,6 @@ class Registry:
         self.parent = parent
         self.fnum = 0
         self.tpass = 0.0
-        self.changed = True
 
     def update(self):
         self.tpass += clock.delta_time
@@ -36,7 +35,17 @@ class Registry:
         """Get the frame"""
         return self.parent.frames[self.fnum].frame
 
+    def change_dataset(self, new: str):
+        """Change the animation data set"""
+        if new in self.parent.parent.anims:
+            self.parent = self.parent.parent.anims[new]
+            self.fnum = 0
+            self.tpass = 0.0
+            self.changed = True
 
+    def get_hitbox(self):
+        """Get hitbox at a certain frame"""
+        return self.parent.frames[self.fnum].hitbox
 
 class FrameData:
     """
@@ -68,6 +77,7 @@ class FrameData:
 
         # get the frame
         self.frame = None
+        self.hitbox = pygame.Rect(0, 0, s_size['w'], s_size['h'])
     
     def get_sprite(self):
         """After loading data + parsing aseprite | call this to get the image"""
@@ -79,7 +89,6 @@ class FrameData:
     @staticmethod
     def __sort__(x):
         return x.frame_number
-
 
 class AnimationDataSet:
     def __init__(self, name, sprite, frames, parent):
@@ -99,10 +108,15 @@ class AnimationDataSet:
         for f in self.frames:
             f.parent = self
             f.get_sprite()
-    
+
     def get_registry(self):
         """Get a registry to access frames"""
         return Registry(self)
+    
+    def hitbox_analysis(self):
+        """Perform hitbox analysis"""
+        for f in self.frames:
+            f.hitbox = find_and_remove_image_hitbox(f.frame)
 
 class Category:
     CATEGORIES = {}
@@ -146,6 +160,7 @@ def load_and_parse_aseprite_animation(filepath):
         result = Category(category, {})
         for animation in parsedframedata[category]:
             result.anims[animation] = AnimationDataSet(animation, Filehandler.get_image(os.path.join(os.path.dirname(filepath), image)), parsedframedata[category][animation], result)
+            result.anims[animation].hitbox_analysis()
         Category.CATEGORIES[category] = result
 
 def parse_frame_data(framedata) -> dict:
@@ -168,7 +183,7 @@ def parse_frame_data(framedata) -> dict:
             result[cat][ani].sort(key=FrameData.__sort__)
     return result
 
-def find_image_hitbox(image):
+def find_and_remove_image_hitbox(image):
     """Find hitboxes on an image given hitbox color"""
     size = image.get_size()
     result = pygame.Rect(0, 0, size[0], size[1])
@@ -180,6 +195,7 @@ def find_image_hitbox(image):
         for y in range(size[1]):
             if image.get_at((x,y)) == HORIZONTAL_HITBOX_COL:
                 result.x = x+1
+                image.set_at((x,y), (0, 0, 0, 0))
                 done = True
                 break
         if done:
@@ -192,6 +208,7 @@ def find_image_hitbox(image):
         for y in range(size[1]):
             if image.get_at((x,y)) == HORIZONTAL_HITBOX_COL:
                 result.w = x-result.x
+                image.set_at((x,y), (0, 0, 0, 0))
                 done = True
                 break
         if done:
@@ -204,6 +221,7 @@ def find_image_hitbox(image):
         for y in range(hfy):
             if image.get_at((x,y)) == VERTICAL_HITBOX_COL:
                 result.y = y+1
+                image.set_at((x,y), (0, 0, 0, 0))
                 done = True
                 break
         if done:
@@ -216,13 +234,13 @@ def find_image_hitbox(image):
         for y in range(size[1]-1, hfy-1, -1):
             if image.get_at((x,y)) == VERTICAL_HITBOX_COL:
                 result.h = y - result.y
+                image.set_at((x,y), (0, 0, 0, 0))
                 done = True
                 break
         if done:
             break
     if not done:
         result.h = size[1] - result.y
-    print(result)
     return result
 
 
