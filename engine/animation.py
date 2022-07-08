@@ -2,6 +2,7 @@ import json
 import os
 import pygame
 
+from .globals import *
 from .filehandler import Filehandler
 from . import clock
 
@@ -166,6 +167,64 @@ def parse_frame_data(framedata) -> dict:
         for ani in result[cat]:
             result[cat][ani].sort(key=FrameData.__sort__)
     return result
+
+def find_image_hitbox(image):
+    """Find hitboxes on an image given hitbox color"""
+    size = image.get_size()
+    result = pygame.Rect(0, 0, size[0], size[1])
+    hfx = size[0]//2
+    hfy = size[1]//2
+    # look for left hitbox
+    done = False
+    for x in range(hfx):
+        for y in range(size[1]):
+            if image.get_at((x,y)) == HORIZONTAL_HITBOX_COL:
+                result.x = x+1
+                done = True
+                break
+        if done:
+            break
+    if not done:
+        result.x = 0
+    # look for right
+    done = False
+    for x in range(size[0]-1, hfx-1, -1):
+        for y in range(size[1]):
+            if image.get_at((x,y)) == HORIZONTAL_HITBOX_COL:
+                result.w = x-result.x
+                done = True
+                break
+        if done:
+            break
+    if not done:
+        result.w = size[0] - result.x
+    # look for top
+    done = False
+    for x in range(size[0]):
+        for y in range(hfy):
+            if image.get_at((x,y)) == VERTICAL_HITBOX_COL:
+                result.y = y+1
+                done = True
+                break
+        if done:
+            break
+    if not done:
+        result.y = 0
+    # look for bottom
+    done = False
+    for x in range(size[0]):
+        for y in range(size[1]-1, hfy-1, -1):
+            if image.get_at((x,y)) == VERTICAL_HITBOX_COL:
+                result.h = y - result.y
+                done = True
+                break
+        if done:
+            break
+    if not done:
+        result.h = size[1] - result.y
+    print(result)
+    return result
+
 
 
 

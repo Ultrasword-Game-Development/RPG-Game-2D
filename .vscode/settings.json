@@ -1,7 +1,6 @@
 {
   "files.autoSave": "onFocusChange",
   "git.ignoreLimitWarning": true,
-  "editor.fontFamily": "Consolas, Calibri, monospace",
   "editor.renderWhitespace": "trailing",
   "editor.cursorStyle": "block-outline",
   "editor.wordWrap": "on",
@@ -9,7 +8,7 @@
     "**/.git": false
   },
   "editor.colorDecorators": true,
-  "workbench.colorTheme": "Material Theme Darker High Contrast",
+  "workbench.colorTheme": "Community Material Theme Darker High Contrast",
   "workbench.sideBar.location": "left",
   "workbench.tree.expandMode": "doubleClick",
   "workbench.tree.renderIndentGuides": "none",

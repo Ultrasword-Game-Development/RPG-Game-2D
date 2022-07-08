@@ -20,6 +20,7 @@ fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
 animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
 image = animation.Category.get_category("player").get_animation("idle").get_registry()
 
+animation.find_image_hitbox(image.get_frame())
 
 # ----------------------------- #
 clock.start()
