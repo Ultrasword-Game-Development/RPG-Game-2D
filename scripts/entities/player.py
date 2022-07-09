@@ -18,11 +18,18 @@ class Player(entity.Entity):
         self.aregist = Player.ANIM_CATEGORY.get_animation(PLAYER_IDLE_ANIM).get_registry()
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
+        self.rect.x += self.hitbox.x
+        self.rect.y += self.hitbox.y
     
     def update(self):
         self.aregist.update()
         self.sprite = self.aregist.get_frame()
+        self.rect.x -= self.hitbox.x
+        self.rect.y -= self.hitbox.y
         self.hitbox = self.aregist.get_hitbox()
+        self.rect.w, self.rect.h = self.hitbox.w, self.hitbox.h
+        self.rect.x += self.hitbox.x
+        self.rect.y += self.hitbox.y
         # movement
         if user_input.is_key_pressed(pygame.K_d):
             self.motion.x += MOVE_SPEED * clock.delta_time
@@ -42,7 +49,9 @@ class Player(entity.Entity):
         window.blit(self.sprite, self.rect)
         entity.render_entity_hitbox(self, window)
 
-def setup():
-    Player.ANIM_CATEGORY = animation.Category.get_category(PLAYER_ANIM_CAT)
+
+# ------------ setup ----------- #
+animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
+Player.ANIM_CATEGORY = animation.Category.get_category(PLAYER_ANIM_CAT)
     
 

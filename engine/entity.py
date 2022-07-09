@@ -29,6 +29,7 @@ class Entity:
         # give id
         E_COUNT += 1
         self.id = E_COUNT
+        self.data = {}
         # define other variables
         self.name = str(self.id)
         self.dead = False

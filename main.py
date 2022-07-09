@@ -5,14 +5,8 @@ from engine import particle
 from engine.window import Window
 from engine.filehandler import *
 
-# -------- external imports --------- #
-
-from scripts.entities import player, particle_scripts
-
-# ----------------------------------- #
-
 WINDOW_CAPTION = "RPG Game"
-WINDOW_SIZE = [1280, 720]
+WINDOW_SIZE = [1280, int(1280/16*9)]
 FB_SIZE = [360, 202]
 
 FPS = 30
@@ -21,10 +15,18 @@ Window.create_window(WINDOW_CAPTION, WINDOW_SIZE[0], WINDOW_SIZE[1], pygame.RESI
 # window.set_icon()
 fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
 
-# --------- testing ----------- #
-animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
 
-player.setup()
+# -------- external imports --------- #
+
+from scripts.entities import player, particle_scripts
+
+# ----------------------------------- #
+
+# --------- testing ----------- #
+
+
+STATE = handler.Handler()
+
 
 ph = particle.ParticleHandler()
 ph.rect.topleft = (100, 100)
@@ -36,17 +38,17 @@ ph.update_func = particle_scripts.GRAVITY_PARTICLE_UPDATE
 
 p = player.Player()
 
+ph.data['player'] = p
 
+STATE.add_entity(p)
+STATE.add_entity(ph)
 
 # ----------------------------- #
 
 clock.start()
 while Window.running:
     fb.fill((255, 255, 255))
-    p.update()
-    ph.update()
-    p.render(fb)
-    ph.render(fb)
+    STATE.handle_entities(fb)
 
     # rescale framebuffer to window
     Window.instance.blit(pygame.transform.scale(fb, (Window.WIDTH, Window.HEIGHT)), (0,0))

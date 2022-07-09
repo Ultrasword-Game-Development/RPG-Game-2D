@@ -17,6 +17,21 @@ def GRAVITY_PARTICLE_UPDATE(ph, p, window):
         return
     # update position
     p[PARTICLE_MY] += GRAVITY * clock.delta_time
+    # interact with player
+    player = ph.data['player']
+    if player.rect.collidepoint(p[PARTICLE_X], p[PARTICLE_Y]):
+        # check for which side
+        if p[PARTICLE_X] > player.rect.centerx:
+            p[PARTICLE_MX] += 20
+        else:
+            p[PARTICLE_MX] -= 20
+        if p[PARTICLE_MY] < 0:
+            p[PARTICLE_Y] = player.rect.bottom
+            p[PARTICLE_MY] = 0
+        elif p[PARTICLE_Y] > player.rect.top:
+            p[PARTICLE_Y] = player.rect.top
+            p[PARTICLE_MY] = -abs(p[PARTICLE_MY]) * 0.3
+    
     p[PARTICLE_X] += p[PARTICLE_MX] * clock.delta_time
     p[PARTICLE_Y] += p[PARTICLE_MY] * clock.delta_time
     if p[PARTICLE_Y] > ph.rect.y:
