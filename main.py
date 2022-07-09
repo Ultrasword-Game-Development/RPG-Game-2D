@@ -3,7 +3,7 @@ import pygame
 from engine.globals import *
 
 from engine import clock, user_input, handler, animation
-from engine import particle, world, chunk, tile
+from engine import particle, world, chunk, tile, entity
 
 from engine.window import Window
 from engine.filehandler import *
@@ -38,12 +38,23 @@ ph.set_life(3)
 ph.create_func = particle_scripts.GRAVITY_PARTICLE_CREATE
 ph.update_func = particle_scripts.GRAVITY_PARTICLE_UPDATE
 
+tree = entity.Entity()
+tree.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_leaves1.png", (0.2, 0.2))
+tree.rect = tree.sprite.get_rect()
+trunk = entity.Entity()
+trunk.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_trunk_base1.png", (0.2, 0.2))
+trunk.rect = trunk.sprite.get_rect()
+trunk.rect.center = (tree.rect.centerx, tree.rect.bottom + trunk.rect.height)
+
+STATE.add_entity(tree)
+STATE.add_entity(trunk)
+
 p = player.Player()
 
 ph.data['player'] = p
 
 STATE.add_entity(p)
-# STATE.add_entity(ph)
+STATE.add_entity(ph)
 
 green_block = pygame.Surface((16,16), 0, 32)
 green_block.fill((0, 255, 0))

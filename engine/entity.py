@@ -18,6 +18,7 @@ class Entity:
         - sprite            = pygame.Surface
         - motion            = [float, float]
         - dead              = bool
+        - visible           = bool
         - rect              = pygame.Rect
         - touching          = [bool, bool, bool, bool]
         
@@ -35,6 +36,7 @@ class Entity:
         # define other variables
         self.name = str(self.id)
         self.dead = False
+        self.visible = True
 
         self.sprite = None
 
@@ -51,8 +53,10 @@ class Entity:
     def update(self):
         pass
 
-    def render(self):
-        pass
+    def render(self, surface):
+        """Default render"""
+        if self.visible and self.sprite:
+            surface.blit(self.sprite, self.rect)
 
 
 HITBOX_COLOR = (255, 0, 0)
