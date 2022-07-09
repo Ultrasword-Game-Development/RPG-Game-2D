@@ -1,15 +1,20 @@
 import pygame
+
+from engine.globals import *
+
 from engine import clock, user_input, handler, animation
-from engine import particle
+from engine import particle, world, chunk, tile
 
 from engine.window import Window
 from engine.filehandler import *
 
 WINDOW_CAPTION = "RPG Game"
-WINDOW_SIZE = [1280, int(1280/16*9)]
-FB_SIZE = [360, 202]
+WW = 1280
+WINDOW_SIZE = [WW, int(WW/16*9)]
+WW//=3
+FB_SIZE = [WW, int(WW/16*9)]
 
-FPS = 30
+FPS = 60
 
 Window.create_window(WINDOW_CAPTION, WINDOW_SIZE[0], WINDOW_SIZE[1], pygame.RESIZABLE, 16)
 # window.set_icon()
@@ -21,9 +26,6 @@ fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
 from scripts.entities import player, particle_scripts
 
 # ----------------------------------- #
-
-# --------- testing ----------- #
-
 
 STATE = handler.Handler()
 
@@ -41,13 +43,25 @@ p = player.Player()
 ph.data['player'] = p
 
 STATE.add_entity(p)
-STATE.add_entity(ph)
+# STATE.add_entity(ph)
+
+green_block = pygame.Surface((16,16), 0, 32)
+green_block.fill((0, 255, 0))
+
+WORLD = world.World()
+chunk = chunk.Chunk(0, 0)
+for x in range(TILEMAP_WIDTH):
+    chunk.get_tile_at(x, 3).sprite = green_block
+WORLD.add_chunk(chunk)
 
 # ----------------------------- #
 
 clock.start()
 while Window.running:
     fb.fill((255, 255, 255))
+    chunk.render(fb)
+
+
     STATE.handle_entities(fb)
 
     # rescale framebuffer to window

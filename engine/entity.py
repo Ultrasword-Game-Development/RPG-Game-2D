@@ -1,4 +1,5 @@
 import pygame
+from .globals import *
 
 E_COUNT = 0
 
@@ -12,12 +13,13 @@ class Entity:
         """
         Constructor for Entity Class
 
-        - id [int]
-        - name [str]
-        - sprite [pygame.Surface]
-        - motion [float, float]
-        - dead [bool]
-        - rect [pygame.Rect]
+        - id                = int
+        - name              = str
+        - sprite            = pygame.Surface
+        - motion            = [float, float]
+        - dead              = bool
+        - rect              = pygame.Rect
+        - touching          = [bool, bool, bool, bool]
         
         # for encoding / serializing
         - data [dict]
@@ -37,6 +39,8 @@ class Entity:
         self.sprite = None
 
         # physics
+        self.chunk = None
+        self.touching = [False]*4
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.hitbox = pygame.Rect(0, 0, 0, 0)
         self.motion = pygame.math.Vector2(0, 0)
