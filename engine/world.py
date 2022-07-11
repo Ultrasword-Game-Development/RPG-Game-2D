@@ -19,5 +19,9 @@ class World:
     def add_chunk(self, chunk):
         """Adds a chunk to the world"""
         self.chunks[chunk.id] = chunk
+    
+    def get_chunk(self, x: int, y: int):
+        """Get a chunk"""
+        return self.chunks.get(f"{x}-{y}")
 
 

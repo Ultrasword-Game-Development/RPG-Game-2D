@@ -20,7 +20,10 @@ class Entity:
         - dead              = bool
         - visible           = bool
         - rect              = pygame.Rect
+        - hitbox            = pygame.Rect
+        - rel_hitbox        = pygame.Rect
         - touching          = [bool, bool, bool, bool]
+        - chunk             = str "x-y"
         
         # for encoding / serializing
         - data [dict]
@@ -45,6 +48,7 @@ class Entity:
         self.touching = [False]*4
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.hitbox = pygame.Rect(0, 0, 0, 0)
+        self.rel_hitbox = pygame.Rect(0, 0, 0, 0)
         self.motion = pygame.math.Vector2(0, 0)
 
         # parents
@@ -57,6 +61,12 @@ class Entity:
         """Default render"""
         if self.visible and self.sprite:
             surface.blit(self.sprite, self.rect)
+        
+    def calculate_rel_hitbox(self):
+        """Calcuale data for rel_hitbox"""
+        self.rel_hitbox.topleft = (self.rect.x + self.hitbox.x, self.rect.y + self.hitbox.y)
+        self.rel_hitbox.w = self.hitbox.w
+        self.rel_hitbox.h = self.hitbox.h
 
 
 HITBOX_COLOR = (255, 0, 0)

@@ -39,3 +39,7 @@ class Chunk:
             for x in range(TILEMAP_WIDTH):
                 if self.tilemap[y][x].visible and self.tilemap[y][x].sprite:
                     surface.blit(self.tilemap[y][x].sprite, self.tilemap[y][x].world_hitbox)
+
+    def add_environment_object(self, obj):
+        """Add environment objects"""
+        self.environment.append(obj)

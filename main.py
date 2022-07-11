@@ -23,7 +23,8 @@ fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
 
 # -------- external imports --------- #
 
-from scripts.entities import player, particle_scripts
+from scripts.entities import player, mage
+from scripts.entities import particle_scripts
 
 # ----------------------------------- #
 
@@ -38,32 +39,37 @@ ph.set_life(3)
 ph.create_func = particle_scripts.GRAVITY_PARTICLE_CREATE
 ph.update_func = particle_scripts.GRAVITY_PARTICLE_UPDATE
 
-tree = entity.Entity()
-tree.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_leaves1.png", (0.2, 0.2))
-tree.rect = tree.sprite.get_rect()
-trunk = entity.Entity()
-trunk.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_trunk_base1.png", (0.2, 0.2))
-trunk.rect = trunk.sprite.get_rect()
-trunk.rect.center = (tree.rect.centerx, tree.rect.bottom + trunk.rect.height)
+# tree = entity.Entity()
+# tree.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_leaves1.png", (0.2, 0.2))
+# tree.rect = tree.sprite.get_rect()
+# trunk = entity.Entity()
+# trunk.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_trunk_base1.png", (0.2, 0.2))
+# trunk.rect = trunk.sprite.get_rect()
+# trunk.rect.center = (tree.rect.centerx, tree.rect.bottom + trunk.rect.height)
 
-STATE.add_entity(tree)
-STATE.add_entity(trunk)
+# STATE.add_entity(tree)
+# STATE.add_entity(trunk)
 
 p = player.Player()
+p.rect.topleft = (10,10)
+
+m = mage.Mage()
+m.rect.topleft = (40, 40)
 
 ph.data['player'] = p
 
 STATE.add_entity(p)
-STATE.add_entity(ph)
+STATE.add_entity(m)
+# STATE.add_entity(ph)
 
 green_block = pygame.Surface((16,16), 0, 32)
 green_block.fill((0, 255, 0))
 
 WORLD = world.World()
-chunk = chunk.Chunk(0, 0)
+WORLD.add_chunk(chunk.Chunk(0, 0))
+chunk = WORLD.get_chunk(0, 0)
 for x in range(TILEMAP_WIDTH):
     chunk.get_tile_at(x, 3).sprite = green_block
-WORLD.add_chunk(chunk)
 
 # ----------------------------- #
 
@@ -71,7 +77,6 @@ clock.start()
 while Window.running:
     fb.fill((255, 255, 255))
     chunk.render(fb)
-
 
     STATE.handle_entities(fb)
 
