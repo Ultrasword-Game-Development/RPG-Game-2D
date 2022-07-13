@@ -4,9 +4,12 @@ from engine.globals import *
 
 from engine import clock, user_input, handler, animation
 from engine import particle, world, chunk, tile, entity
+from engine import statehandler
 
 from engine.window import Window
 from engine.filehandler import *
+
+# --------- initialization -------------- #
 
 WINDOW_CAPTION = "RPG Game"
 WW = 1280
@@ -22,6 +25,8 @@ fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
 
 
 # -------- external imports --------- #
+
+from scripts import singleton
 
 from scripts.entities import player, mage
 from scripts.entities import particle_scripts
@@ -50,15 +55,15 @@ ph.update_func = particle_scripts.GRAVITY_PARTICLE_UPDATE
 # STATE.add_entity(tree)
 # STATE.add_entity(trunk)
 
-p = player.Player()
-p.rect.topleft = (10,10)
+singleton.PLAYER = player.Player()
+singleton.PLAYER.rect.topleft = (10,10)
 
 m = mage.Mage()
-m.rect.topleft = (40, 40)
+m.rect.topleft = (100, 100)
 
-ph.data['player'] = p
+ph.data['player'] = singleton.PLAYER
 
-STATE.add_entity(p)
+STATE.add_entity(singleton.PLAYER)
 STATE.add_entity(m)
 # STATE.add_entity(ph)
 

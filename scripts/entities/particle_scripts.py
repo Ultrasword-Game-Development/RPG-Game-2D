@@ -2,7 +2,7 @@ from engine import particle
 from engine import maths, clock
 
 from engine.particle import *
-from ..globals import *
+from .. import singleton
 
 
 def GRAVITY_PARTICLE_CREATE(ph):
@@ -16,7 +16,7 @@ def GRAVITY_PARTICLE_UPDATE(ph, p, window):
         ph.rq.append(p[PARTICLE_ID])
         return
     # update position
-    p[PARTICLE_MY] += GRAVITY * clock.delta_time
+    p[PARTICLE_MY] += singleton.GRAVITY * clock.delta_time
     # interact with player
     player = ph.data['player']
     # move x
