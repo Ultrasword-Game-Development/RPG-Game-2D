@@ -90,7 +90,7 @@
     "duration": 100
    },
    {
-    "filename": "mage-idle-0.aseprite",
+    "filename": "mage-pre_attack-0.aseprite",
     "frame": { "x": 0, "y": 16, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
@@ -99,7 +99,7 @@
     "duration": 100
    },
    {
-    "filename": "mage-idle-1.aseprite",
+    "filename": "mage-pre_attack-1.aseprite",
     "frame": { "x": 16, "y": 16, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
@@ -108,7 +108,7 @@
     "duration": 100
    },
    {
-    "filename": "mage-idle-2.aseprite",
+    "filename": "mage-pre_attack-2.aseprite",
     "frame": { "x": 32, "y": 16, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
@@ -117,7 +117,7 @@
     "duration": 100
    },
    {
-    "filename": "mage-idle-3.aseprite",
+    "filename": "mage-pre_attack-3.aseprite",
     "frame": { "x": 48, "y": 16, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
@@ -126,7 +126,7 @@
     "duration": 100
    },
    {
-    "filename": "mage-idle-4.aseprite",
+    "filename": "mage-pre_attack-4.aseprite",
     "frame": { "x": 64, "y": 16, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
@@ -135,7 +135,7 @@
     "duration": 100
    },
    {
-    "filename": "mage-idle-5.aseprite",
+    "filename": "mage-pre_attack-5.aseprite",
     "frame": { "x": 80, "y": 16, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
@@ -144,8 +144,98 @@
     "duration": 100
    },
    {
+    "filename": "mage-casting-0.aseprite",
+    "frame": { "x": 0, "y": 32, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-casting-1.aseprite",
+    "frame": { "x": 16, "y": 32, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-casting-2.aseprite",
+    "frame": { "x": 32, "y": 32, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-casting-3.aseprite",
+    "frame": { "x": 48, "y": 32, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-idle-0.aseprite",
+    "frame": { "x": 0, "y": 48, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-idle-1.aseprite",
+    "frame": { "x": 16, "y": 48, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-idle-2.aseprite",
+    "frame": { "x": 32, "y": 48, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-idle-3.aseprite",
+    "frame": { "x": 48, "y": 48, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-idle-4.aseprite",
+    "frame": { "x": 64, "y": 48, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
+    "filename": "mage-idle-5.aseprite",
+    "frame": { "x": 80, "y": 48, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 100
+   },
+   {
     "filename": "mage-idle-6.aseprite",
-    "frame": { "x": 96, "y": 16, "w": 16, "h": 16 },
+    "frame": { "x": 96, "y": 48, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
@@ -154,7 +244,7 @@
    },
    {
     "filename": "mage-idle-7.aseprite",
-    "frame": { "x": 112, "y": 16, "w": 16, "h": 16 },
+    "frame": { "x": 112, "y": 48, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
@@ -163,7 +253,7 @@
    },
    {
     "filename": "mage-idle-8.aseprite",
-    "frame": { "x": 128, "y": 16, "w": 16, "h": 16 },
+    "frame": { "x": 128, "y": 48, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
@@ -172,7 +262,7 @@
    },
    {
     "filename": "mage-idle-9.aseprite",
-    "frame": { "x": 144, "y": 16, "w": 16, "h": 16 },
+    "frame": { "x": 144, "y": 48, "w": 16, "h": 16 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
@@ -185,12 +275,14 @@
   "version": "1.2.32-x64",
   "image": "mage.png",
   "format": "RGBA8888",
-  "size": { "w": 160, "h": 32 },
+  "size": { "w": 160, "h": 64 },
   "scale": "1",
   "frameTags": [
   ],
   "layers": [
    { "name": "run", "opacity": 255, "blendMode": "normal" },
+   { "name": "pre_attack", "opacity": 255, "blendMode": "normal" },
+   { "name": "casting", "opacity": 255, "blendMode": "normal" },
    { "name": "idle", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [

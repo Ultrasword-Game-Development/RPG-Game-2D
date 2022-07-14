@@ -41,11 +41,10 @@ class Player(entity.Entity):
 
     def render(self, surface):
         surface.blit(self.sprite, self.rect)
-        entity.render_entity_hitbox(self, surface)
+        # entity.render_entity_hitbox(self, surface)
 
 
 # ------------ setup ----------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
 Player.ANIM_CATEGORY = animation.Category.get_category(PLAYER_ANIM_CAT)
-    
 

@@ -18,10 +18,12 @@ class Registry:
         - parent                = AnimationDataSet
         - fnum                  = int
         - tpass                 = float
+        - fini                  = int (# times it loops)
         """
         self.parent = parent
         self.fnum = 0
         self.tpass = 0.0
+        self.fini = 0
 
     def update(self):
         self.tpass += clock.delta_time
@@ -30,6 +32,7 @@ class Registry:
             self.fnum += 1
             if self.fnum >= self.parent.length:
                 self.fnum = 0
+                self.fini += 1
 
     def get_frame(self):
         """Get the frame"""
@@ -65,7 +68,8 @@ class FrameData:
         - duration                  = duraction
 
         Loaded after creation
-        - the frame image           = frame
+        - origin frame image        = pygame.Surface
+        - the frame image           = pygame.Surface
         """
         self.parent = None
         self.frame_number = 0
@@ -76,12 +80,38 @@ class FrameData:
         self.trimmed = trim
 
         # get the frame
+        self.oframe = None
         self.frame = None
+        self.ohitbox = pygame.Rect(0, 0, s_size['w'], s_size['h'])
         self.hitbox = pygame.Rect(0, 0, s_size['w'], s_size['h'])
+        self.scale = 1
     
     def get_sprite(self):
         """After loading data + parsing aseprite | call this to get the image"""
-        self.frame = self.parent.sprite.subsurface(self.sprite_source_location)
+        self.oframe = self.parent.sprite.subsurface(self.sprite_source_location)
+        self.frame = self.oframe
+    
+    def rescale_sprite(self, scale):
+        """Resize a sprite based off scale"""
+        self.scale = scale
+        self.frame = pygame.transform.scale(self.oframe, (int(self.oframe.get_size()[0]*scale), int(self.oframe.get_size()[1]*scale)))
+        self.update_hitbox()
+
+    def set_hitbox(self, new):
+        """Set the hitbox to new hitbox"""
+        self.ohitbox = new
+        self.update_hitbox()
+    
+    def update_hitbox(self):
+        ls, ts = self.ohitbox.x / self.sprite_source_location.w, self.ohitbox.y / self.sprite_source_location.h
+        rs, bs = self.ohitbox.right / self.sprite_source_location.w, self.ohitbox.bottom / self.sprite_source_location.h
+        # print(ls, ts, rs, bs)
+        
+        newsize = self.oframe.get_size()
+        self.hitbox.x = int(ls*newsize[0]*self.scale)
+        self.hitbox.y = int(ts*newsize[1]*self.scale)
+        self.hitbox.w = int((rs-ls)*newsize[0]*self.scale)
+        self.hitbox.h = int((bs-ts)*newsize[1]*self.scale)
 
     def __str__(self):
         return f"{self.frame_number}-{self.source_size}"
@@ -116,7 +146,24 @@ class AnimationDataSet:
     def hitbox_analysis(self):
         """Perform hitbox analysis"""
         for f in self.frames:
-            f.hitbox = find_and_remove_image_hitbox(f.frame)
+            f.set_hitbox(find_and_remove_image_hitbox(f.frame))
+
+    def rescale_images(self, scale: float):
+        """Resize all sprite images"""
+        for fd in self.frames:
+            fd.rescale_sprite(scale)
+        
+    def get_frame_dimensions(self, index):
+        """get the sprite dimensions"""
+        return self.frames[index].frame.get_size()
+    
+    def __sizeof__(self):
+        """Get the amount of frames"""
+        return self.length
+    
+    def get_frame_count(self):
+        """Get the amount of frames"""
+        return self.length
 
 class Category:
     CATEGORIES = {}
@@ -141,6 +188,15 @@ class Category:
     def get_animation(self, name):
         """Get an animation"""
         return self.anims[name]
+    
+    def rescale_all_animation(self, scale):
+        """Rescale all animation"""
+        for aname, anim in self.anims.items():
+            anim.rescale_images(scale)
+    
+    def create_registry_for_all(self):
+        """Creates a dict of registries to be used"""
+        return {ani.name: ani.get_registry() for ani in self.anims.values()}
 
 
 def load_and_parse_aseprite_animation(filepath):
