@@ -10,6 +10,7 @@ PLAYER_RUN_ANIM = "run"
 MOVE_SPEED = 30
 LERP_COEF = 0.3
 
+
 class Player(entity.Entity):
     ANIM_CATEGORY = None
 

@@ -23,5 +23,11 @@ class World:
     def get_chunk(self, x: int, y: int):
         """Get a chunk"""
         return self.chunks.get(f"{x}-{y}")
+    
+    def handle_chunks(self, surface):
+        """Handles rendering of chunks"""
+        # print("handling chunks")
+        # TODO - create system for rendering chunks
+        pass
 
 

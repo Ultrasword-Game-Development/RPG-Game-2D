@@ -4,7 +4,7 @@ from engine.globals import *
 
 from engine import clock, user_input, handler, animation
 from engine import particle, world, chunk, tile, entity
-from engine import statehandler
+from engine import statehandler, scenehandler
 
 from engine.window import Window
 from engine.filehandler import *
@@ -28,12 +28,14 @@ fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
 
 from scripts import singleton
 
-from scripts.entities import player, mage
+from scripts.entities import player, mage, fireball
 from scripts.entities import particle_scripts
 
 # ----------------------------------- #
 
-STATE = handler.Handler()
+__scene = scenehandler.Scene()
+scenehandler.SceneHandler.push_state(__scene)
+STATE = __scene.handler
 
 
 ph = particle.ParticleHandler()
@@ -63,28 +65,37 @@ m.rect.topleft = (100, 100)
 
 ph.data['player'] = singleton.PLAYER
 
+f = fireball.Fire()
+f.rect.topleft = (30, 30)
+
 STATE.add_entity(singleton.PLAYER)
 STATE.add_entity(m)
+STATE.add_entity(f)
 # STATE.add_entity(ph)
 
 green_block = pygame.Surface((16,16), 0, 32)
 green_block.fill((0, 255, 0))
 
-WORLD = world.World()
+
+WORLD = __scene.world
 WORLD.add_chunk(chunk.Chunk(0, 0))
 chunk = WORLD.get_chunk(0, 0)
-for x in range(TILEMAP_WIDTH):
-    chunk.get_tile_at(x, 3).sprite = green_block
+for y in range(TILEMAP_HEIGHT):
+    for x in range(TILEMAP_WIDTH):
+        chunk.get_tile_at(x, y).sprite = green_block
 
 # ----------------------------- #
 
 clock.start()
 while Window.running:
     fb.fill((255, 255, 255))
+
     chunk.render(fb)
 
-    STATE.handle_entities(fb)
-
+    if scenehandler.SceneHandler.CURRENT:
+        scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
+        scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)
+    
     # rescale framebuffer to window
     Window.instance.blit(pygame.transform.scale(fb, (Window.WIDTH, Window.HEIGHT)), (0,0))
 

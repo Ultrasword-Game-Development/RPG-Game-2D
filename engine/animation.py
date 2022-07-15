@@ -226,6 +226,7 @@ def parse_frame_data(framedata) -> dict:
         fname = f["filename"].split('-')
         category_name = fname[0]
         ani_name = fname[1]
+        print(fname)
         f_num = int(fname[2].split('.')[0])
         frame = FrameData(f_num, f["rotated"], f["trimmed"], f["sourceSize"], f["frame"], f["duration"]/1000)
         if category_name not in result:
