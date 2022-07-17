@@ -6,14 +6,16 @@ from engine import statehandler, particle, scenehandler
 from engine.globals import *
 
 
-from scripts import singleton
-from scripts.game import state
+from scripts import singleton, entityext
+from scripts.game import state, skillhandler
 from scripts.entities import fireball
 from scripts.entities.attacks import mage_atk
 
 # ---------- CONST VALUES ---------
 
 ENTITY_NAME = "MAGE"
+MAGE_HEALTH = 100
+MAGE_MANA = 100
 
 # -------- animations ------------
 
@@ -55,6 +57,13 @@ MAGE_PARTICLE_COLOR = (255, 0, 100)
 
 MAGE_ALERT_PRECAST_CDR = 1.0
 MAGE_DEFAULT_CASTING_CDR = 3.0
+
+# ---------- MAGE SKILLS ---------
+
+SKILL_FIREBALL = fireball.FireBallSkill()
+
+MAGE_SKILLS = skillhandler.SkillHandler()
+MAGE_SKILLS.add_skill(SKILL_FIREBALL)
 
 
 # TODO:
@@ -173,8 +182,8 @@ class MagePostcastState(state.EntityState):
                 # case 1 fulfilled, begin alrt
                 # add finished spell to world
                 fire = mage_atk.MageFireBall()
-                fire.rect.center = self.parent.rect.center
-                fire.motion = self.parent.player_dis.normalize()
+                fire.position = maths.convert_array_to_int(self.parent.rect.center)
+                fire.motion = self.parent.player_dis.normalize() * 2
                 scenehandler.SceneHandler.CURRENT.handler.add_entity(fire)
                 self.handler.set_active_state(MAGE_ALERT_STATE)
         # case 2: interrupted -> backlash 
@@ -265,18 +274,15 @@ class MageParticleHandler(particle.ParticleHandler):
         self.set_life(MAGE_PARTICLE_LIFE)
         self.set_create_func(particle_create)
         self.set_update_func(particle_update)
-    
-    def update(self):
-        pass
 
 
 # -------- mage class ------------------- #
 
-class Mage(entity.Entity):
+class Mage(entityext.GameEntity):
     ANIM_CATEGORY = None
 
     def __init__(self):
-        super().__init__()
+        super().__init__(ENTITY_NAME, MAGE_HEALTH, MAGE_MANA)
         self.aregist = Mage.ANIM_CATEGORY.create_registry_for_all()
         self.sprite = self.aregist[MAGE_IDLE_ANIM].get_frame()
         self.hitbox = self.aregist[MAGE_IDLE_ANIM].get_hitbox()
@@ -286,10 +292,11 @@ class Mage(entity.Entity):
         # state handler
         self.shandler = MageStateHandler(self)
         self.phandler = MageParticleHandler(self)
+        self.fire_phandler = fireball.FireParticleHandler(self)
     
     def update(self):
-        self.player_dis.x = singleton.PLAYER.rect.x - self.rect.x
-        self.player_dis.y = singleton.PLAYER.rect.y - self.rect.y
+        self.player_dis.x = singleton.PLAYER.rect.centerx - self.rect.centerx
+        self.player_dis.y = singleton.PLAYER.rect.centery - self.rect.centery
         self.shandler.player_dis = self.player_dis.magnitude()
 
         self.shandler.update()
@@ -309,3 +316,5 @@ class Mage(entity.Entity):
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
 Mage.ANIM_CATEGORY = animation.Category.get_category(MAGE_ANIM_CAT)
+
+

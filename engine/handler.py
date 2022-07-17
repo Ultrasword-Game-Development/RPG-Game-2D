@@ -12,7 +12,9 @@ class Handler:
         - stores arrays of pygame.sprite.Group objects
         """
         self.entity_buffer = {}
-        self.entities = []
+        self.entities = set()
+        self.to_add = []
+        self.to_remove = []
 
         # world
         self.world = world.World()
@@ -22,17 +24,28 @@ class Handler:
         for i in self.entities:
             self.entity_buffer[i].update()
             self.entity_buffer[i].render(window)
+        self.handle_changes()
     
     def add_entity(self, entity):
         """Add an entity"""
         entity.group = self
-        self.entity_buffer[entity.id] = entity
-        self.entities.append(entity.id)
+        self.to_add.append(entity)
     
+    def handle_changes(self):
+        """Handles adding + removal of entities"""
+        for entity in self.to_add:
+            self.entity_buffer[entity.id] = entity
+            self.entities.add(entity.id)
+        for eid in self.to_remove:
+            self.entity_buffer[eid] = None
+            self.entities.remove(eid)
+        self.to_add.clear()
+        self.to_remove.clear()
+
     def remove_entity(self, i):
         """Remove an entity"""
-        self.entities[i].dead = True
-    
+        self.to_remove.append(i)
+
     def get_world(self):
         """Get world object"""
         return self.world

@@ -1,13 +1,16 @@
 import pygame
 
 from engine import *
-from scripts import animationext, singleton
+from engine.globals import *
 
+from scripts import animationext, singleton
+from scripts.game import skillhandler
 
 
 # ---------- CONST VALUES ---------
 
 ENTITY_NAME = "FIREBALL"
+SKILL_NAME = "FireBall"
 
 # -------- animations ------------
 
@@ -25,16 +28,21 @@ FIREBALL_ORIENTATION_COUNT = 8
 MOVE_SPEED = 25
 LERP_COEF = 0.3
 
+DEFAULT_FIRE_MAX_DISTANCE = 150
+SMOKE_MOVE_SPEED = 10
+
+
+CASTING_TIME = 2
+COOLDOWN_TIME = 3
+MANA_COST = 25
 
 # -------- fire particle handler -------------- #
 
 def particle_create(self):
     self.p_count += 1
     # calculate x and y
-    theta = maths.normalized_random() * 3.14
-    x = maths.math.sin(theta)*MAGE_PREFERED_DISTANCE + self.parent.rel_hitbox.centerx
-    y = maths.math.cos(theta)*MAGE_PREFERED_DISTANCE + self.parent.rel_hitbox.centery
-    self.particles[self.p_count] = [self.p_count, x, y, 1, self.start_life, 0, 0]
+    
+    self.particles[self.p_count] = [self.p_count, self.parent.rect.centerx, self.parent.rect.centery, 1, self.start_life, maths.normalized_random() * SMOKE_MOVE_SPEED, maths.normalized_random() * SMOKE_MOVE_SPEED]
 
 def particle_update(self, p, surface):
     p[PARTICLE_LIFE] -= clock.delta_time
@@ -42,13 +50,8 @@ def particle_update(self, p, surface):
         self.rq.append(p[PARTICLE_ID])
         return
     # update position
-    off = pygame.math.Vector2(self.parent.rel_hitbox.centerx - p[PARTICLE_X], self.parent.rel_hitbox.centery - p[PARTICLE_Y])
-    off.normalize_ip()
-    p[PARTICLE_MX] += off.x * clock.delta_time
-    p[PARTICLE_MY] += off.y * clock.delta_time
-
-    p[PARTICLE_X] += p[PARTICLE_MX]
-    p[PARTICLE_Y] += p[PARTICLE_MY]
+    p[PARTICLE_X] += p[PARTICLE_MX] * clock.delta_time
+    p[PARTICLE_Y] += p[PARTICLE_MY] * clock.delta_time
     # render
     pygame.draw.circle(surface, self.color, (p[PARTICLE_X], p[PARTICLE_Y]), 1)
 
@@ -59,12 +62,20 @@ class FireParticleHandler(particle.ParticleHandler):
         self.parent = parent
         self.set_color((255, 0, 100))
         self.set_freq(1/20)
-        self.set_life(2)
+        self.set_life(5)
         self.set_create_func(particle_create)
         self.set_update_func(particle_update)
+
+
+# ----------- skill ------------------- #
+
+class FireBallSkill(skillhandler.Skill):
+    def __init__(self):
+        super().__init__(SKILL_NAME, CASTING_TIME, COOLDOWN_TIME, MANA_COST)
     
-    def update(self):
-        pass
+    def activate(self):
+        return Fire()
+
 
 
 # ------------ fire class ------------- #
@@ -82,23 +93,32 @@ class Fire(entity.Entity):
         self.phandler = FireParticleHandler(self)
         # state handler for (creation + destruction + idle)
         # self.shandler = FireStateHandler(self)
+        self.max_distance = DEFAULT_FIRE_MAX_DISTANCE
+        self.distance_travelled = 0
+        self.position = list(self.rect.center)
 
     def update(self):
+        # standard stuff
         self.aregist.update()
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
         self.calculate_rel_hitbox()
-        self.motion.x += MOVE_SPEED * clock.delta_time
-        self.motion.y += MOVE_SPEED * clock.delta_time
         self.aregist.angle = self.motion.angle_to(singleton.DOWN)
         self.aregist.update_angle()
-
-        self.rect.centerx += round(self.motion.x)
-        self.rect.centery += round(self.motion.y)
-        self.motion *= LERP_COEF
+        self.phandler.update()
+        # kill check
+        self.distance_travelled += self.motion.magnitude()
+        if self.distance_travelled > self.max_distance:
+            self.kill()
+        # movement
+        self.position[0] += self.motion.x
+        self.position[1] += self.motion.y
+        self.rect.center = list(map(int, self.position))
 
     def render(self, surface):
         surface.blit(self.sprite, self.rect)
+        entity.render_entity_hitbox(self, surface)
+        self.phandler.render(surface)
 
 # ------------- setup ----------- #
 animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)

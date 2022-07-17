@@ -51,7 +51,7 @@ class RotatedRegistry(animation.Registry):
         self.index_offset = self.calc_index_offset() * self.parent.length
 
     def calc_index_offset(self):
-        return round(self.angle / self.parent.rot_angle) % self.parent.rot_angle % self.parent.rotations
+        return round((self.angle if self.angle > 0 else 360+self.angle) / self.parent.rot_angle) % self.parent.rot_angle % self.parent.rotations
     
     def update_angle(self):
         self.index_offset = self.calc_index_offset() * self.parent.length

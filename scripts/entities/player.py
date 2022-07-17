@@ -1,9 +1,16 @@
 import pygame
+
 from engine import entity, clock, maths
 from engine import animation, user_input
 
-PLAYER_ANIM_CAT = "player"
+from scripts import entityext
 
+ENTITY_NAME = "Player"
+PLAYER_HEALTH = 100
+PLAYER_MANA = 100
+
+
+PLAYER_ANIM_CAT = "player"
 PLAYER_IDLE_ANIM = "idle"
 PLAYER_RUN_ANIM = "run"
 
@@ -11,11 +18,11 @@ MOVE_SPEED = 30
 LERP_COEF = 0.3
 
 
-class Player(entity.Entity):
+class Player(entityext.GameEntity):
     ANIM_CATEGORY = None
 
     def __init__(self):
-        super().__init__()
+        super().__init__(ENTITY_NAME, PLAYER_HEALTH, PLAYER_MANA)
         self.aregist = Player.ANIM_CATEGORY.get_animation(PLAYER_IDLE_ANIM).get_registry()
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()

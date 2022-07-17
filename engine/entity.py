@@ -1,6 +1,8 @@
 import pygame
 from .globals import *
 
+from . import scenehandler
+
 E_COUNT = 0
 
 class Entity:
@@ -68,6 +70,9 @@ class Entity:
         self.rel_hitbox.w = self.hitbox.w
         self.rel_hitbox.h = self.hitbox.h
 
+    def kill(self):
+        """Kill an entity / remove it from the current state"""
+        scenehandler.SceneHandler.CURRENT.handler.remove_entity(self.id)
 
 HITBOX_COLOR = (255, 0, 0)
 
