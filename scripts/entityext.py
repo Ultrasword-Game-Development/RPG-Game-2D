@@ -7,4 +7,5 @@ class GameEntity(entity.Entity):
         self.name = name
         self.health = health
         self.mana = mana
+        self.level = 1
 
