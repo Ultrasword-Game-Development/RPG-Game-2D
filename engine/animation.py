@@ -145,6 +145,7 @@ class AnimationDataSet:
     
     def hitbox_analysis(self):
         """Perform hitbox analysis"""
+        print(self.name)
         for f in self.frames:
             f.set_hitbox(find_and_remove_image_hitbox(f.frame))
 
@@ -152,14 +153,10 @@ class AnimationDataSet:
         """Resize all sprite images"""
         for fd in self.frames:
             fd.rescale_sprite(scale)
-        
+    
     def get_frame_dimensions(self, index):
         """get the sprite dimensions"""
         return self.frames[index].frame.get_size()
-    
-    def __sizeof__(self):
-        """Get the amount of frames"""
-        return self.length
     
     def get_frame_count(self):
         """Get the amount of frames"""
@@ -207,11 +204,14 @@ def load_and_parse_aseprite_animation(filepath):
     # loaded data - now parse data
     metadata = filedata["meta"]
     framedata = filedata["frames"]
-    # get relavant metadata
-    image = metadata["image"]
     # prase frame data
     parsedframedata = parse_frame_data(framedata)
     # create AnimationDataSet and Category Objects
+    load_categories(metadata, filepath, parsedframedata)
+
+def load_categories(metadata, filepath, parsedframedata):
+    """Given parsed frame data, all the animations are created and cached"""
+    image = metadata['image']
     for category in parsedframedata:
         result = Category(category, {})
         for animation in parsedframedata[category]:
@@ -226,7 +226,6 @@ def parse_frame_data(framedata) -> dict:
         fname = f["filename"].split('-')
         category_name = fname[0]
         ani_name = fname[1]
-        print(fname)
         f_num = int(fname[2].split('.')[0])
         frame = FrameData(f_num, f["rotated"], f["trimmed"], f["sourceSize"], f["frame"], f["duration"]/1000)
         if category_name not in result:

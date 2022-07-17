@@ -65,12 +65,12 @@ m.rect.topleft = (100, 100)
 
 ph.data['player'] = singleton.PLAYER
 
-f = fireball.Fire()
-f.rect.topleft = (30, 30)
+# f = fireball.Fire()
+# f.rect.topleft = (30, 30)
 
 STATE.add_entity(singleton.PLAYER)
 STATE.add_entity(m)
-STATE.add_entity(f)
+# STATE.add_entity(f)
 # STATE.add_entity(ph)
 
 green_block = pygame.Surface((16,16), 0, 32)

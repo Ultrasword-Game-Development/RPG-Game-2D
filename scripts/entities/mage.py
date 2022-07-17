@@ -9,7 +9,7 @@ from engine.globals import *
 from scripts import singleton
 from scripts.game import state
 from scripts.entities import fireball
-
+from scripts.entities.attacks import mage_atk
 
 # ---------- CONST VALUES ---------
 
@@ -85,7 +85,7 @@ class MageAlertState(state.EntityState):
         self.countdown = MAGE_ALERT_PRECAST_CDR
 
     def start(self):
-        print("alert")
+        # print("alert")
         self.countdown = MAGE_ALERT_PRECAST_CDR
 
     def update(self):
@@ -112,7 +112,7 @@ class MagePrecastState(state.EntityState):
         super().__init__(MAGE_PRECAST_STATE, parent)
     
     def start(self):
-        print("starting precast")
+        # print("starting precast")
         self.parent.aregist[MAGE_PRECAST_ANIM].fini = 0
     
     def update(self):
@@ -132,7 +132,7 @@ class MageCastingState(state.EntityState):
         self.casting_cdr = MAGE_DEFAULT_CASTING_CDR
     
     def start(self):
-        print("casting spell")
+        # print("casting spell")
         self.casting_cdr = MAGE_DEFAULT_CASTING_CDR
         # decide on an attack and set casting_cdr depending on attack
     
@@ -146,7 +146,7 @@ class MageCastingState(state.EntityState):
         self.casting_cdr -= clock.delta_time
         if self.casting_cdr < 0:
             # case 1 fulfilled, begin alert state
-            print("attacking")
+            # print("attacking")
             self.handler.set_active_state(MAGE_POSTCAST_STATE)
 
 class MagePostcastState(state.EntityState):
@@ -172,8 +172,9 @@ class MagePostcastState(state.EntityState):
             if self.wparticle:
                 # case 1 fulfilled, begin alrt
                 # add finished spell to world
-                fire = fireball.Fire()
+                fire = mage_atk.MageFireBall()
                 fire.rect.center = self.parent.rect.center
+                fire.motion = self.parent.player_dis.normalize()
                 scenehandler.SceneHandler.CURRENT.handler.add_entity(fire)
                 self.handler.set_active_state(MAGE_ALERT_STATE)
         # case 2: interrupted -> backlash 

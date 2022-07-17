@@ -1,37 +1,32 @@
-from dataclasses import dataclass
+from engine import maths
 
-@dataclass(init=False)
-class Tile:
-    """
-    Tile Dataclass Object
-    - holds simple data
-    """
-    position: tuple
+def rot_rect_90deg(rect, orect):
+    """Rounds the rect to nearest orientation - counterclockwise"""
+    result = pygame.Rect(0, 0, 0, 0)
+    # newly rotate point
+    result.x = rect.y
+    result.y = orect.w-rect.right
+    result.w = rect.h
+    result.h = rect.w
 
-    def __init__(self, x, y):
-        """
-        Constructor for Tile
-        contains:
-        - position      = (int, int)
-        - world_hitbox  = pygame.Rect
-        - data          = dict {str: hashable /pickle-able value}
-        """
-        self.position = (x, y)
+    return result
 
-class BigTile:
-    def __init__(self, x, y):
-        self.position = (x, y)
 
-import time
+import pygame
 
-T = 8 * 8 * 10 * 10000
-st = time.time()
 
-for i in range(T):
-    Tile(1,2)
-print(time.time()-st)
-st = time.time()
-for i in range(T):
-    BigTile(1, 2)
-print(time.time()-st)
+
+rect = pygame.Rect(1, 1, 2, 1)
+orect = pygame.Rect(0, 0, 4, 4)
+angle = 90
+
+rect = rot_rect_90deg(rect, orect)
+print(rect)
+rect = rot_rect_90deg(rect, orect)
+print(rect)
+rect = rot_rect_90deg(rect, orect)
+print(rect)
+rect = rot_rect_90deg(rect, orect)
+print(rect)
+
 

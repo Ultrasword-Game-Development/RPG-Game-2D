@@ -1,6 +1,7 @@
 import pygame
 
 from engine import *
+from scripts import animationext, singleton
 
 
 
@@ -19,8 +20,10 @@ FIRE_IDLE_ANIM = "fire"
 
 # --------------------------------
 
-MOVE_SPEED = 25
+FIREBALL_ORIENTATION_COUNT = 8
 
+MOVE_SPEED = 25
+LERP_COEF = 0.3
 
 
 # -------- fire particle handler -------------- #
@@ -68,6 +71,7 @@ class FireParticleHandler(particle.ParticleHandler):
 
 class Fire(entity.Entity):
     ANIM_CATEGORY = None
+    ANGLE_CACHE = []
 
     def __init__(self):
         super().__init__()
@@ -84,16 +88,20 @@ class Fire(entity.Entity):
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
         self.calculate_rel_hitbox()
+        self.motion.x += MOVE_SPEED * clock.delta_time
+        self.motion.y += MOVE_SPEED * clock.delta_time
+        self.aregist.angle = self.motion.angle_to(singleton.DOWN)
+        self.aregist.update_angle()
 
-        self.rect.x += MOVE_SPEED * clock.delta_time
-        self.rect.y += MOVE_SPEED * clock.delta_time
+        self.rect.centerx += round(self.motion.x)
+        self.rect.centery += round(self.motion.y)
+        self.motion *= LERP_COEF
 
     def render(self, surface):
         surface.blit(self.sprite, self.rect)
 
 # ------------- setup ----------- #
-animation.load_and_parse_aseprite_animation("assets/particles/fire.json")
+animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)
 Fire.ANIM_CATEGORY = animation.Category.get_category(FIRE_ANIM_CAT)
-
 
 
