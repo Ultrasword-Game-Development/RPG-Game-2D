@@ -9,7 +9,6 @@ from engine.globals import *
 from scripts import singleton, entityext
 from scripts.game import state, skillhandler
 from scripts.entities import fireball
-from scripts.entities.attacks import mage_atk
 
 # ---------- CONST VALUES ---------
 
@@ -48,15 +47,15 @@ MAGE_CRITICAL_DEF_DISTANCE = 30
 
 
 PLERP_COEF = 0.97
-MAGE_PARTICLE_SPAWN_RADIUS = 50
-MAGE_PARTICLE_LIFE = 3
+MAGE_PARTICLE_SPAWN_RADIUS = 20
+MAGE_PARTICLE_LIFE = 0.1
 MAGE_PARTICLE_FREQ = 30
 MAGE_PARTICLE_COLOR = (255, 0, 100)
 
 # ---------- CDR TIMES ------------
 
-MAGE_ALERT_PRECAST_CDR = 1.0
-MAGE_DEFAULT_CASTING_CDR = 3.0
+MAGE_ALERT_PRECAST_CDR = 0.1
+MAGE_DEFAULT_CASTING_CDR = 0.1
 
 # ---------- MAGE SKILLS ---------
 
@@ -181,7 +180,8 @@ class MagePostcastState(state.EntityState):
             if self.wparticle:
                 # case 1 fulfilled, begin alrt
                 # add finished spell to world
-                fire = mage_atk.MageFireBall()
+                fire = fireball.Fire(self.parent, self.parent.atk_phandler)
+                self.parent.add_active_attack(fire)
                 fire.position = maths.convert_array_to_int(self.parent.rect.center)
                 fire.motion = self.parent.player_dis.normalize() * 2
                 scenehandler.SceneHandler.CURRENT.handler.add_entity(fire)
@@ -215,7 +215,6 @@ class MageFlightState(state.EntityState):
         elif self.handler.player_dis > MAGE_PREFERED_DISTANCE:
             # case 2 fulfilled, begin alert state
             self.handler.set_active_state(MAGE_ALERT_STATE)
-
 
 class MageStateHandler(statehandler.StateHandler):
     def __init__(self, mage):
@@ -292,7 +291,7 @@ class Mage(entityext.GameEntity):
         # state handler
         self.shandler = MageStateHandler(self)
         self.phandler = MageParticleHandler(self)
-        self.fire_phandler = fireball.FireParticleHandler(self)
+        self.atk_phandler = fireball.FireParticleHandler(self)
     
     def update(self):
         self.player_dis.x = singleton.PLAYER.rect.centerx - self.rect.centerx
@@ -312,6 +311,7 @@ class Mage(entityext.GameEntity):
         pygame.draw.circle(surface, (0, 100, 100), self.rel_hitbox.center, MAGE_CRITICAL_DEF_DISTANCE, width=1)
         # particle handler
         self.phandler.render(surface)
+        self.atk_phandler.render(surface)
 
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")

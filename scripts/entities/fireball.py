@@ -1,9 +1,10 @@
 import pygame
 
 from engine import *
+from engine.scenehandler import SceneHandler
 from engine.globals import *
 
-from scripts import animationext, singleton
+from scripts import animationext, singleton, entityext
 from scripts.game import skillhandler
 
 
@@ -31,6 +32,9 @@ LERP_COEF = 0.3
 DEFAULT_FIRE_MAX_DISTANCE = 150
 SMOKE_MOVE_SPEED = 10
 
+FIRE_PARTICLE_COLOR = (80, 10, 0)
+FIRE_PARTICLE_FREQ = 1/20
+FIRE_PARTICLE_LIFE = 5
 
 CASTING_TIME = 2
 COOLDOWN_TIME = 3
@@ -39,10 +43,11 @@ MANA_COST = 25
 # -------- fire particle handler -------------- #
 
 def particle_create(self):
-    self.p_count += 1
-    # calculate x and y
-    
-    self.particles[self.p_count] = [self.p_count, self.parent.rect.centerx, self.parent.rect.centery, 1, self.start_life, maths.normalized_random() * SMOKE_MOVE_SPEED, maths.normalized_random() * SMOKE_MOVE_SPEED]
+    for item in self.parent.activeatk:
+        if item not in self.parent.group.entities:
+            continue
+        self.p_count += 1
+        self.particles[self.p_count] = self.parent.group.entity_buffer[item].create_particle(self.p_count)
 
 def particle_update(self, p, surface):
     p[PARTICLE_LIFE] -= clock.delta_time
@@ -60,9 +65,9 @@ class FireParticleHandler(particle.ParticleHandler):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.set_color((255, 0, 100))
-        self.set_freq(1/20)
-        self.set_life(5)
+        self.set_color(FIRE_PARTICLE_COLOR)
+        self.set_freq(FIRE_PARTICLE_FREQ)
+        self.set_life(FIRE_PARTICLE_LIFE)
         self.set_create_func(particle_create)
         self.set_update_func(particle_update)
 
@@ -77,25 +82,28 @@ class FireBallSkill(skillhandler.Skill):
         return Fire()
 
 
-
 # ------------ fire class ------------- #
 
-class Fire(entity.Entity):
+class Fire(entityext.NonGameEntity):
     ANIM_CATEGORY = None
     ANGLE_CACHE = []
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, rent, phandler=None):
+        super().__init__(ENTITY_NAME, rent)
         self.aregist = Fire.ANIM_CATEGORY.get_animation(FIRE_IDLE_ANIM).get_registry()
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
         # particle handler for smoke + embers
-        self.phandler = FireParticleHandler(self)
+        if phandler:
+            self.phandler = phandler
+        else:
+            self.phandler = FireParticleHandler(self)
+        self.timer = clock.Timer(FIRE_PARTICLE_FREQ)
         # state handler for (creation + destruction + idle)
         # self.shandler = FireStateHandler(self)
         self.max_distance = DEFAULT_FIRE_MAX_DISTANCE
         self.distance_travelled = 0
-        self.position = list(self.rect.center)
+        self.position = [0, 0]
 
     def update(self):
         # standard stuff
@@ -105,20 +113,29 @@ class Fire(entity.Entity):
         self.calculate_rel_hitbox()
         self.aregist.angle = self.motion.angle_to(singleton.DOWN)
         self.aregist.update_angle()
-        self.phandler.update()
-        # kill check
-        self.distance_travelled += self.motion.magnitude()
-        if self.distance_travelled > self.max_distance:
-            self.kill()
+        self.timer.update()
+        if self.timer.changed:
+            self.timer.changed = False
+            self.phandler.create_particle()
         # movement
         self.position[0] += self.motion.x
         self.position[1] += self.motion.y
-        self.rect.center = list(map(int, self.position))
+        self.rect.centerx = self.position[0]
+        self.rect.centery = self.position[1]
+        # kill check
+        self.distance_travelled += self.motion.magnitude()
+        if self.distance_travelled > self.max_distance:
+            self.rentity.remove_active_attack(self)
+            self.kill()
 
     def render(self, surface):
         surface.blit(self.sprite, self.rect)
         entity.render_entity_hitbox(self, surface)
-        self.phandler.render(surface)
+        pygame.draw.rect(surface, (255,0,0), self.rect)
+
+    def create_particle(self, pid):
+        return [pid, self.rel_hitbox.centerx, self.rel_hitbox.centery, 1, FIRE_PARTICLE_LIFE, maths.normalized_random() * SMOKE_MOVE_SPEED, maths.normalized_random() * SMOKE_MOVE_SPEED]
+
 
 # ------------- setup ----------- #
 animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)

@@ -31,7 +31,7 @@ class Entity:
         - data [dict]
 
         # parents
-        - handler
+        - group            = Handler
         """
         global E_COUNT
         # give id

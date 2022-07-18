@@ -25,8 +25,6 @@ class SceneHandler:
         SceneHandler.CURRENT = None
         if SceneHandler.QUEUE:
             SceneHandler.CURRENT = SceneHandler.QUEUE[-1]
-        
-
 
 
 class Scene:
