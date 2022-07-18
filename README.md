@@ -1,18 +1,37 @@
 # RPG-Game-2D
+
 An RPG Game made in python using the pygame engine
 
 # Design
-Idk how to explain the design but its kinda confusing 
+
+Idk how to explain the design but its kinda confusing
 
 Here is an oversimplified mindmap for whats going on there
 
 ![MindMap](docs/mindmeister-mindmap.png)
 
 ## Handler
+
 The handler handles entities :)
 
-1. Entity
+![Handler](docs/mindmeister-handler.png)
 
-2. FiniteStateSystem
+### Entity
 
-3. ParticleHandler
+![Entity](docs/mindmeister-entity.png)
+
+### FiniteStateSystem
+
+![FiniteStateSystem](docs/mindmeister-finitestatesystem.png)
+
+#### State
+
+![State](docs/mindmeister-state.png)
+
+#### StateHandler
+
+![StateHandler](docs/mindmeister-statehandler.png)
+
+### ParticleHandler
+
+![ParticleHandler](docs/mindmeister-particlehandler.png)
