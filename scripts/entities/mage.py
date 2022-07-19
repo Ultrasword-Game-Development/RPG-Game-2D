@@ -6,7 +6,7 @@ from engine import statehandler, particle, scenehandler
 from engine.globals import *
 
 
-from scripts import singleton, entityext
+from scripts import singleton, entityext, skillext
 from scripts.game import state, skillhandler
 from scripts.entities import fireball
 
@@ -47,17 +47,19 @@ MAGE_CRITICAL_DEF_DISTANCE = 30
 
 
 PLERP_COEF = 0.97
-MAGE_PARTICLE_SPAWN_RADIUS = 20
-MAGE_PARTICLE_LIFE = 0.1
+MAGE_PARTICLE_SPAWN_RADIUS = MAGE_CRITICAL_DEF_DISTANCE
+MAGE_PARTICLE_LIFE = 2.0
 MAGE_PARTICLE_FREQ = 30
 MAGE_PARTICLE_COLOR = (255, 0, 100)
 
 # ---------- CDR TIMES ------------
 
-MAGE_ALERT_PRECAST_CDR = 0.1
-MAGE_DEFAULT_CASTING_CDR = 0.1
+MAGE_ALERT_PRECAST_CDR = 1.0
+MAGE_DEFAULT_CASTING_CDR = 2.3
 
 # ---------- MAGE SKILLS ---------
+
+MAGE_SKILL_TREE = skillhandler.SkillTree(skillext.SkillTreeLoader("assets/skilltree/mage.json"))
 
 SKILL_FIREBALL = fireball.FireBallSkill()
 
@@ -180,7 +182,8 @@ class MagePostcastState(state.EntityState):
             if self.wparticle:
                 # case 1 fulfilled, begin alrt
                 # add finished spell to world
-                fire = fireball.Fire(self.parent, self.parent.atk_phandler)
+                skill = self.parent.skhandler.get_skill(fireball.SKILL_NAME)
+                fire = skill.activate(self.parent, self.parent.atk_phandler)
                 self.parent.add_active_attack(fire)
                 fire.position = maths.convert_array_to_int(self.parent.rect.center)
                 fire.motion = self.parent.player_dis.normalize() * 2
@@ -290,9 +293,12 @@ class Mage(entityext.GameEntity):
         
         # state handler
         self.shandler = MageStateHandler(self)
+        # particle handlers
         self.phandler = MageParticleHandler(self)
         self.atk_phandler = fireball.FireParticleHandler(self)
-    
+        # skill tree
+        self.skhandler = MAGE_SKILL_TREE.get_registry(self)
+
     def update(self):
         self.player_dis.x = singleton.PLAYER.rect.centerx - self.rect.centerx
         self.player_dis.y = singleton.PLAYER.rect.centery - self.rect.centery

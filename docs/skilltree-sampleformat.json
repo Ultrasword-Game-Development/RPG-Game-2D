@@ -1,0 +1,22 @@
+{
+    "base": "basename",
+    "basename": {
+        "branch": ["leftchild", "rightchild"],
+        "limitation": {}
+    },
+    "leftchild": {
+        "branch": [null, "rightchildchild"],
+        "limitation": {
+            "entity-level": 5,
+            "skill-level": 4
+        }
+    },
+    "rightchild": {
+        "branch": [null, null],
+        "limitation": {}
+    },
+    "rightchildchild": {
+        "branch": [null, null],
+        "limitation": {}
+    }
+}

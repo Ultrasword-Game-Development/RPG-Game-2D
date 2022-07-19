@@ -8,30 +8,30 @@ Idk how to explain the design but its kinda confusing
 
 Here is an oversimplified mindmap for whats going on there
 
-![MindMap](docs/mindmeister-mindmap.png)
+![MindMap](docs/readme/mindmeister-mindmap.png)
 
 ## Handler
 
 The handler handles entities :)
 
-![Handler](docs/mindmeister-handler.png)
+![Handler](docs/readme/mindmeister-handler.png)
 
 ### Entity
 
-![Entity](docs/mindmeister-entity.png)
+![Entity](docs/readme/mindmeister-entity.png)
 
 ### FiniteStateSystem
 
-![FiniteStateSystem](docs/mindmeister-finitestatesystem.png)
+![FiniteStateSystem](docs/readme/mindmeister-finitestatesystem.png)
 
 #### State
 
-![State](docs/mindmeister-state.png)
+![State](docs/readme/mindmeister-state.png)
 
 #### StateHandler
 
-![StateHandler](docs/mindmeister-statehandler.png)
+![StateHandler](docs/readme/mindmeister-statehandler.png)
 
 ### ParticleHandler
 
-![ParticleHandler](docs/mindmeister-particlehandler.png)
+![ParticleHandler](docs/readme/mindmeister-particlehandler.png)

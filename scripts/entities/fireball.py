@@ -11,7 +11,7 @@ from scripts.game import skillhandler
 # ---------- CONST VALUES ---------
 
 ENTITY_NAME = "FIREBALL"
-SKILL_NAME = "FireBall"
+SKILL_NAME = "Fireball"
 
 # -------- animations ------------
 
@@ -34,7 +34,7 @@ SMOKE_MOVE_SPEED = 10
 
 FIRE_PARTICLE_COLOR = (80, 10, 0)
 FIRE_PARTICLE_FREQ = 1/20
-FIRE_PARTICLE_LIFE = 5
+FIRE_PARTICLE_LIFE = 3
 
 CASTING_TIME = 2
 COOLDOWN_TIME = 3
@@ -78,8 +78,8 @@ class FireBallSkill(skillhandler.Skill):
     def __init__(self):
         super().__init__(SKILL_NAME, CASTING_TIME, COOLDOWN_TIME, MANA_COST)
     
-    def activate(self):
-        return Fire()
+    def activate(self, *args):
+        return Fire(args[0], args[1])
 
 
 # ------------ fire class ------------- #
@@ -88,8 +88,8 @@ class Fire(entityext.NonGameEntity):
     ANIM_CATEGORY = None
     ANGLE_CACHE = []
 
-    def __init__(self, rent, phandler=None):
-        super().__init__(ENTITY_NAME, rent)
+    def __init__(self, r_ent, phandler=None):
+        super().__init__(ENTITY_NAME, r_ent)
         self.aregist = Fire.ANIM_CATEGORY.get_animation(FIRE_IDLE_ANIM).get_registry()
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
@@ -130,7 +130,7 @@ class Fire(entityext.NonGameEntity):
 
     def render(self, surface):
         surface.blit(self.sprite, self.rect)
-        entity.render_entity_hitbox(self, surface)
+        # entity.render_entity_hitbox(self, surface)
         pygame.draw.rect(surface, (255,0,0), self.rect)
 
     def create_particle(self, pid):
@@ -141,4 +141,5 @@ class Fire(entityext.NonGameEntity):
 animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)
 Fire.ANIM_CATEGORY = animation.Category.get_category(FIRE_ANIM_CAT)
 
+skillhandler.SkillHandler.add_skill(FireBallSkill())
 

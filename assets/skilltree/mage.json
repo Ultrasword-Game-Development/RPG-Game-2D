@@ -1,0 +1,7 @@
+{
+    "base": "Fireball",
+    "Fireball": {
+        "branch": [null, null],
+        "limitation": {}
+    }
+}
