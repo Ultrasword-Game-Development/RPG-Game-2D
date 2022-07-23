@@ -6,7 +6,7 @@ from engine import statehandler, particle, scenehandler
 from engine.globals import *
 
 
-from scripts import singleton, entityext, skillext
+from scripts import singleton, entityext, skillext, animationext
 from scripts.game import state, skillhandler
 from scripts.entities import fireball
 
@@ -72,7 +72,7 @@ MAGE_SKILLS.add_skill(SKILL_FIREBALL)
 
 # --------- mage state handler ---------- #
 
-class MageIdleState(state.EntityState):
+class IdleState(state.EntityState):
     def __init__(self, parent):
         super().__init__(MAGE_IDLE_STATE, parent)
 
@@ -80,16 +80,13 @@ class MageIdleState(state.EntityState):
         self.parent.aregist[MAGE_IDLE_ANIM].f_num = 0
 
     def update(self):
-        self.parent.aregist[MAGE_IDLE_ANIM].update()
-        self.parent.sprite = self.parent.aregist[MAGE_IDLE_ANIM].get_frame()
-        self.parent.hitbox = self.parent.aregist[MAGE_IDLE_ANIM].get_hitbox()
-        self.parent.calculate_rel_hitbox()
+        entityext.update_ani_and_hitbox(self.parent, MAGE_IDLE_ANIM)
         # check for player distance etc
         if self.handler.player_dis < MAGE_DETECT_RADIUS:
             self.handler.set_active_state(MAGE_ALERT_STATE)
         # also calculate for idle movement
 
-class MageAlertState(state.EntityState):
+class AlertState(state.EntityState):
     def __init__(self, parent):
         super().__init__(MAGE_ALERT_STATE, parent)
         self.countdown = MAGE_ALERT_PRECAST_CDR
@@ -99,10 +96,8 @@ class MageAlertState(state.EntityState):
         self.countdown = MAGE_ALERT_PRECAST_CDR
 
     def update(self):
-        self.parent.aregist[MAGE_IDLE_ANIM].update()
-        self.parent.sprite = self.parent.aregist[MAGE_IDLE_ANIM].get_frame()
-        self.parent.hitbox = self.parent.aregist[MAGE_IDLE_ANIM].get_hitbox()
-        self.parent.calculate_rel_hitbox()
+        entityext.update_ani_and_hitbox(self.parent, MAGE_IDLE_ANIM)
+
         # case 1: timer counts to 0
         self.countdown -= clock.delta_time
         if self.countdown <= 0:
@@ -117,7 +112,7 @@ class MageAlertState(state.EntityState):
             # case 3 fulfilled, begin idle
             self.handler.set_active_state(MAGE_IDLE_STATE)
 
-class MagePrecastState(state.EntityState):
+class PrecastState(state.EntityState):
     def __init__(self, parent):
         super().__init__(MAGE_PRECAST_STATE, parent)
     
@@ -126,17 +121,15 @@ class MagePrecastState(state.EntityState):
         self.parent.aregist[MAGE_PRECAST_ANIM].fini = 0
     
     def update(self):
-        self.parent.aregist[MAGE_PRECAST_ANIM].update()
-        self.parent.sprite = self.parent.aregist[MAGE_PRECAST_ANIM].get_frame()
-        self.parent.hitbox = self.parent.aregist[MAGE_PRECAST_ANIM].get_hitbox()
-        self.parent.calculate_rel_hitbox()
+        entityext.update_ani_and_hitbox(self.parent, MAGE_PRECAST_ANIM)
+
         # case 1: finish precast
         if self.parent.aregist[MAGE_PRECAST_ANIM].fini > 0:
             # case 1 fulfilled, begin casting
             self.handler.set_active_state(MAGE_CASTING_STATE)
         # case 2: what if casting fails? what if player interrupts?
 
-class MageCastingState(state.EntityState):
+class CastingState(state.EntityState):
     def __init__(self, parent):
         super().__init__(MAGE_CASTING_STATE, parent)
         self.casting_cdr = MAGE_DEFAULT_CASTING_CDR
@@ -147,10 +140,8 @@ class MageCastingState(state.EntityState):
         # decide on an attack and set casting_cdr depending on attack
     
     def update(self):
-        self.parent.aregist[MAGE_CASTING_ANIM].update()
-        self.parent.sprite = self.parent.aregist[MAGE_CASTING_ANIM].get_frame()
-        self.parent.hitbox = self.parent.aregist[MAGE_CASTING_ANIM].get_hitbox()
-        self.parent.calculate_rel_hitbox()
+        entityext.update_ani_and_hitbox(self.parent, MAGE_CASTING_ANIM)
+
         self.parent.phandler.create_particle()
         # case 1: finish casting
         self.casting_cdr -= clock.delta_time
@@ -159,7 +150,7 @@ class MageCastingState(state.EntityState):
             # print("attacking")
             self.handler.set_active_state(MAGE_POSTCAST_STATE)
 
-class MagePostcastState(state.EntityState):
+class PostcastState(state.EntityState):
     def __init__(self, parent):
         super().__init__(MAGE_POSTCAST_STATE, parent)
         self.cani = MAGE_POSTCAST_ANIM
@@ -171,10 +162,8 @@ class MagePostcastState(state.EntityState):
         self.parent.aregist[MAGE_POSTCAST_ANIM].fini = 0
     
     def update(self):
-        self.parent.aregist[self.cani].update()
-        self.parent.sprite = self.parent.aregist[self.cani].get_frame()
-        self.parent.hitbox = self.parent.aregist[self.cani].get_hitbox()
-        self.parent.calculate_rel_hitbox()
+        entityext.update_ani_and_hitbox(self.parent, self.cani)
+
         # case 1: finish postcast
         if not self.parent.phandler.ap_count:
             self.wparticle = True
@@ -191,7 +180,7 @@ class MagePostcastState(state.EntityState):
                 self.handler.set_active_state(MAGE_ALERT_STATE)
         # case 2: interrupted -> backlash 
 
-class MageFlightState(state.EntityState):
+class FlightState(state.EntityState):
     def __init__(self, parent):
         super().__init__(MAGE_FLIGHT_STATE, parent)
 
@@ -199,10 +188,7 @@ class MageFlightState(state.EntityState):
         return 1/(.05*dis + 4/5)
 
     def update(self):
-        self.parent.aregist[MAGE_IDLE_ANIM].update()
-        self.parent.sprite = self.parent.aregist[MAGE_IDLE_ANIM].get_frame()
-        self.parent.hitbox = self.parent.aregist[MAGE_IDLE_ANIM].get_hitbox()
-        self.parent.calculate_rel_hitbox()
+        entityext.update_ani_and_hitbox(self.parent, MAGE_RUN_ANIM)
         # player is already known to be nearby
         if self.parent.player_dis:
             self.parent.player_dis.normalize()
@@ -219,22 +205,19 @@ class MageFlightState(state.EntityState):
             # case 2 fulfilled, begin alert state
             self.handler.set_active_state(MAGE_ALERT_STATE)
 
-class MageStateHandler(statehandler.StateHandler):
+class StateHandler(statehandler.StateHandler):
     def __init__(self, mage):
         super().__init__(MAGE_IDLE_STATE)
         self.mage = mage
         self.player_dis = 0
-        self.start_cast = False
-        self.is_casting = False
-        self.attacking = False
 
         # add all necassary states
-        self.add_state(MageIdleState(self.mage))
-        self.add_state(MageAlertState(self.mage))
-        self.add_state(MagePrecastState(self.mage))
-        self.add_state(MageCastingState(self.mage))
-        self.add_state(MageFlightState(self.mage))
-        self.add_state(MagePostcastState(self.mage))
+        self.add_state(IdleState(self.mage))
+        self.add_state(AlertState(self.mage))
+        self.add_state(PrecastState(self.mage))
+        self.add_state(CastingState(self.mage))
+        self.add_state(FlightState(self.mage))
+        self.add_state(PostcastState(self.mage))
 
 # ------------- mage particle system ------------ #
 
@@ -267,7 +250,7 @@ def particle_update(self, p, surface):
     pygame.draw.circle(surface, self.color, (p[PARTICLE_X], p[PARTICLE_Y]), 1)
 
 
-class MageParticleHandler(particle.ParticleHandler):
+class ParticleHandler(particle.ParticleHandler):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
@@ -286,15 +269,16 @@ class Mage(entityext.GameEntity):
     def __init__(self):
         super().__init__(ENTITY_NAME, MAGE_HEALTH, MAGE_MANA)
         self.aregist = Mage.ANIM_CATEGORY.create_registry_for_all()
+        print(self.aregist.keys())
         self.sprite = self.aregist[MAGE_IDLE_ANIM].get_frame()
         self.hitbox = self.aregist[MAGE_IDLE_ANIM].get_hitbox()
         # distance from player
         self.player_dis = pygame.math.Vector2()
         
         # state handler
-        self.shandler = MageStateHandler(self)
+        self.shandler = StateHandler(self)
         # particle handlers
-        self.phandler = MageParticleHandler(self)
+        self.phandler = ParticleHandler(self)
         self.atk_phandler = fireball.FireParticleHandler(self)
         # skill tree
         self.skhandler = MAGE_SKILL_TREE.get_registry(self)
@@ -322,5 +306,6 @@ class Mage(entityext.GameEntity):
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
 Mage.ANIM_CATEGORY = animation.Category.get_category(MAGE_ANIM_CAT)
+Mage.ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
 
 

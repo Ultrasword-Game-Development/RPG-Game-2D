@@ -78,6 +78,7 @@ class FrameData:
         self.duration = dur
         self.rotated = rot
         self.trimmed = trim
+        self.points = {}
 
         # get the frame
         self.oframe = None
@@ -162,6 +163,11 @@ class AnimationDataSet:
         """Get the amount of frames"""
         return self.length
 
+    def apply_func_to_frames(self, _func):
+        """Apply a given function to each framedata object"""
+        for x in self.frames:
+            _func(x)
+
 class Category:
     CATEGORIES = {}
 
@@ -195,6 +201,11 @@ class Category:
         """Creates a dict of registries to be used"""
         return {ani.name: ani.get_registry() for ani in self.anims.values()}
 
+    def apply_func_to_animations(self, _func):
+        """Apply a functino to all animations"""
+        for x in self.anims.values():
+            x.apply_func_to_frames(_func)
+    
 
 def load_and_parse_aseprite_animation(filepath):
     """Loads and parses an asesprite animation"""

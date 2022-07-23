@@ -6,12 +6,30 @@ from engine import animation, maths
 from engine.filehandler import Filehandler
 
 
+# ------ const ----------- #
+
+HANDLE_NAME = "handle"
+HANDLE_POS_COL = (0, 255, 0)
 
 # ------- functions ---------- #
 
+def handle_handle_position(framedata):
+    """Find and remove the handle positions"""
+    pos = (0, 0)
+    f = False
+    for x in range(framedata.sprite_source_location.w):
+        for y in range(framedata.sprite_source_location.h):
+            if framedata.oframe.get_at((x, y)) == HANDLE_POS_COL:
+                f = True
+                framedata.oframe.set_at((x, y), (0, 0, 0, 0))
+                pos = (x, y)
+                break
+        if f:
+            break
+    framedata.points[HANDLE_NAME] = pos
+
 def rect_to_dict(rect):
     return {'x':rect.x,'y':rect.y,'w':rect.w,'h':rect.h}
-
 
 def rot_rect_90deg(rect, orect):
     """Rounds the rect 90 deg - counterclockwise"""
@@ -22,7 +40,6 @@ def rot_rect_90deg(rect, orect):
     result.w = rect.h
     result.h = rect.w
     return result
-
 
 def load_and_parse_aseprite_animation_wrotations(filepath, rotations):
     with open(filepath, 'r') as file:
@@ -58,7 +75,6 @@ class RotatedRegistry(animation.Registry):
 
     def get_frame(self):
         return self.parent.frames[self.index_offset + self.fnum].frame
-
 
 class RotatedAnimationDataSet(animation.AnimationDataSet):
     def __init__(self, name, sprite, frames, parent, rotations):

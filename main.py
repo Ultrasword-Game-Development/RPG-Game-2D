@@ -28,7 +28,7 @@ fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
 
 from scripts import singleton
 
-from scripts.entities import player, mage, fireball
+from scripts.entities import player, mage, fireball, peasant
 from scripts.entities import particle_scripts
 
 # ----------------------------------- #
@@ -63,6 +63,9 @@ singleton.PLAYER.rect.topleft = (10,10)
 m = mage.Mage()
 m.rect.topleft = (100, 100)
 
+p = peasant.Peasant()
+p.rect.topleft = (150, 150)
+
 ph.data['player'] = singleton.PLAYER
 
 # f = fireball.Fire()
@@ -70,6 +73,7 @@ ph.data['player'] = singleton.PLAYER
 
 STATE.add_entity(singleton.PLAYER)
 STATE.add_entity(m)
+STATE.add_entity(p)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
 

@@ -1,4 +1,18 @@
+
 from engine import entity
+
+
+
+# ---------- functions ---------- #
+
+def update_ani_and_hitbox(entity, ani_name):
+    """This entity must contain an shandler"""
+    entity.aregist[ani_name].update()
+    entity.sprite = entity.aregist[ani_name].get_frame()
+    entity.hitbox = entity.aregist[ani_name].get_hitbox()
+    entity.calculate_rel_hitbox()
+
+# --------------------------------- #
 
 
 class GameEntity(entity.Entity):
@@ -79,4 +93,7 @@ class NonGameEntity(entity.Entity):
         # stats
         self.name = name
         self.rentity = related_entity
+
+
+
 
