@@ -15,7 +15,7 @@ PLAYER_IDLE_ANIM = "idle"
 PLAYER_RUN_ANIM = "run"
 
 MOVE_SPEED = 30
-LERP_COEF = 0.3
+LERP_COEF = 0.5
 
 
 class Player(entityext.GameEntity):
@@ -32,6 +32,8 @@ class Player(entityext.GameEntity):
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
         self.calculate_rel_hitbox()
+        self.motion.x = maths.lerp(self.motion.x, 0.0, LERP_COEF)
+        self.motion.y = maths.lerp(self.motion.y, 0.0, LERP_COEF)
         # movement
         if user_input.is_key_pressed(pygame.K_d):
             self.motion.x += MOVE_SPEED * clock.delta_time
@@ -41,11 +43,10 @@ class Player(entityext.GameEntity):
             self.motion.y -= MOVE_SPEED * clock.delta_time
         if user_input.is_key_pressed(pygame.K_s):
             self.motion.y += MOVE_SPEED * clock.delta_time
-        self.motion.x = maths.lerp(self.motion.x, 0.0, LERP_COEF)
-        self.motion.y = maths.lerp(self.motion.y, 0.0, LERP_COEF)
 
-        self.rect.x += round(self.motion.x)
-        self.rect.y += round(self.motion.y)
+        self.position += self.motion
+        self.rect.x = round(self.position.x)
+        self.rect.y = round(self.position.y)
 
     def render(self, surface):
         surface.blit(self.sprite, self.rect)

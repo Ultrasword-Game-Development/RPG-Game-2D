@@ -17,12 +17,13 @@ LERP_COEF = 0.3
 
 DETECT_RANGE = 80
 ATTACK_RANGE = 30
-MOVE_SPEED = 20
+MS = 30
+IDLE_MS = 39
 
 ALERT_DECISION_PAUSE = 0.5
 IDLE_MOVE_PAUSE = 3.0
 
-IDLE_MOVE_DECISION = 1.4
+IDLE_MOVE_PERIOD = 1.4
 IDLE_MOVE_WAIT = 1.0
 
 # -------- animations ------------
@@ -62,15 +63,18 @@ class IdleState(state.EntityState):
 class IdleMoveState(state.EntityState):
     def __init__(self, parent):
         super().__init__(IDLE_MOVE_STATE, parent)
-        self.decision_timer = clock.Timer(IDLE_MOVE_PAUSE)
+        self.move_timer = clock.Timer(IDLE_MOVE_PERIOD)
         self.pause_timer = clock.Timer(IDLE_MOVE_WAIT)
         self.c_ani = IDLE_ANIM
+        self.is_making_dec = True
+        self.move_vec = None
 
     def start(self):
         self.parent.aregist[IDLE_ANIM].f_num = 0
-        self.decision_timer.st = 0
+        self.move_timer.st = 0
         self.pause_timer.st = 0
         self.c_ani = IDLE_ANIM
+        self.is_making_dec = True
     
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, self.c_ani)
@@ -80,16 +84,28 @@ class IdleMoveState(state.EntityState):
             self.handler.set_active_state(ALERT_STATE)
             return
         # print(self.decision_timer.st, self.pause_timer.st)
+        # print(self.parent.motion)
+        
+        # if we are not making a decision, we can start moving the entity
+        if not self.is_making_dec:
+            # entity is deciding where to move
+            self.move_timer.update()
+            # add motion to entity
+            self.parent.motion += self.move_vec * clock.delta_time
+            # check if time is over
+            if self.move_timer.changed:
+                self.move_timer.changed = False
+                self.is_making_dec = True
+        else:
+            # pause 
+            self.pause_timer.update()
+            if self.pause_timer.changed:
+                # when pausing time is over, we stop making the decision
+                self.pause_timer.changed = False
+                self.is_making_dec = False
+                # TODO - CHANGE TO DETECTING NEARBY MAGES
+                self.move_vec = entityext.find_idle_mot(IDLE_MS)
 
-        self.decision_timer.update()
-        if self.decision_timer.changed:
-            self.decision_timer.changed = False
-            print("decision time")
-
-        self.pause_timer.update()
-        if self.pause_timer.changed:
-            self.pause_timer.changed = False
-            print("pause done")
 
 class AlertState(state.EntityState):
     def __init__(self, parent):
@@ -113,6 +129,7 @@ class AlertState(state.EntityState):
                 # case 2 fulfilled - player leaves detected range
                 self.handler.set_active_state(IDLE_STATE)
 
+
 class ApproachState(state.EntityState):
     def __init__(self, parent):
         super().__init__(APPROACH_STATE, parent)
@@ -123,7 +140,7 @@ class ApproachState(state.EntityState):
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, RUN_ANIM)
         # move towards player
-        self.parent.motion += self.parent.player_dis.normalize() * clock.delta_time * MOVE_SPEED
+        self.parent.motion += self.parent.player_dis.normalize() * clock.delta_time * MS
         # case 1: player leaves range
         if self.handler.player_dis > DETECT_RANGE:
             # case 1 fulfilled
@@ -166,8 +183,9 @@ class Peasant(entityext.GameEntity):
 
         self.shandler.update()
 
-        self.rect.x += round(self.motion.x)
-        self.rect.y += round(self.motion.y)
+        self.position += self.motion
+        self.rect.x = round(self.position.x)
+        self.rect.y = round(self.position.y)
         self.motion *= LERP_COEF
 
     def render(self, surface):

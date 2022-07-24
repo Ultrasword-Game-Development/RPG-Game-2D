@@ -26,6 +26,7 @@ class Entity:
         - rel_hitbox        = pygame.Rect
         - touching          = [bool, bool, bool, bool]
         - chunk             = str "x-y"
+        - tiles_area        = (int, int)
         
         # for encoding / serializing
         - data [dict]
@@ -48,6 +49,7 @@ class Entity:
         # physics
         self.chunk = None
         self.touching = [False]*4
+        self.tiles_area = (0, 0)
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.hitbox = pygame.Rect(0, 0, 0, 0)
         self.rel_hitbox = pygame.Rect(0, 0, 0, 0)

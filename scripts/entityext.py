@@ -1,5 +1,9 @@
+import pygame
+import numpy as np
 
-from engine import entity
+from engine import entity, maths, scenehandler
+
+from .game import state
 
 
 
@@ -12,7 +16,23 @@ def update_ani_and_hitbox(entity, ani_name):
     entity.hitbox = entity.aregist[ani_name].get_hitbox()
     entity.calculate_rel_hitbox()
 
-# --------------------------------- #
+def find_idle_mot(MS):
+    dx = np.random.random()-.5
+    dy = np.random.random()-.5
+    result = pygame.math.Vector2(dx * MS, dy * MS)
+    return result
+
+def find_mot_with_weight(point, weight, MS):
+    mot = find_idle_mot(MS)
+    # apply linear interpolation
+    mot.x = maths.lerp(mot.x, point.x, weight)
+    mot.y = maths.lerp(mot.y, poitn.y, weight)
+    return mot
+
+def move_entity_through_world(entity):
+    pass
+
+# ------------- classes ------------- #
 
 
 class GameEntity(entity.Entity):
@@ -42,6 +62,7 @@ class GameEntity(entity.Entity):
         - health            = int
         - mana              = int
         - level             = float
+        - position          = vec2
         """
         super().__init__()
         # stats
@@ -52,6 +73,7 @@ class GameEntity(entity.Entity):
 
         # attacks --------- set to hold attack entity id (for particles)
         self.activeatk = set()
+        self.position = pygame.math.Vector2()
     
     def add_active_attack(self, attack):
         self.activeatk.add(attack.id)
@@ -93,7 +115,5 @@ class NonGameEntity(entity.Entity):
         # stats
         self.name = name
         self.rentity = related_entity
-
-
 
 

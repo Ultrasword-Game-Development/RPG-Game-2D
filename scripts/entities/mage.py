@@ -289,8 +289,9 @@ class Mage(entityext.GameEntity):
         self.shandler.player_dis = self.player_dis.magnitude()
 
         self.shandler.update()
-        self.rect.x += round(self.motion.x)
-        self.rect.y += round(self.motion.y)
+        self.position += self.motion
+        self.rect.x = round(self.position.x)
+        self.rect.y = round(self.position.y)
         self.motion *= LERP_COEF
 
     def render(self, surface):
