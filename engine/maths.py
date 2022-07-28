@@ -1,6 +1,10 @@
 import math
 import numpy as np
 
+def __mod__(val, mod):
+    if val < 0: return -(val%mod)
+    return val%mod
+
 def lerp(start, end, co):
     """Linear interpolation"""
     return (end-start)*co + start

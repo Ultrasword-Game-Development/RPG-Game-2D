@@ -26,11 +26,8 @@ def find_mot_with_weight(point, weight, MS):
     mot = find_idle_mot(MS)
     # apply linear interpolation
     mot.x = maths.lerp(mot.x, point.x, weight)
-    mot.y = maths.lerp(mot.y, poitn.y, weight)
+    mot.y = maths.lerp(mot.y, point.y, weight)
     return mot
-
-def move_entity_through_world(entity):
-    pass
 
 # ------------- classes ------------- #
 

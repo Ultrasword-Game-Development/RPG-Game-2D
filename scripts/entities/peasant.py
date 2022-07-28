@@ -1,6 +1,6 @@
 import pygame
 
-from engine import statehandler, animation, clock
+from engine import statehandler, animation, clock, scenehandler
 
 from scripts import singleton, entityext, skillext, animationext
 from scripts.game import state, skillhandler
@@ -20,11 +20,14 @@ ATTACK_RANGE = 30
 MS = 30
 IDLE_MS = 39
 
+ENVIRO_CHECK_TIMER = 2.5
 ALERT_DECISION_PAUSE = 0.5
 IDLE_MOVE_PAUSE = 3.0
 
 IDLE_MOVE_PERIOD = 1.4
 IDLE_MOVE_WAIT = 1.0
+
+IDLE_MOVE_MAGE_WEIGHT = 0.6
 
 # -------- animations ------------
 
@@ -104,8 +107,7 @@ class IdleMoveState(state.EntityState):
                 self.pause_timer.changed = False
                 self.is_making_dec = False
                 # TODO - CHANGE TO DETECTING NEARBY MAGES
-                self.move_vec = entityext.find_idle_mot(IDLE_MS)
-
+                self.move_vec = entityext.find_mot_with_weight(self.handler.nearby_mage, IDLE_MOVE_MAGE_WEIGHT, IDLE_MS)
 
 class AlertState(state.EntityState):
     def __init__(self, parent):
@@ -129,7 +131,6 @@ class AlertState(state.EntityState):
                 # case 2 fulfilled - player leaves detected range
                 self.handler.set_active_state(IDLE_STATE)
 
-
 class ApproachState(state.EntityState):
     def __init__(self, parent):
         super().__init__(APPROACH_STATE, parent)
@@ -152,12 +153,23 @@ class StateHandler(statehandler.StateHandler):
         super().__init__(IDLE_STATE)
         self.peasant = peasant
         self.player_dis = 0
-        
+
+        # peasants hover around mages
+        # this is relative position to the peasant
+        self.nearby_mage = pygame.math.Vector2()
+        self.search_timer = clock.Timer(ENVIRO_CHECK_TIMER)
+
         # add all states
         self.add_state(IdleState(self.peasant))
         self.add_state(AlertState(self.peasant))
         self.add_state(ApproachState(self.peasant))
         self.add_state(IdleMoveState(self.peasant))
+    
+    def update(self):
+        super().update()
+        self.search_timer.update()
+        if self.search_timer.changed:
+            self.search_timer.changed = False
 
 
 # --------------- peasant class -------------- #
@@ -183,7 +195,7 @@ class Peasant(entityext.GameEntity):
 
         self.shandler.update()
 
-        self.position += self.motion
+        scenehandler.SceneHandler.CURRENT.world.move_entity(self)
         self.rect.x = round(self.position.x)
         self.rect.y = round(self.position.y)
         self.motion *= LERP_COEF

@@ -146,7 +146,7 @@ class AnimationDataSet:
     
     def hitbox_analysis(self):
         """Perform hitbox analysis"""
-        print(self.name)
+        # print(self.name)
         for f in self.frames:
             f.set_hitbox(find_and_remove_image_hitbox(f.frame))
 

@@ -269,7 +269,6 @@ class Mage(entityext.GameEntity):
     def __init__(self):
         super().__init__(ENTITY_NAME, MAGE_HEALTH, MAGE_MANA)
         self.aregist = Mage.ANIM_CATEGORY.create_registry_for_all()
-        print(self.aregist.keys())
         self.sprite = self.aregist[MAGE_IDLE_ANIM].get_frame()
         self.hitbox = self.aregist[MAGE_IDLE_ANIM].get_hitbox()
         # distance from player
@@ -289,7 +288,8 @@ class Mage(entityext.GameEntity):
         self.shandler.player_dis = self.player_dis.magnitude()
 
         self.shandler.update()
-        self.position += self.motion
+        scenehandler.SceneHandler.CURRENT.world.move_entity(self)
+
         self.rect.x = round(self.position.x)
         self.rect.y = round(self.position.y)
         self.motion *= LERP_COEF

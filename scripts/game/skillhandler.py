@@ -125,7 +125,7 @@ class SkillNode:
         # TODO - this hsould be done by checking
         # the level of entity
         # and level of skill / uses of skill by said entity
-        print(self.skill.name, self.limitation)
+        print("{}: SkillHandler --> limit pass check to be made".format(__file__.split('\\')[-1]))
         return True
 
 

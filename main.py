@@ -61,10 +61,10 @@ singleton.PLAYER = player.Player()
 singleton.PLAYER.rect.topleft = (10,10)
 
 m = mage.Mage()
-m.position = (100, 100)
+m.position.xy = (100, 100)
 
 p = peasant.Peasant()
-p.position = (150, 150)
+p.position.xy = (150, 150)
 
 ph.data['player'] = singleton.PLAYER
 

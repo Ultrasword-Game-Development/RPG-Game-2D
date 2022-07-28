@@ -1,6 +1,6 @@
 import pygame
 
-from engine import entity, clock, maths
+from engine import entity, clock, maths, scenehandler
 from engine import animation, user_input
 
 from scripts import entityext
@@ -44,7 +44,7 @@ class Player(entityext.GameEntity):
         if user_input.is_key_pressed(pygame.K_s):
             self.motion.y += MOVE_SPEED * clock.delta_time
 
-        self.position += self.motion
+        scenehandler.SceneHandler.CURRENT.world.move_entity(self)
         self.rect.x = round(self.position.x)
         self.rect.y = round(self.position.y)
 

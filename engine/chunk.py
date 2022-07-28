@@ -28,6 +28,7 @@ class Chunk:
         self.area_rect = pygame.Rect(self.world_rel_pos, (TILE_WIDTH * TILEMAP_WIDTH, TILE_HEIGHT * TILEMAP_HEIGHT))
         self.tilemap = tuple(tuple(tile.Tile(x,y,self) for x in range(TILEMAP_WIDTH)) for y in range(TILEMAP_HEIGHT))
         self.environment = []
+        self.entities = set()
     
     def get_tile_at(self, x, y):
         """Get a tile"""
@@ -43,3 +44,16 @@ class Chunk:
     def add_environment_object(self, obj):
         """Add environment objects"""
         self.environment.append(obj)
+
+    def add_entity(self, entity):
+        """Add an entity to this chunk"""
+        self.entities.add(entity.id)
+    
+    def remove_entity(self, entity):
+        """Remove an entity"""
+        if entity.id in self.entities:
+            self.entities.remove(entity.id)
+        else:
+            print(__file__.split('\\')[-1], entity)
+
+
