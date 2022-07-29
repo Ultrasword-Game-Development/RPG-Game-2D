@@ -260,7 +260,6 @@ class ParticleHandler(particle.ParticleHandler):
         self.set_create_func(particle_create)
         self.set_update_func(particle_update)
 
-
 # -------- mage class ------------------- #
 
 class Mage(entityext.GameEntity):
@@ -295,7 +294,7 @@ class Mage(entityext.GameEntity):
         self.motion *= LERP_COEF
 
     def render(self, surface):
-        surface.blit(self.sprite, self.rect)
+        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.rect)
         # entity.render_entity_hitbox(self, surface)
         pygame.draw.circle(surface, (255, 0, 0), self.rel_hitbox.center, MAGE_DETECT_RADIUS, width=1)
         pygame.draw.circle(surface, (0, 0, 255), self.rel_hitbox.center, MAGE_PREFERED_DISTANCE, width=1)

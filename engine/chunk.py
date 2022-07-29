@@ -25,6 +25,7 @@ class Chunk:
         self.id = f"{x}-{y}"
         self.world_chunk_tile = (x,y)
         self.world_rel_pos = (x * TILE_WIDTH * TILEMAP_WIDTH, y * TILE_HEIGHT * TILEMAP_HEIGHT)
+        
         self.area_rect = pygame.Rect(self.world_rel_pos, (TILE_WIDTH * TILEMAP_WIDTH, TILE_HEIGHT * TILEMAP_HEIGHT))
         self.tilemap = tuple(tuple(tile.Tile(x,y,self) for x in range(TILEMAP_WIDTH)) for y in range(TILEMAP_HEIGHT))
         self.environment = []

@@ -1,0 +1,3 @@
+[submodule "Pygame-Game-Engine"]
+	path = engine
+	url = https://github.com/Ultrasword-Coder/Pygame-Game-Engine

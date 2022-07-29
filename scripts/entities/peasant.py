@@ -171,7 +171,6 @@ class StateHandler(statehandler.StateHandler):
         if self.search_timer.changed:
             self.search_timer.changed = False
 
-
 # --------------- peasant class -------------- #
 
 

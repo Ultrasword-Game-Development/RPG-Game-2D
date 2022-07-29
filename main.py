@@ -77,16 +77,19 @@ STATE.add_entity(p)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
 
-green_block = pygame.Surface((16,16), 0, 32)
-green_block.fill((0, 255, 0))
 
 
 WORLD = __scene.world
-WORLD.add_chunk(chunk.Chunk(0, 0))
-chunk = WORLD.get_chunk(0, 0)
-for y in range(TILEMAP_HEIGHT):
-    for x in range(TILEMAP_WIDTH):
-        chunk.get_tile_at(x, y).sprite = green_block
+# WORLD.add_chunk(chunk.Chunk(0, 0))
+# chunk = WORLD.get_chunk(0, 0)
+# for y in range(TILEMAP_HEIGHT):
+#     for x in range(TILEMAP_WIDTH):
+#         chunk.get_tile_at(x, y).set_sprite("assets/levels/editor/grass.png")
+
+# ChunkSaver.save_chunk(chunk, "assets/testing/c1.chk")
+
+chunk = ChunkSaver.load_chunk("assets/testing/c1.chk")
+WORLD.add_chunk(chunk)
 
 # ----------------------------- #
 
