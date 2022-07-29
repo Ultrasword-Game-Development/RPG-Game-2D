@@ -1,4 +1,5 @@
 import pygame
+
 from dataclasses import dataclass
 
 from .globals import *
