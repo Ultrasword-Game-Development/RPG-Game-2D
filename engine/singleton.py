@@ -1,6 +1,15 @@
 
 
+# ----------- window stuff --------- 
 
+WINDOW_WIDTH = 0
+WINDOW_HEIGHT = 0
+
+FB_WIDTH = 0
+FB_HEIGHT = 0
+
+FBWHALF = 0
+FBHHALF = 0
 
 
 # ---------- chunk + world --------

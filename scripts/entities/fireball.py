@@ -2,7 +2,7 @@ import pygame
 
 from engine import *
 from engine.scenehandler import SceneHandler
-from engine.globals import *
+from engine import singleton as EGLOB
 
 from scripts import animationext, singleton, entityext
 from scripts.game import skillhandler
@@ -50,15 +50,15 @@ def particle_create(self):
         self.particles[self.p_count] = self.parent.group.entity_buffer[item].create_particle(self.p_count)
 
 def particle_update(self, p, surface):
-    p[PARTICLE_LIFE] -= clock.delta_time
-    if p[PARTICLE_LIFE] < 0:
-        self.rq.append(p[PARTICLE_ID])
+    p[EGLOB.PARTICLE_LIFE] -= clock.delta_time
+    if p[EGLOB.PARTICLE_LIFE] < 0:
+        self.rq.append(p[EGLOB.PARTICLE_ID])
         return
     # update position
-    p[PARTICLE_X] += p[PARTICLE_MX] * clock.delta_time
-    p[PARTICLE_Y] += p[PARTICLE_MY] * clock.delta_time
+    p[EGLOB.PARTICLE_X] += p[EGLOB.PARTICLE_MX] * clock.delta_time
+    p[EGLOB.PARTICLE_Y] += p[EGLOB.PARTICLE_MY] * clock.delta_time
     # render
-    pygame.draw.circle(surface, self.color, (p[PARTICLE_X], p[PARTICLE_Y]), 1)
+    pygame.draw.circle(surface, self.color, (p[EGLOB.PARTICLE_X]+EGLOB.WORLD_OFFSET_X, p[EGLOB.PARTICLE_Y]+EGLOB.WORLD_OFFSET_Y), 1)
 
 
 class FireParticleHandler(particle.ParticleHandler):
@@ -129,9 +129,9 @@ class Fire(entityext.NonGameEntity):
             self.kill()
 
     def render(self, surface):
-        surface.blit(self.sprite, self.rect)
+        surface.blit(self.sprite, self.get_glob_pos())
         # entity.render_entity_hitbox(self, surface)
-        pygame.draw.rect(surface, (255,0,0), self.rect)
+        # pygame.draw.rect(surface, (255,0,0), self.get_glob_cpos())
 
     def create_particle(self, pid):
         return [pid, self.rel_hitbox.centerx, self.rel_hitbox.centery, 1, FIRE_PARTICLE_LIFE, maths.normalized_random() * SMOKE_MOVE_SPEED, maths.normalized_random() * SMOKE_MOVE_SPEED]

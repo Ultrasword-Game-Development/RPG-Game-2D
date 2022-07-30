@@ -3,7 +3,7 @@ from engine import entity, clock, maths
 from engine import animation, user_input
 from engine import statehandler, particle, scenehandler
 
-from engine.globals import *
+from engine import singleton as EGLOB
 
 
 from scripts import singleton, entityext, skillext, animationext
@@ -232,22 +232,22 @@ def particle_create(self):
     self.particles[self.p_count] = [self.p_count, x, y, 1, self.start_life, mx, my]
 
 def particle_update(self, p, surface):
-    p[PARTICLE_LIFE] -= clock.delta_time
-    if p[PARTICLE_LIFE] < 0:
-        self.rq.append(p[PARTICLE_ID])
+    p[EGLOB.PARTICLE_LIFE] -= clock.delta_time
+    if p[EGLOB.PARTICLE_LIFE] < 0:
+        self.rq.append(p[EGLOB.PARTICLE_ID])
         return
     # update position
-    p[PARTICLE_MX] *= PLERP_COEF
-    p[PARTICLE_MY] *= PLERP_COEF
-    off = pygame.math.Vector2(self.parent.rel_hitbox.centerx - p[PARTICLE_X], self.parent.rel_hitbox.centery - p[PARTICLE_Y])
+    p[EGLOB.PARTICLE_MX] *= PLERP_COEF
+    p[EGLOB.PARTICLE_MY] *= PLERP_COEF
+    off = pygame.math.Vector2(self.parent.rel_hitbox.centerx - p[EGLOB.PARTICLE_X], self.parent.rel_hitbox.centery - p[EGLOB.PARTICLE_Y])
     off.normalize_ip()
-    p[PARTICLE_MX] += off.x * clock.delta_time
-    p[PARTICLE_MY] += off.y * clock.delta_time
+    p[EGLOB.PARTICLE_MX] += off.x * clock.delta_time
+    p[EGLOB.PARTICLE_MY] += off.y * clock.delta_time
 
-    p[PARTICLE_X] += p[PARTICLE_MX]
-    p[PARTICLE_Y] += p[PARTICLE_MY]
+    p[EGLOB.PARTICLE_X] += p[EGLOB.PARTICLE_MX]
+    p[EGLOB.PARTICLE_Y] += p[EGLOB.PARTICLE_MY]
     # render
-    pygame.draw.circle(surface, self.color, (p[PARTICLE_X], p[PARTICLE_Y]), 1)
+    pygame.draw.circle(surface, self.color, (p[EGLOB.PARTICLE_X]+EGLOB.WORLD_OFFSET_X, p[EGLOB.PARTICLE_Y] + EGLOB.WORLD_OFFSET_Y), 1)
 
 
 class ParticleHandler(particle.ParticleHandler):
@@ -294,11 +294,11 @@ class Mage(entityext.GameEntity):
         self.motion *= LERP_COEF
 
     def render(self, surface):
-        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.rect)
+        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.get_glob_pos())
         # entity.render_entity_hitbox(self, surface)
-        pygame.draw.circle(surface, (255, 0, 0), self.rel_hitbox.center, MAGE_DETECT_RADIUS, width=1)
-        pygame.draw.circle(surface, (0, 0, 255), self.rel_hitbox.center, MAGE_PREFERED_DISTANCE, width=1)
-        pygame.draw.circle(surface, (0, 100, 100), self.rel_hitbox.center, MAGE_CRITICAL_DEF_DISTANCE, width=1)
+        pygame.draw.circle(surface, (255, 0, 0), self.get_glob_cpos(), MAGE_DETECT_RADIUS, width=1)
+        pygame.draw.circle(surface, (0, 0, 255), self.get_glob_cpos(), MAGE_PREFERED_DISTANCE, width=1)
+        pygame.draw.circle(surface, (0, 100, 100), self.get_glob_cpos(), MAGE_CRITICAL_DEF_DISTANCE, width=1)
         # particle handler
         self.phandler.render(surface)
         self.atk_phandler.render(surface)

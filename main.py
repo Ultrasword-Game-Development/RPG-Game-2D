@@ -1,13 +1,20 @@
 import pygame
+# from OpenGL.GL import *
+# from OpenGL.GLU import *
+# import numpy as np
 
-from engine.globals import *
+
+from engine.singleton import *
 
 from engine import clock, user_input, handler, animation
-from engine import particle, world, chunk, tile, entity
+from engine import particle, chunk, tile, entity
 from engine import statehandler, scenehandler
+
+from engine import singleton as EGLOB
 
 from engine.window import Window
 from engine.filehandler import *
+
 
 # --------- initialization -------------- #
 
@@ -19,14 +26,16 @@ FB_SIZE = [WW, int(WW/16*9)]
 
 FPS = 60
 
-Window.create_window(WINDOW_CAPTION, WINDOW_SIZE[0], WINDOW_SIZE[1], pygame.RESIZABLE, 16)
+Window.create_window(WINDOW_CAPTION, WINDOW_SIZE[0], WINDOW_SIZE[1], pygame.RESIZABLE | pygame.DOUBLEBUF , 16)
 # window.set_icon()
-fb = pygame.Surface(FB_SIZE, 0, 32).convert_alpha()
+fb = Window.create_framebuffer(FB_SIZE[0], FB_SIZE[1], flags=0, bits=32).convert_alpha()
 
-
+print(EGLOB.FB_WIDTH)
 # -------- external imports --------- #
 
 from scripts import singleton
+
+from scripts.game import world as _world
 
 from scripts.entities import player, mage, fireball, peasant
 from scripts.entities import particle_scripts
@@ -78,28 +87,16 @@ STATE.add_entity(p)
 # STATE.add_entity(ph)
 
 
-
+__scene.world = _world.RPGWorld()
 WORLD = __scene.world
-# WORLD.add_chunk(chunk.Chunk(0, 0))
-# chunk = WORLD.get_chunk(0, 0)
-# for y in range(TILEMAP_HEIGHT):
-#     for x in range(TILEMAP_WIDTH):
-#         chunk.get_tile_at(x, y).set_sprite("assets/levels/editor/grass.png")
 
-# ChunkSaver.save_chunk(chunk, "assets/testing/c1.chk")
-
-chunk = ChunkSaver.load_chunk("assets/testing/c1.chk")
-WORLD.add_chunk(chunk)
 
 # ----------------------------- #
 
 clock.start()
 while Window.running:
-    fb.fill((255, 255, 255))
-
-    chunk.render(fb)
-
     if scenehandler.SceneHandler.CURRENT:
+        fb.fill(scenehandler.SceneHandler.CURRENT.world.bg_col)
         scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
         scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)
     

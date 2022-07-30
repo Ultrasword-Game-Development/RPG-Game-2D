@@ -1,5 +1,7 @@
 import pygame
 
+from . import singleton as EGLOB
+
 
 class Window:
     instance = None
@@ -26,6 +28,9 @@ class Window:
         cls.FLAGS = flags
         cls.BITS =  bits
 
+        EGLOB.WINDOW_WIDTH = width
+        EGLOB.WINDOW_HEIGHT = height
+
     @classmethod
     def set_icon(cls, surface):
         """Set the icon surface"""
@@ -36,6 +41,15 @@ class Window:
         cls.PREV_WIDTH, cls.PREV_HEIGHT = cls.WIDTH, cls.HEIGHT
         cls.WIDTH, cls.HEIGHT = resize_event.x, resize_event.y
         # also scale input in input
+    
+    @classmethod
+    def create_framebuffer(cls, width, height, flags=0, bits=32):
+        """Create a framebuffer object"""
+        EGLOB.FB_WIDTH = width
+        EGLOB.FB_HEIGHT = height
+        EGLOB.FBWHALF = width//2
+        EGLOB.FBHHALF = height//2
+        return pygame.Surface((width, height), flags=flags, depth=bits).convert_alpha()
 
 
 

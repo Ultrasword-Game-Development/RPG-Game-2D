@@ -41,7 +41,7 @@ class Chunk:
             for x in range(TILEMAP_WIDTH):
                 if self.tilemap[y][x].visible and self.tilemap[y][x].sprite:
                     tile = self.tilemap[y][x]
-                    surface.blit(tile.sprite, (tile.world_hitbox.x - offset[0], tile.world_hitbox.y - pygame.Surface.get_offset()[1]))
+                    surface.blit(tile.sprite, (tile.world_hitbox.x + WORLD_OFFSET_X, tile.world_hitbox.y + WORLD_OFFSET_Y))
     
     def add_environment_object(self, obj):
         """Add environment objects"""

@@ -1,7 +1,8 @@
 import pygame
 
 from engine import entity, clock, maths, scenehandler
-from engine import animation, user_input
+from engine import animation, user_input, camera
+from engine import singleton as EGLOB
 
 from scripts import entityext
 
@@ -26,6 +27,10 @@ class Player(entityext.GameEntity):
         self.aregist = Player.ANIM_CATEGORY.get_animation(PLAYER_IDLE_ANIM).get_registry()
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
+
+        self.camera = camera.Camera()
+        self.camera.set_target(self)
+        self.camera.track_target()
     
     def update(self):
         self.aregist.update()
@@ -47,9 +52,13 @@ class Player(entityext.GameEntity):
         scenehandler.SceneHandler.CURRENT.world.move_entity(self)
         self.rect.x = round(self.position.x)
         self.rect.y = round(self.position.y)
+        # update camera
+        self.camera.campos -= self.motion
+        self.camera.track_target()
+        self.camera.update()
 
     def render(self, surface):
-        surface.blit(self.sprite, self.rect)
+        surface.blit(self.sprite, self.camera.get_target_rel_pos())
         # entity.render_entity_hitbox(self, surface)
 
 

@@ -200,8 +200,8 @@ class Peasant(entityext.GameEntity):
         self.motion *= LERP_COEF
 
     def render(self, surface):
-        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.rect)
-        pygame.draw.circle(surface, (0,255,0), self.rel_hitbox.center, DETECT_RANGE, 1)
+        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.get_glob_pos())
+        pygame.draw.circle(surface, (0,255,0), self.get_glob_cpos(), DETECT_RANGE, 1)
 
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/peasant.json")

@@ -1,6 +1,6 @@
 import pygame
-from .singleton import *
 
+from . import singleton as EGLOB
 from . import scenehandler
 
 E_COUNT = 0
@@ -67,7 +67,7 @@ class Entity:
     def render(self, surface):
         """Default render"""
         if self.visible and self.sprite:
-            surface.blit(self.sprite, (self.rect.x + WORLD_OFFSET_X, self.rect.y + WORLD_OFFSET_Y))
+            surface.blit(self.sprite, self.get_glob_pos())
         
     def calculate_rel_hitbox(self):
         """Calcuale data for rel_hitbox"""
@@ -78,6 +78,14 @@ class Entity:
     def kill(self):
         """Kill an entity / remove it from the current state"""
         scenehandler.SceneHandler.CURRENT.handler.remove_entity(self.id)
+    
+    def get_glob_pos(self):
+        """Gets the position with global translation applied"""
+        return (self.rect.x + EGLOB.WORLD_OFFSET_X, self.rect.y + EGLOB.WORLD_OFFSET_Y)
+
+    def get_glob_cpos(self):
+        """Get the global center position"""
+        return (self.rel_hitbox.centerx + EGLOB.WORLD_OFFSET_X, self.rel_hitbox.centery + EGLOB.WORLD_OFFSET_Y)
 
 HITBOX_COLOR = (255, 0, 0)
 
