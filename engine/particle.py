@@ -1,5 +1,5 @@
 import pygame
-from .globals import *
+from .singleton import *
 
 from . import filehandler, entity, clock, maths
 

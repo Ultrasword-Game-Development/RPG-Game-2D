@@ -2,7 +2,7 @@ import json
 import os
 import pygame
 
-from .globals import *
+from .singleton import *
 from .filehandler import Filehandler
 from . import clock
 

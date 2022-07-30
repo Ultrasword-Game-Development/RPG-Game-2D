@@ -1,5 +1,5 @@
 import pygame
-from . import globals, maths, chunk
+from . import singleton, maths, chunk
 
 class World:
     """
@@ -36,7 +36,7 @@ class World:
     def move_entity(self, entity):
         """Move an entity through the chunk"""
         # find range of intercepting tiles
-        intercept = pygame.Rect((entity.rect.x // globals.TILE_WIDTH - 1, entity.rect.y // globals.TILE_HEIGHT - 1), entity.tiles_area)
+        intercept = pygame.Rect((entity.rect.x // singleton.TILE_WIDTH - 1, entity.rect.y // singleton.TILE_HEIGHT - 1), entity.tiles_area)
         # move x\
         entity.position.x += entity.motion.x
         # check for collisions with tilemap
@@ -45,17 +45,17 @@ class World:
         entity.position.y += entity.motion.y
         # check for collisions with tilemap
 
-        entity.chunk = (int(entity.position.x) // globals.CHUNK_PIX_WIDTH, int(entity.position.y) // globals.CHUNK_PIX_HEIGHT)
+        entity.chunk = (int(entity.position.x) // singleton.CHUNK_PIX_WIDTH, int(entity.position.y) // singleton.CHUNK_PIX_HEIGHT)
         if entity.chunk != entity.p_chunk:
             self.get_chunk(entity.p_chunk[0], entity.p_chunk[1]).remove_entity(entity)
             entity.p_chunk = entity.chunk
             self.get_chunk(entity.chunk[0], entity.chunk[1]).add_entity(entity)
         # print(entity.name, entity.chunk)
 
-    def find_nearby_entities(self, cpos: tuple, range: int):
+    def find_nearby_entities(self, cpos: tuple, crange: int):
         """Searches nearby chunks for entities - is an iterable"""
-        for ix in range(cpos[0]-range, cpos[0]+range+1):
-            for iy in range(cpos[1]-range, cpos[1]+range+1):
+        for ix in range(cpos[0]-crange, cpos[0]+crange+1):
+            for iy in range(cpos[1]-crange, cpos[1]+crange+1):
                 c = self.get_chunk(ix, iy)
                 if not c: continue
                 for e in c.entities:

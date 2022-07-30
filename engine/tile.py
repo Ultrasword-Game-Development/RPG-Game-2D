@@ -2,7 +2,7 @@ import pygame
 
 from dataclasses import dataclass
 
-from .globals import *
+from .singleton import *
 from .filehandler import Filehandler
 
 def calculate_world_position(tchunk_pos, cworld_pos):

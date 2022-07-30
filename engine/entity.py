@@ -1,5 +1,5 @@
 import pygame
-from .globals import *
+from .singleton import *
 
 from . import scenehandler
 
@@ -67,7 +67,7 @@ class Entity:
     def render(self, surface):
         """Default render"""
         if self.visible and self.sprite:
-            surface.blit(self.sprite, self.rect)
+            surface.blit(self.sprite, (self.rect.x + WORLD_OFFSET_X, self.rect.y + WORLD_OFFSET_Y))
         
     def calculate_rel_hitbox(self):
         """Calcuale data for rel_hitbox"""

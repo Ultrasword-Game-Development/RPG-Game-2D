@@ -1,6 +1,6 @@
 import pygame
 
-from .globals import *
+from .singleton import *
 from . import tile
 
 
@@ -28,23 +28,28 @@ class Chunk:
         
         self.area_rect = pygame.Rect(self.world_rel_pos, (TILE_WIDTH * TILEMAP_WIDTH, TILE_HEIGHT * TILEMAP_HEIGHT))
         self.tilemap = tuple(tuple(tile.Tile(x,y,self) for x in range(TILEMAP_WIDTH)) for y in range(TILEMAP_HEIGHT))
-        self.environment = []
+        self.environment = set()
         self.entities = set()
     
     def get_tile_at(self, x, y):
         """Get a tile"""
         return self.tilemap[y][x]
     
-    def render(self, surface):
+    def render(self, surface, offset=(0, 0)):
         """Render function"""
         for y in range(TILEMAP_HEIGHT):
             for x in range(TILEMAP_WIDTH):
                 if self.tilemap[y][x].visible and self.tilemap[y][x].sprite:
-                    surface.blit(self.tilemap[y][x].sprite, self.tilemap[y][x].world_hitbox)
-
+                    tile = self.tilemap[y][x]
+                    surface.blit(tile.sprite, (tile.world_hitbox.x - offset[0], tile.world_hitbox.y - pygame.Surface.get_offset()[1]))
+    
     def add_environment_object(self, obj):
         """Add environment objects"""
-        self.environment.append(obj)
+        self.environment.add(obj.id)
+    
+    def remove_environment_object(self, obj):
+        """Remove an environment object"""
+        self.environment.remove(obj.id)
 
     def add_entity(self, entity):
         """Add an entity to this chunk"""
