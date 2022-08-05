@@ -225,8 +225,8 @@ def particle_create(self):
     self.p_count += 1
     # calculate x and y
     theta = maths.normalized_random() * 3.14
-    x = maths.math.sin(theta)*MAGE_PARTICLE_SPAWN_RADIUS + self.parent.rel_hitbox.centerx
-    y = maths.math.cos(theta)*MAGE_PARTICLE_SPAWN_RADIUS + self.parent.rel_hitbox.centery
+    x = maths.math.sin(theta)*MAGE_PARTICLE_SPAWN_RADIUS + maths.normalized_random()*10 + self.parent.rel_hitbox.centerx
+    y = maths.math.cos(theta)*MAGE_PARTICLE_SPAWN_RADIUS + maths.normalized_random()*10 + self.parent.rel_hitbox.centery
     mx = maths.math.sin(theta+3.14/2)
     my = maths.math.cos(theta+3.14/2)
     self.particles[self.p_count] = [self.p_count, x, y, 1, self.start_life, mx, my]
@@ -289,8 +289,7 @@ class Mage(entityext.GameEntity):
         self.shandler.update()
         scenehandler.SceneHandler.CURRENT.world.move_entity(self)
 
-        self.rect.x = round(self.position.x)
-        self.rect.y = round(self.position.y)
+        self.move_to_position()
         self.motion *= LERP_COEF
 
     def render(self, surface):
@@ -307,5 +306,4 @@ class Mage(entityext.GameEntity):
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
 Mage.ANIM_CATEGORY = animation.Category.get_category(MAGE_ANIM_CAT)
 Mage.ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
-
-
+entityext.EntityTypes.register_entity_type(ENTITY_NAME, Mage)

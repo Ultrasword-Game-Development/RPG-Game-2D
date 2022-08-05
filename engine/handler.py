@@ -6,7 +6,7 @@ class Handler:
     Handles all pygame.sprite.Sprite objects
     - update + render
     """
-    def __init__(self):
+    def __init__(self, scene):
         """
         Handler Constructor
         - stores arrays of pygame.sprite.Group objects
@@ -17,7 +17,7 @@ class Handler:
         self.to_remove = []
 
         # world
-        self.world = world.World()
+        self.scene = scene
     
     def handle_entities(self, window):
         """Update and render entities to supplied window"""
@@ -48,10 +48,6 @@ class Handler:
     def remove_entity(self, i):
         """Remove an entity"""
         self.to_remove.append(i)
-
-    def get_world(self):
-        """Get world object"""
-        return self.world
 
 
 

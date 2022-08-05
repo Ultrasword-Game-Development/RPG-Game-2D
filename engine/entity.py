@@ -53,6 +53,7 @@ class Entity:
 
         self.touching = [False]*4
         self.tiles_area = (0, 0)
+        self.position = pygame.math.Vector2()
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.hitbox = pygame.Rect(0, 0, 0, 0)
         self.rel_hitbox = pygame.Rect(0, 0, 0, 0)
@@ -86,6 +87,12 @@ class Entity:
     def get_glob_cpos(self):
         """Get the global center position"""
         return (self.rel_hitbox.centerx + EGLOB.WORLD_OFFSET_X, self.rel_hitbox.centery + EGLOB.WORLD_OFFSET_Y)
+
+    def distance_to_other(self, other):
+        """Get the distance to another entity"""
+        return pygame.math.Vector2(other.rel_hitbox.x - self.rel_hitbox.x, other.rel_hitbox.y - self.rel_hitbox.y)
+
+
 
 HITBOX_COLOR = (255, 0, 0)
 

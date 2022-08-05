@@ -22,18 +22,31 @@ def find_idle_mot(MS):
     result = pygame.math.Vector2(dx * MS, dy * MS)
     return result
 
-def find_mot_with_weight(point, weight, MS):
+def find_mot_with_weight_vec(vec, weight, MS):
     mot = find_idle_mot(MS)
     # apply linear interpolation
-    mot.x = maths.lerp(mot.x, point.x, weight)
-    mot.y = maths.lerp(mot.y, point.y, weight)
+    mot.x = maths.lerp(mot.x, vec.x, weight)
+    mot.y = maths.lerp(mot.y, vec.y, weight)
     return mot
 
 # ------------- classes ------------- #
 
+class EntityTypes:
+    TYPES = {}
+
+    @classmethod
+    def get_entity_type(cls, name):
+        """Get an entity class given the name"""
+        return cls.TYPES[name] if name in cls.TYPES else None
+    
+    @classmethod
+    def register_entity_type(cls, name, etype):
+        """Register the entity type"""
+        cls.TYPES[name] = etype
+
 
 class GameEntity(entity.Entity):
-    def __init__(self, name: str, health: int, mana: int):
+    def __init__(self, entity_name: str, health: int, mana: int):
         """
         Constructor for Entity Class - EXTENDED
 
@@ -63,7 +76,7 @@ class GameEntity(entity.Entity):
         """
         super().__init__()
         # stats
-        self.name = name
+        self.ename = entity_name
         self.health = health
         self.mana = mana
         self.level = 1
@@ -81,6 +94,10 @@ class GameEntity(entity.Entity):
     def create_particle(self, pid):
         return [pid, 0, 0, 0, 0, 0, 0]
 
+    def move_to_position(self):
+        """Move rect to position vec"""
+        self.rect.x = round(self.position.x)
+        self.rect.y = round(self.position.y)
 
 class NonGameEntity(entity.Entity):
     def __init__(self, name: str, related_entity):
@@ -113,4 +130,8 @@ class NonGameEntity(entity.Entity):
         self.name = name
         self.rentity = related_entity
 
+    def move_to_position(self):
+        """Move rect to position vec"""
+        self.rect.x = round(self.position.x)
+        self.rect.y = round(self.position.y)
 

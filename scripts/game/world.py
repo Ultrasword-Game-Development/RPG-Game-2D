@@ -10,13 +10,13 @@ class RPGWorld(world.World):
     - structures
     - environment
     """
-    def __init__(self, bg_col = (255, 255, 255)):
+    def __init__(self, scene, bg_col = (255, 255, 255)):
         """
         Constructor for RPGWorld
         - should be able to save and be loaded
         - contains chunks
         """
-        super().__init__()
+        super().__init__(scene)
         self.bg_col = bg_col
 
 

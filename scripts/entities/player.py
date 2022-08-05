@@ -4,7 +4,7 @@ from engine import entity, clock, maths, scenehandler
 from engine import animation, user_input, camera
 from engine import singleton as EGLOB
 
-from scripts import entityext
+from scripts import entityext, singleton
 
 ENTITY_NAME = "Player"
 PLAYER_HEALTH = 100
@@ -50,19 +50,18 @@ class Player(entityext.GameEntity):
             self.motion.y += MOVE_SPEED * clock.delta_time
 
         scenehandler.SceneHandler.CURRENT.world.move_entity(self)
-        self.rect.x = round(self.position.x)
-        self.rect.y = round(self.position.y)
+        self.move_to_position()
         # update camera
         self.camera.campos -= self.motion
         self.camera.track_target()
         self.camera.update()
 
     def render(self, surface):
-        surface.blit(self.sprite, self.camera.get_target_rel_pos())
+        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, True, False), self.camera.get_target_rel_pos())
         # entity.render_entity_hitbox(self, surface)
 
 
 # ------------ setup ----------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
 Player.ANIM_CATEGORY = animation.Category.get_category(PLAYER_ANIM_CAT)
-
+entityext.EntityTypes.register_entity_type(ENTITY_NAME, Player)

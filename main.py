@@ -30,14 +30,14 @@ Window.create_window(WINDOW_CAPTION, WINDOW_SIZE[0], WINDOW_SIZE[1], pygame.RESI
 # window.set_icon()
 fb = Window.create_framebuffer(FB_SIZE[0], FB_SIZE[1], flags=0, bits=32).convert_alpha()
 
-print(EGLOB.FB_WIDTH)
+# print(EGLOB.FB_WIDTH)
 # -------- external imports --------- #
 
 from scripts import singleton
 
 from scripts.game import world as _world
 
-from scripts.entities import player, mage, fireball, peasant
+from scripts.entities import player, mage, fireball, peasant, test
 from scripts.entities import particle_scripts
 
 # ----------------------------------- #
@@ -73,21 +73,25 @@ m = mage.Mage()
 m.position.xy = (100, 100)
 
 p = peasant.Peasant()
-p.position.xy = (150, 150)
+p.position.xy = (50, 50)
+p2 = peasant.Peasant()
+p2.position.xy = (100, 100)
 
 ph.data['player'] = singleton.PLAYER
 
 # f = fireball.Fire()
 # f.rect.topleft = (30, 30)
 
+STATE.add_entity(test.Test())
 STATE.add_entity(singleton.PLAYER)
 STATE.add_entity(m)
 STATE.add_entity(p)
+STATE.add_entity(p2)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
 
 
-__scene.world = _world.RPGWorld()
+__scene.world = _world.RPGWorld(__scene, bg_col=(153, 229, 80))
 WORLD = __scene.world
 
 
@@ -103,6 +107,7 @@ while Window.running:
     # rescale framebuffer to window
     Window.instance.blit(pygame.transform.scale(fb, (Window.WIDTH, Window.HEIGHT)), (0,0))
 
+    user_input.update()
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             Window.running = False

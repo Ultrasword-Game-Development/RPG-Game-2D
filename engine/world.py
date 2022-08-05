@@ -8,12 +8,13 @@ class World:
     - tilemap
     - entities
     """
-    def __init__(self):
+    def __init__(self, scene):
         """
         Constructor for World
         contains:
         - chunks        = dict [str, list]
         """
+        self.scene = scene
         self.chunks = {}
     
     def add_chunk(self, chunk):
@@ -59,7 +60,7 @@ class World:
                 c = self.get_chunk(ix, iy)
                 if not c: continue
                 for e in c.entities:
-                    yield e
+                    yield self.scene.handler.entity_buffer[e]
 
 
 

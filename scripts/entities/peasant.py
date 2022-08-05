@@ -1,6 +1,6 @@
 import pygame
 
-from engine import statehandler, animation, clock, scenehandler
+from engine import statehandler, animation, clock, scenehandler, maths
 
 from scripts import singleton, entityext, skillext, animationext
 from scripts.game import state, skillhandler
@@ -17,6 +17,8 @@ LERP_COEF = 0.3
 
 DETECT_RANGE = 80
 ATTACK_RANGE = 30
+MAGE_HOVER_DIS = 120
+
 MS = 30
 IDLE_MS = 39
 
@@ -26,6 +28,8 @@ IDLE_MOVE_PAUSE = 3.0
 
 IDLE_MOVE_PERIOD = 1.4
 IDLE_MOVE_WAIT = 1.0
+ORBIT_ATTACK_WAIT = 1.5
+RUN_TIME_PERIOD = 1.5
 
 IDLE_MOVE_MAGE_WEIGHT = 0.6
 
@@ -38,6 +42,9 @@ RUN_ANIM = "run"
 IDLE_STATE = "idle"
 ALERT_STATE = "alert"
 APPROACH_STATE = "approach"
+ORBIT_STATE = "orbit"
+ATTACK_STATE = "attack"
+RUN_STATE = "run"
 
 IDLE_MOVE_STATE = "idle-move"
 
@@ -107,7 +114,9 @@ class IdleMoveState(state.EntityState):
                 self.pause_timer.changed = False
                 self.is_making_dec = False
                 # TODO - CHANGE TO DETECTING NEARBY MAGES
-                self.move_vec = entityext.find_mot_with_weight(self.handler.nearby_mage, IDLE_MOVE_MAGE_WEIGHT, IDLE_MS)
+                if not self.handler.nearby_mage:
+                    self.handler.nearby_mage.x = 0.1
+                self.move_vec = entityext.find_mot_with_weight_vec(self.handler.nearby_mage.normalize(), IDLE_MOVE_MAGE_WEIGHT, IDLE_MS)
 
 class AlertState(state.EntityState):
     def __init__(self, parent):
@@ -141,11 +150,67 @@ class ApproachState(state.EntityState):
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, RUN_ANIM)
         # move towards player
-        self.parent.motion += self.parent.player_dis.normalize() * clock.delta_time * MS
+        if self.parent.player_dis:
+            self.parent.motion += self.parent.player_dis.normalize() * clock.delta_time * MS
         # case 1: player leaves range
         if self.handler.player_dis > DETECT_RANGE:
             # case 1 fulfilled
             self.handler.set_active_state(ALERT_STATE)
+        # case 2: player enters orbit range
+        elif self.handler.player_dis < ATTACK_RANGE:
+            # case 2 fulfilled
+            self.handler.set_active_state(ORBIT_STATE)
+        # case 3: peasant leaves mage 
+        elif self.handler.nearby_mage.magnitude() > MAGE_HOVER_DIS:
+            # case 3 fulfilled
+            self.handler.set_active_state(RUN_STATE)
+
+class OrbitState(state.EntityState):
+    def __init__(self, parent):
+        super().__init__(ORBIT_STATE, parent)
+        self.attack_timer = clock.Timer(ORBIT_ATTACK_WAIT)
+
+    def start(self):
+        self.attack_timer.st = 0
+        self.runmode = -1 if maths.np.random.randint(0,2) else 1
+
+    def update(self):
+        entityext.update_ani_and_hitbox(self.parent, IDLE_ANIM)
+        # move to stay in certain range
+        rot_vec = self.parent.player_dis.normalize().rotate(90*self.runmode)
+        self.parent.motion += rot_vec * MS * clock.delta_time
+        # attack timer update
+        self.attack_timer.update()
+        # case 1: move out of attacking range
+        if self.handler.player_dis > ATTACK_RANGE + 10:
+            # case 1 fulfilled
+            self.handler.set_active_state(APPROACH_STATE)
+        # case 2: timer is up
+        if self.attack_timer.changed:
+            # case2 fulfilled
+            self.attack_timer.changed = False
+            # print("attacking")
+            self.handler.set_active_state(RUN_STATE)
+
+
+class RunState(state.EntityState):
+    def __init__(self, parent):
+        super().__init__(RUN_STATE, parent)
+        self.run_timer = clock.Timer(RUN_TIME_PERIOD)
+    
+    def start(self):
+        self.run_timer.st = 0
+    
+    def update(self):
+        entityext.update_ani_and_hitbox(self.parent, RUN_ANIM)
+        # move entity away from player
+        self.run_timer.update()
+        self.parent.motion += self.handler.nearby_mage.normalize() * MS * clock.delta_time
+        # case 1: run time is over
+        if self.run_timer.changed:
+            self.run_timer.changed = False
+            self.handler.set_active_state(IDLE_STATE)
+        # case 2: if player is still too close
 
 
 class StateHandler(statehandler.StateHandler):
@@ -158,18 +223,25 @@ class StateHandler(statehandler.StateHandler):
         # this is relative position to the peasant
         self.nearby_mage = pygame.math.Vector2()
         self.search_timer = clock.Timer(ENVIRO_CHECK_TIMER)
+        self.search_timer.st = ENVIRO_CHECK_TIMER
 
         # add all states
         self.add_state(IdleState(self.peasant))
         self.add_state(AlertState(self.peasant))
         self.add_state(ApproachState(self.peasant))
         self.add_state(IdleMoveState(self.peasant))
+        self.add_state(OrbitState(self.peasant))
+        self.add_state(RunState(self.peasant))
     
     def update(self):
         super().update()
         self.search_timer.update()
         if self.search_timer.changed:
             self.search_timer.changed = False
+            for e in scenehandler.SceneHandler.CURRENT.world.find_nearby_entities(self.peasant.p_chunk, 1):
+                if type(e) == entityext.EntityTypes.get_entity_type("MAGE"):
+                    self.nearby_mage = self.peasant.distance_to_other(e)
+                    break
 
 # --------------- peasant class -------------- #
 
@@ -195,16 +267,18 @@ class Peasant(entityext.GameEntity):
         self.shandler.update()
 
         scenehandler.SceneHandler.CURRENT.world.move_entity(self)
-        self.rect.x = round(self.position.x)
-        self.rect.y = round(self.position.y)
+        self.move_to_position()
         self.motion *= LERP_COEF
 
     def render(self, surface):
         surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.get_glob_pos())
         pygame.draw.circle(surface, (0,255,0), self.get_glob_cpos(), DETECT_RANGE, 1)
+        pygame.draw.circle(surface, (0, 100, 255), self.get_glob_cpos(), ATTACK_RANGE, 1)
+
+        pygame.draw.line(surface, (255, 0, 0), self.get_glob_cpos(), self.get_glob_cpos() - singleton.UP.rotate(180-self.motion.angle_to(singleton.UP)) * 10)
 
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/peasant.json")
 Peasant.ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
 Peasant.ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
-
+entityext.EntityTypes.register_entity_type(ENTITY_NAME, Peasant)

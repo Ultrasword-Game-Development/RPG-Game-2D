@@ -38,6 +38,6 @@ class Scene:
         - handler               = handler.Handler()
         - world                 = world.World()
         """
-        self.handler = handler.Handler()
-        self.world = world.World()
+        self.handler = handler.Handler(self)
+        self.world = world.World(self)
 

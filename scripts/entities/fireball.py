@@ -103,7 +103,6 @@ class Fire(entityext.NonGameEntity):
         # self.shandler = FireStateHandler(self)
         self.max_distance = DEFAULT_FIRE_MAX_DISTANCE
         self.distance_travelled = 0
-        self.position = [0, 0]
 
     def update(self):
         # standard stuff
@@ -118,10 +117,8 @@ class Fire(entityext.NonGameEntity):
             self.timer.changed = False
             self.phandler.create_particle()
         # movement
-        self.position[0] += self.motion.x
-        self.position[1] += self.motion.y
-        self.rect.centerx = self.position[0]
-        self.rect.centery = self.position[1]
+        self.position += self.motion
+        self.move_to_position()
         # kill check
         self.distance_travelled += self.motion.magnitude()
         if self.distance_travelled > self.max_distance:
@@ -140,6 +137,5 @@ class Fire(entityext.NonGameEntity):
 # ------------- setup ----------- #
 animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)
 Fire.ANIM_CATEGORY = animation.Category.get_category(FIRE_ANIM_CAT)
-
 skillhandler.SkillHandler.add_skill(FireBallSkill())
-
+entityext.EntityTypes.register_entity_type(ENTITY_NAME, Fire)

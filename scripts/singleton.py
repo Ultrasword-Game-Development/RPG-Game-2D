@@ -11,3 +11,7 @@ LEFT = pygame.math.Vector2(-1,0)
 # ---------- Singletons ----------- #
 
 PLAYER = None
+
+# ---------- types ---------------- #
+
+
