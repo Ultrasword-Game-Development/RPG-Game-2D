@@ -7,6 +7,10 @@ from scripts.game import state, skillhandler
 from scripts.entities import fireball
 
 
+# trailtest
+from scripts.entities import test
+
+
 # ---------- CONST VALUES ---------
 
 ENTITY_NAME = "PEASANT"
@@ -17,6 +21,7 @@ LERP_COEF = 0.3
 
 DETECT_RANGE = 80
 ATTACK_RANGE = 30
+MELEE_ATTACK_RANGE = 25
 MAGE_HOVER_DIS = 120
 
 MS = 30
@@ -116,7 +121,9 @@ class IdleMoveState(state.EntityState):
                 # TODO - CHANGE TO DETECTING NEARBY MAGES
                 if not self.handler.nearby_mage:
                     self.handler.nearby_mage.x = 0.1
-                self.move_vec = entityext.find_mot_with_weight_vec(self.handler.nearby_mage.normalize(), IDLE_MOVE_MAGE_WEIGHT, IDLE_MS)
+                self.move_vec = entityext.find_idle_mot(MS)
+                if self.handler.nearby_mage:
+                    self.move_vec += self.handler.nearby_mage.normalize() * clock.delta_time * MS * 1.3
 
 class AlertState(state.EntityState):
     def __init__(self, parent):
@@ -179,19 +186,40 @@ class OrbitState(state.EntityState):
         # move to stay in certain range
         rot_vec = self.parent.player_dis.normalize().rotate(90*self.runmode)
         self.parent.motion += rot_vec * MS * clock.delta_time
+        for pea in self.handler.nearby_peasants:
+            self.parent.motion -= self.parent.distance_to_other(pea).normalize().rotate(10) * MS * clock.delta_time * self.handler.peasant_avoid_weight / 2
         # attack timer update
         self.attack_timer.update()
         # case 1: move out of attacking range
-        if self.handler.player_dis > ATTACK_RANGE + 10:
+        if self.handler.player_dis > ATTACK_RANGE+10:
             # case 1 fulfilled
             self.handler.set_active_state(APPROACH_STATE)
         # case 2: timer is up
-        if self.attack_timer.changed:
+        elif self.attack_timer.changed:
             # case2 fulfilled
             self.attack_timer.changed = False
             # print("attacking")
-            self.handler.set_active_state(RUN_STATE)
+            self.handler.set_active_state(ATTACK_STATE)
 
+class AttackState(state.EntityState):
+    def __init__(self, parent):
+        super().__init__(ATTACK_STATE, parent)
+    
+    def start(self):
+        pass
+
+    def update(self):
+        if self.handler.player_dis > MELEE_ATTACK_RANGE+10:
+            entityext.update_ani_and_hitbox(self.parent, RUN_ANIM)
+        else:
+            entityext.update_ani_and_hitbox(self.parent, IDLE_ANIM)
+
+        p = test.TrailTest()
+        p.position.xy = self.parent.handle_pos
+        p.position += self.parent.rect.topleft
+        print(p.position, self.parent.rect)
+        scenehandler.SceneHandler.CURRENT.handler.add_entity(p)
+        self.handler.set_active_state(ORBIT_STATE)
 
 class RunState(state.EntityState):
     def __init__(self, parent):
@@ -206,6 +234,8 @@ class RunState(state.EntityState):
         # move entity away from player
         self.run_timer.update()
         self.parent.motion += self.handler.nearby_mage.normalize() * MS * clock.delta_time
+        for pea in self.handler.nearby_peasants:
+            self.parent.motion -= self.parent.distance_to_other(pea).normalize() * MS * clock.delta_time * self.handler.peasant_avoid_weight
         # case 1: run time is over
         if self.run_timer.changed:
             self.run_timer.changed = False
@@ -225,6 +255,9 @@ class StateHandler(statehandler.StateHandler):
         self.search_timer = clock.Timer(ENVIRO_CHECK_TIMER)
         self.search_timer.st = ENVIRO_CHECK_TIMER
 
+        self.nearby_peasants = []
+        self.peasant_avoid_weight = 0
+
         # add all states
         self.add_state(IdleState(self.peasant))
         self.add_state(AlertState(self.peasant))
@@ -232,16 +265,23 @@ class StateHandler(statehandler.StateHandler):
         self.add_state(IdleMoveState(self.peasant))
         self.add_state(OrbitState(self.peasant))
         self.add_state(RunState(self.peasant))
+        self.add_state(AttackState(self.peasant))
     
     def update(self):
         super().update()
         self.search_timer.update()
         if self.search_timer.changed:
             self.search_timer.changed = False
+            self.nearby_peasants.clear()
             for e in scenehandler.SceneHandler.CURRENT.world.find_nearby_entities(self.peasant.p_chunk, 1):
                 if type(e) == entityext.EntityTypes.get_entity_type("MAGE"):
                     self.nearby_mage = self.peasant.distance_to_other(e)
-                    break
+                elif type(e) == Peasant and e.id != self.peasant.id:
+                    self.nearby_peasants.append(e)
+            # handle the peasant_avoid_weight
+            if self.nearby_peasants:
+                self.peasant_avoid_weight = 1/len(self.nearby_peasants)/2
+            else: self.peasant_avoid_weight = 0
 
 # --------------- peasant class -------------- #
 

@@ -3,6 +3,7 @@ import numpy as np
 
 from engine import entity, maths, scenehandler
 
+from . import singleton
 from .game import state
 
 
@@ -14,6 +15,7 @@ def update_ani_and_hitbox(entity, ani_name):
     entity.aregist[ani_name].update()
     entity.sprite = entity.aregist[ani_name].get_frame()
     entity.hitbox = entity.aregist[ani_name].get_hitbox()
+    entity.handle_pos = entity.aregist[ani_name].get_frame_data().get_point(singleton.HANDLE_IDENTIFIER)
     entity.calculate_rel_hitbox()
 
 def find_idle_mot(MS):
@@ -84,6 +86,8 @@ class GameEntity(entity.Entity):
         # attacks --------- set to hold attack entity id (for particles)
         self.activeatk = set()
         self.position = pygame.math.Vector2()
+
+        self.handle_pos = (0, 0)
     
     def add_active_attack(self, attack):
         self.activeatk.add(attack.id)

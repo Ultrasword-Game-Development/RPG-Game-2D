@@ -73,7 +73,7 @@ m = mage.Mage()
 m.position.xy = (100, 100)
 
 p = peasant.Peasant()
-p.position.xy = (50, 50)
+p.position.xy = (200, 200)
 p2 = peasant.Peasant()
 p2.position.xy = (100, 100)
 

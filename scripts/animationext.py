@@ -5,11 +5,7 @@ import json
 from engine import animation, maths
 from engine.filehandler import Filehandler
 
-
-# ------ const ----------- #
-
-HANDLE_NAME = "handle"
-HANDLE_POS_COL = (0, 255, 0)
+from . import singleton
 
 # ------- functions ---------- #
 
@@ -19,14 +15,14 @@ def handle_handle_position(framedata):
     f = False
     for x in range(framedata.sprite_source_location.w):
         for y in range(framedata.sprite_source_location.h):
-            if framedata.oframe.get_at((x, y)) == HANDLE_POS_COL:
+            if framedata.oframe.get_at((x, y)) == singleton.HANDLE_POS_COL:
                 f = True
                 framedata.oframe.set_at((x, y), (0, 0, 0, 0))
                 pos = (x, y)
                 break
         if f:
             break
-    framedata.points[HANDLE_NAME] = pos
+    framedata.points[singleton.HANDLE_IDENTIFIER] = pos
 
 def rect_to_dict(rect):
     return {'x':rect.x,'y':rect.y,'w':rect.w,'h':rect.h}

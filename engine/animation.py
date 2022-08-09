@@ -37,6 +37,10 @@ class Registry:
     def get_frame(self):
         """Get the frame"""
         return self.parent.frames[self.fnum].frame
+    
+    def get_frame_data(self):
+        """Get the frame data"""
+        return self.parent.frames[self.fnum]
 
     def change_dataset(self, new: str):
         """Change the animation data set"""
@@ -114,6 +118,10 @@ class FrameData:
         self.hitbox.w = int((rs-ls)*newsize[0]*self.scale)
         self.hitbox.h = int((bs-ts)*newsize[1]*self.scale)
 
+    def get_point(self, point: str):
+        """Get a point given the identifier"""
+        return self.points[point]
+
     def __str__(self):
         return f"{self.frame_number}-{self.source_size}"
     
@@ -154,6 +162,10 @@ class AnimationDataSet:
         """Resize all sprite images"""
         for fd in self.frames:
             fd.rescale_sprite(scale)
+        
+    def get_framedata(self, index):
+        """Get a framedata object at a specific index"""
+        return self.frames[index]
     
     def get_frame_dimensions(self, index):
         """get the sprite dimensions"""
