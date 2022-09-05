@@ -1,7 +1,9 @@
 import pygame
 
-from engine import entity, clock, maths, scenehandler
-from engine import animation, user_input, camera
+from engine.gamesystem import entity
+from engine.graphics import camera, animation
+from engine.misc import clock, maths
+from engine.handler import scenehandler
 from engine import singleton as EGLOB
 
 from scripts import entityext, singleton
@@ -13,6 +15,7 @@ class Test(entityext.NonGameEntity):
         super().__init__(ENTITY_NAME, None)
         # self.position.xy = (100, 100)
         self.vec = pygame.math.Vector2(singleton.UP)
+        self.start = pygame.math.Vector2(self.position)
 
     def update(self):
         self.vec.rotate_ip(90 * clock.delta_time)
@@ -21,6 +24,7 @@ class Test(entityext.NonGameEntity):
     def render(self, surface):
         pygame.draw.line(surface, (255,0,0), self.position+self.get_glob_cpos(), self.position+singleton.UP * 10+self.get_glob_cpos())
         pygame.draw.line(surface, (255, 100, 0), self.position+self.get_glob_cpos(), self.position + self.vec*10+self.get_glob_cpos())
+        pygame.draw.circle(surface, (255, 0, 0), self.start+self.get_glob_cpos(), 1)
 
 
 class TrailTest(entityext.NonGameEntity):

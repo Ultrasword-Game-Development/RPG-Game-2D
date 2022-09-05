@@ -3,18 +3,17 @@ import pygame
 # from OpenGL.GLU import *
 # import numpy as np
 
+from engine import singleton
 
-from engine.singleton import *
+from engine.handler import filehandler, scenehandler
+from engine.world import world
+from engine.misc import clock, user_input
+from engine.handler.filehandler import *
 
-from engine import clock, user_input, handler, animation
-from engine import particle, chunk, tile, entity
-from engine import statehandler, scenehandler
+from engine.gamesystem import particle, entity
 
-from engine import singleton as EGLOB
-
+import engine.window
 from engine.window import Window
-from engine.filehandler import *
-
 
 # --------- initialization -------------- #
 
@@ -30,21 +29,28 @@ Window.create_window(WINDOW_CAPTION, WINDOW_SIZE[0], WINDOW_SIZE[1], pygame.RESI
 # window.set_icon()
 fb = Window.create_framebuffer(FB_SIZE[0], FB_SIZE[1], flags=0, bits=32).convert_alpha()
 
-# print(EGLOB.FB_WIDTH)
+# print(singleton.FB_WIDTH)
 # -------- external imports --------- #
 
 from scripts import singleton
-
-from scripts.game import world as _world
 
 from scripts.entities import player, mage, fireball, peasant, test
 from scripts.entities import particle_scripts
 
 # ----------------------------------- #
 
+# CLIENT = client.Client(client.socket.gethostbyname(client.socket.gethostname()))
+# CLIENT.connect()
+
+
+
 __scene = scenehandler.Scene()
 scenehandler.SceneHandler.push_state(__scene)
-STATE = __scene.handler
+__layer = __scene.add_layer()
+STATE = __layer.handler
+WORLD = __layer.world
+
+__scene.add_data("bg_color", (153, 220, 80))
 
 
 ph = particle.ParticleHandler()
@@ -91,18 +97,17 @@ STATE.add_entity(p2)
 # STATE.add_entity(ph)
 
 
-__scene.world = _world.RPGWorld(__scene, bg_col=(153, 229, 80))
-WORLD = __scene.world
-
 
 # ----------------------------- #
 
 clock.start()
 while Window.running:
     if scenehandler.SceneHandler.CURRENT:
-        fb.fill(scenehandler.SceneHandler.CURRENT.world.bg_col)
-        scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
-        scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)
+        fb.fill(scenehandler.SceneHandler.CURRENT.data["bg_color"])
+        scenehandler.SceneHandler.CURRENT.update(fb)
+        # scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
+        # scenehandler.SceneHandler.CURRENT.handler.debug_handle_entities(fb)
+        # scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)
     
     # rescale framebuffer to window
     Window.instance.blit(pygame.transform.scale(fb, (Window.WIDTH, Window.HEIGHT)), (0,0))
@@ -131,9 +136,10 @@ while Window.running:
             Window.handle_resize(e)
             fbsize = fb.get_size()
             user_input.update_ratio(Window.WIDTH, Window.HEIGHT, fbsize[0], fbsize[1])
+    
     pygame.display.flip()
     clock.update()
 
-
+# CLIENT.close()
 pygame.quit()
 

@@ -2,8 +2,9 @@ import pygame
 import os
 import json
 
-from engine import animation, maths
-from engine.filehandler import Filehandler
+from engine.graphics import animation
+from engine.misc import maths
+from engine.handler.filehandler import Filehandler
 
 from . import singleton
 

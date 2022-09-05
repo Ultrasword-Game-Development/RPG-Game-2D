@@ -1,7 +1,9 @@
 import pygame
-from .singleton import *
+from .. singleton import *
 
-from . import filehandler, entity, clock, maths
+from ..handler import filehandler
+from . import entity
+from ..misc import clock, maths
 
 
 def DEFAULT_CREATE_FUNC(ph):

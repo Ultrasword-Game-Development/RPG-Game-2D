@@ -1,7 +1,8 @@
 import pygame
-from engine import entity, clock, maths
-from engine import animation, user_input
-from engine import statehandler, particle, scenehandler
+from engine.misc import clock, maths, user_input
+from engine.graphics import animation 
+from engine.handler import statehandler, scenehandler
+from engine.gamesystem import particle
 
 from engine import singleton as EGLOB
 
@@ -176,7 +177,7 @@ class PostcastState(state.EntityState):
                 self.parent.add_active_attack(fire)
                 fire.position = maths.convert_array_to_int(self.parent.rect.center)
                 fire.motion = self.parent.player_dis.normalize() * 2
-                scenehandler.SceneHandler.CURRENT.handler.add_entity(fire)
+                self.parent.layer.handler.add_entity(fire)
                 self.handler.set_active_state(MAGE_ALERT_STATE)
         # case 2: interrupted -> backlash 
 
@@ -287,20 +288,24 @@ class Mage(entityext.GameEntity):
         self.shandler.player_dis = self.player_dis.magnitude()
 
         self.shandler.update()
-        scenehandler.SceneHandler.CURRENT.world.move_entity(self)
+        self.layer.world.move_entity(self)
 
         self.move_to_position()
         self.motion *= LERP_COEF
 
     def render(self, surface):
         surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.get_glob_pos())
+        # particle handler
+        self.phandler.render(surface)
+        self.atk_phandler.render(surface)
+
+    def debug(self, surface):
+        super().debug(surface)
         # entity.render_entity_hitbox(self, surface)
         pygame.draw.circle(surface, (255, 0, 0), self.get_glob_cpos(), MAGE_DETECT_RADIUS, width=1)
         pygame.draw.circle(surface, (0, 0, 255), self.get_glob_cpos(), MAGE_PREFERED_DISTANCE, width=1)
         pygame.draw.circle(surface, (0, 100, 100), self.get_glob_cpos(), MAGE_CRITICAL_DEF_DISTANCE, width=1)
-        # particle handler
-        self.phandler.render(surface)
-        self.atk_phandler.render(surface)
+
 
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")

@@ -1,6 +1,6 @@
 import pygame
 
-from .singleton import *
+from .. singleton import *
 from . import tile
 
 

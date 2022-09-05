@@ -1,7 +1,9 @@
 import pygame
 import numpy as np
 
-from engine import entity, maths, scenehandler
+from engine.gamesystem import entity
+from engine.misc import maths
+from engine.handler import scenehandler
 
 from . import singleton
 from .game import state

@@ -1,4 +1,4 @@
-from engine import statehandler
+from engine.handler import statehandler
 
 
 class EntityState(statehandler.State):

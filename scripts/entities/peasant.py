@@ -1,6 +1,8 @@
 import pygame
 
-from engine import statehandler, animation, clock, scenehandler, maths
+from engine.misc import clock, maths
+from engine.handler import statehandler, scenehandler
+from engine.graphics import animation
 
 from scripts import singleton, entityext, skillext, animationext
 from scripts.game import state, skillhandler
@@ -9,6 +11,7 @@ from scripts.entities import fireball
 
 # trailtest
 from scripts.entities import test
+from scripts.entities import particle_scripts, attacks
 
 
 # ---------- CONST VALUES ---------
@@ -41,6 +44,9 @@ IDLE_MOVE_MAGE_WEIGHT = 0.6
 # -------- animations ------------
 
 ANIM_CAT = "peasant"
+MELEE_ATTACK_ANIM_CAT = "melee_swing"
+MELEE_ATTACK_ANIM = "attack"
+
 IDLE_ANIM = "idle"
 RUN_ANIM = "run"
 
@@ -190,15 +196,10 @@ class OrbitState(state.EntityState):
             self.parent.motion -= self.parent.distance_to_other(pea).normalize().rotate(10) * MS * clock.delta_time * self.handler.peasant_avoid_weight / 2
         # attack timer update
         self.attack_timer.update()
-        # case 1: move out of attacking range
-        if self.handler.player_dis > ATTACK_RANGE+10:
+        # case 1: timer is up
+        if self.attack_timer.changed:
             # case 1 fulfilled
-            self.handler.set_active_state(APPROACH_STATE)
-        # case 2: timer is up
-        elif self.attack_timer.changed:
-            # case2 fulfilled
             self.attack_timer.changed = False
-            # print("attacking")
             self.handler.set_active_state(ATTACK_STATE)
 
 class AttackState(state.EntityState):
@@ -209,17 +210,25 @@ class AttackState(state.EntityState):
         pass
 
     def update(self):
-        if self.handler.player_dis > MELEE_ATTACK_RANGE+10:
-            entityext.update_ani_and_hitbox(self.parent, RUN_ANIM)
-        else:
-            entityext.update_ani_and_hitbox(self.parent, IDLE_ANIM)
-
-        p = test.TrailTest()
-        p.position.xy = self.parent.handle_pos
-        p.position += self.parent.rect.topleft
-        print(p.position, self.parent.rect)
-        scenehandler.SceneHandler.CURRENT.handler.add_entity(p)
-        self.handler.set_active_state(ORBIT_STATE)
+        # TODO - add new attack animatino in future
+        entityext.update_ani_and_hitbox(self.parent, IDLE_ANIM)
+        # stop moving
+        self.parent.motion *= 0
+        # create attack particle
+        pos = [self.parent.position.x, self.parent.position.y]
+        if self.parent.position.x < singleton.PLAYER.position.x:
+            pos[0] = self.parent.rect.w - self.parent.handle_pos[0] + self.parent.position.x
+        r = attacks.MeleeStab(pos[0], pos[1], self.parent.MELEE_ATTACK_CATEGORY.get_animation(MELEE_ATTACK_ANIM).get_registry())
+        r.motion = self.parent.player_dis.normalize() * 10
+        self.parent.layer.handler.add_entity(r)
+        # p = test.TrailTest()
+        # p.position.xy = self.parent.handle_pos
+        # p.position += self.parent.rect.topleft
+        # print(p.position, self.parent.rect)
+        # scenehandler.SceneHandler.CURRENT.handler.add_entity(p)
+        # self.handler.set_active_state(ORBIT_STATE)
+        # immediately dip
+        self.handler.set_active_state(RUN_STATE)
 
 class RunState(state.EntityState):
     def __init__(self, parent):
@@ -273,7 +282,7 @@ class StateHandler(statehandler.StateHandler):
         if self.search_timer.changed:
             self.search_timer.changed = False
             self.nearby_peasants.clear()
-            for e in scenehandler.SceneHandler.CURRENT.world.find_nearby_entities(self.peasant.p_chunk, 1):
+            for e in self.peasant.layer.world.find_nearby_entities(self.peasant.p_chunk, 1):
                 if type(e) == entityext.EntityTypes.get_entity_type("MAGE"):
                     self.nearby_mage = self.peasant.distance_to_other(e)
                 elif type(e) == Peasant and e.id != self.peasant.id:
@@ -288,6 +297,7 @@ class StateHandler(statehandler.StateHandler):
 
 class Peasant(entityext.GameEntity):
     ANIM_CATEGORY = None
+    MELEE_ATTACK_CATEGORY = None
 
     def __init__(self):
         super().__init__(ENTITY_NAME, _HEALTH, _MANA)
@@ -306,12 +316,15 @@ class Peasant(entityext.GameEntity):
 
         self.shandler.update()
 
-        scenehandler.SceneHandler.CURRENT.world.move_entity(self)
+        self.layer.world.move_entity(self)
         self.move_to_position()
         self.motion *= LERP_COEF
 
     def render(self, surface):
         surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.get_glob_pos())
+    
+    def debug(self, surface):
+        super().debug(surface)
         pygame.draw.circle(surface, (0,255,0), self.get_glob_cpos(), DETECT_RANGE, 1)
         pygame.draw.circle(surface, (0, 100, 255), self.get_glob_cpos(), ATTACK_RANGE, 1)
 
@@ -319,6 +332,10 @@ class Peasant(entityext.GameEntity):
 
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/peasant.json")
+animation.load_and_parse_aseprite_animation("assets/sprites/particles/melee_swing.json")
 Peasant.ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
 Peasant.ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
+Peasant.MELEE_ATTACK_CATEGORY = animation.Category.get_category(MELEE_ATTACK_ANIM_CAT)
+print(Peasant.MELEE_ATTACK_CATEGORY)
 entityext.EntityTypes.register_entity_type(ENTITY_NAME, Peasant)
+

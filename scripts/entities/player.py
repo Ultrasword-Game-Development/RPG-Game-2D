@@ -1,7 +1,9 @@
 import pygame
 
-from engine import entity, clock, maths, scenehandler
-from engine import animation, user_input, camera
+from engine.misc import clock, maths, user_input
+from engine.handler import scenehandler
+from engine.graphics import animation, camera
+
 from engine import singleton as EGLOB
 
 from scripts import entityext, singleton
@@ -49,7 +51,7 @@ class Player(entityext.GameEntity):
         if user_input.is_key_pressed(pygame.K_s):
             self.motion.y += MOVE_SPEED * clock.delta_time
 
-        scenehandler.SceneHandler.CURRENT.world.move_entity(self)
+        self.layer.world.move_entity(self)
         self.move_to_position()
         # update camera
         self.camera.campos -= self.motion

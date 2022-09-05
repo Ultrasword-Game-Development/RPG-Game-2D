@@ -1,5 +1,5 @@
 import pygame
-from . import singleton as EGLOB
+from .. import singleton as EGLOB
 
 
 class Camera:

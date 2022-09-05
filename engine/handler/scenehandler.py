@@ -1,5 +1,5 @@
 import pygame
-from . import handler, world
+from ..gamesystem import layer
 
 from queue import deque
 
@@ -38,6 +38,24 @@ class Scene:
         - handler               = handler.Handler()
         - world                 = world.World()
         """
-        self.handler = handler.Handler(self)
-        self.world = world.World(self)
+        self.layers = []
+        self.data = {}
+    
+    def add_data(self, key, value):
+        self.data[key] = value
+    
+    def get_data(self, key):
+        return self.data[key]
+
+    def add_layer(self):
+        self.layers.append(layer.Layer(self))
+        return self.layers[-1]
+    
+    def get_layer(self, index):
+        return self.layers[index]
+    
+    def update(self, surface):
+        for layer in self.layers:
+            layer.handle(surface)
+
 

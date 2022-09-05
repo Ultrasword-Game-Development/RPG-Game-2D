@@ -1,8 +1,10 @@
 import pygame
 
-from engine import *
-from engine.scenehandler import SceneHandler
+from engine.misc import clock, maths
+from engine.handler.scenehandler import SceneHandler
 from engine import singleton as EGLOB
+from engine.gamesystem import particle
+from engine.graphics import animation
 
 from scripts import animationext, singleton, entityext
 from scripts.game import skillhandler
@@ -44,10 +46,10 @@ MANA_COST = 25
 
 def particle_create(self):
     for item in self.parent.activeatk:
-        if item not in self.parent.group.entities:
+        if item not in self.parent.layer.handler.entities:
             continue
         self.p_count += 1
-        self.particles[self.p_count] = self.parent.group.entity_buffer[item].create_particle(self.p_count)
+        self.particles[self.p_count] = self.parent.layer.handler.entity_buffer[item].create_particle(self.p_count)
 
 def particle_update(self, p, surface):
     p[EGLOB.PARTICLE_LIFE] -= clock.delta_time

@@ -1,4 +1,4 @@
-from engine import clock
+from engine.misc import clock
 
 
 # ------------------ skills ---------------- #

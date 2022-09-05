@@ -2,8 +2,8 @@ import pygame
 
 from dataclasses import dataclass
 
-from .singleton import *
-from .filehandler import Filehandler
+from .. singleton import *
+from ..handler.filehandler import Filehandler
 
 def calculate_world_position(tchunk_pos, cworld_pos):
     return (TILE_WIDTH * (tchunk_pos[0] + cworld_pos[0] * TILEMAP_WIDTH), TILE_HEIGHT * (tchunk_pos[1] + cworld_pos[1] * TILEMAP_HEIGHT))
