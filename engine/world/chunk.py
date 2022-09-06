@@ -5,7 +5,7 @@ from . import tile
 
 
 class Chunk:
-    def __init__(self, x, y):
+    def __init__(self, x, y, world):
         """
         Constructor for Chunk
         contains:
@@ -30,6 +30,7 @@ class Chunk:
         self.tilemap = tuple(tuple(tile.Tile(x,y,self) for x in range(TILEMAP_WIDTH)) for y in range(TILEMAP_HEIGHT))
         self.environment = set()
         self.entities = set()
+        self.world = world
     
     def get_tile_at(self, x, y):
         """Get a tile"""
@@ -37,12 +38,13 @@ class Chunk:
     
     def render(self, surface, offset=(0, 0)):
         """Render function"""
+        # render tilemap
         for y in range(TILEMAP_HEIGHT):
             for x in range(TILEMAP_WIDTH):
                 if self.tilemap[y][x].visible and self.tilemap[y][x].sprite:
                     tile = self.tilemap[y][x]
                     surface.blit(tile.sprite, (tile.world_hitbox.x + WORLD_OFFSET_X, tile.world_hitbox.y + WORLD_OFFSET_Y))
-    
+
     def add_environment_object(self, obj):
         """Add environment objects"""
         self.environment.add(obj.id)

@@ -3,6 +3,7 @@ import pygame
 from engine.misc import clock, maths, user_input
 from engine.handler import scenehandler
 from engine.graphics import animation, camera
+from engine.gamesystem import entity
 
 from engine import singleton as EGLOB
 
@@ -29,8 +30,10 @@ class Player(entityext.GameEntity):
         self.aregist = Player.ANIM_CATEGORY.get_animation(PLAYER_IDLE_ANIM).get_registry()
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
+        self.camera = None
 
-        self.camera = camera.Camera()
+    def start(self):
+        self.camera = self.layer.camera
         self.camera.set_target(self)
         self.camera.track_target()
     
@@ -66,4 +69,4 @@ class Player(entityext.GameEntity):
 # ------------ setup ----------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
 Player.ANIM_CATEGORY = animation.Category.get_category(PLAYER_ANIM_CAT)
-entityext.EntityTypes.register_entity_type(ENTITY_NAME, Player)
+entity.EntityTypes.register_entity_type(ENTITY_NAME, Player)

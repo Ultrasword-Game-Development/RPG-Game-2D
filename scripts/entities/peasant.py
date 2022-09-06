@@ -3,6 +3,7 @@ import pygame
 from engine.misc import clock, maths
 from engine.handler import statehandler, scenehandler
 from engine.graphics import animation
+from engine.gamesystem import entity
 
 from scripts import singleton, entityext, skillext, animationext
 from scripts.game import state, skillhandler
@@ -283,7 +284,7 @@ class StateHandler(statehandler.StateHandler):
             self.search_timer.changed = False
             self.nearby_peasants.clear()
             for e in self.peasant.layer.world.find_nearby_entities(self.peasant.p_chunk, 1):
-                if type(e) == entityext.EntityTypes.get_entity_type("MAGE"):
+                if type(e) == entity.EntityTypes.get_entity_type("MAGE"):
                     self.nearby_mage = self.peasant.distance_to_other(e)
                 elif type(e) == Peasant and e.id != self.peasant.id:
                     self.nearby_peasants.append(e)
@@ -293,7 +294,6 @@ class StateHandler(statehandler.StateHandler):
             else: self.peasant_avoid_weight = 0
 
 # --------------- peasant class -------------- #
-
 
 class Peasant(entityext.GameEntity):
     ANIM_CATEGORY = None
@@ -330,6 +330,7 @@ class Peasant(entityext.GameEntity):
 
         pygame.draw.line(surface, (255, 0, 0), self.get_glob_cpos(), self.get_glob_cpos() - singleton.UP.rotate(180-self.motion.angle_to(singleton.UP)) * 10)
 
+
 # ----------- setup -------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/peasant.json")
 animation.load_and_parse_aseprite_animation("assets/sprites/particles/melee_swing.json")
@@ -337,5 +338,5 @@ Peasant.ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
 Peasant.ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
 Peasant.MELEE_ATTACK_CATEGORY = animation.Category.get_category(MELEE_ATTACK_ANIM_CAT)
 print(Peasant.MELEE_ATTACK_CATEGORY)
-entityext.EntityTypes.register_entity_type(ENTITY_NAME, Peasant)
+entity.EntityTypes.register_entity_type(ENTITY_NAME, Peasant)
 

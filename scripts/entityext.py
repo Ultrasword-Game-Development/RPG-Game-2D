@@ -35,19 +35,6 @@ def find_mot_with_weight_vec(vec, weight, MS):
 
 # ------------- classes ------------- #
 
-class EntityTypes:
-    TYPES = {}
-
-    @classmethod
-    def get_entity_type(cls, name):
-        """Get an entity class given the name"""
-        return cls.TYPES[name] if name in cls.TYPES else None
-    
-    @classmethod
-    def register_entity_type(cls, name, etype):
-        """Register the entity type"""
-        cls.TYPES[name] = etype
-
 
 class GameEntity(entity.Entity):
     def __init__(self, entity_name: str, health: int, mana: int):
@@ -90,20 +77,21 @@ class GameEntity(entity.Entity):
         self.position = pygame.math.Vector2()
 
         self.handle_pos = (0, 0)
-    
+
+    def start(self):
+        pass
+
     def add_active_attack(self, attack):
         self.activeatk.add(attack.id)
     
     def remove_active_attack(self, attack):
         self.activeatk.remove(attack.id)
-    
-    def create_particle(self, pid):
-        return [pid, 0, 0, 0, 0, 0, 0]
 
     def move_to_position(self):
         """Move rect to position vec"""
         self.rect.x = round(self.position.x)
         self.rect.y = round(self.position.y)
+
 
 class NonGameEntity(entity.Entity):
     def __init__(self, name: str, related_entity):

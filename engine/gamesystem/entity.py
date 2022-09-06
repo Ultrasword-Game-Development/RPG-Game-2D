@@ -5,6 +5,21 @@ from ..handler import scenehandler
 
 E_COUNT = 0
 
+# ------------- classes ---------- #
+class EntityTypes:
+    TYPES = {}
+
+    @classmethod
+    def get_entity_type(cls, name):
+        """Get an entity class given the name"""
+        return cls.TYPES[name] if name in cls.TYPES else None
+
+    @classmethod
+    def register_entity_type(cls, name, etype):
+        """Register the entity type"""
+        cls.TYPES[name] = etype
+
+
 class Entity:
     """
     Entity object class
@@ -62,7 +77,10 @@ class Entity:
 
         # parents
         self.layer = None
-    
+
+    def start(self):
+        pass
+
     def update(self):
         pass
 

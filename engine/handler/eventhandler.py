@@ -16,9 +16,9 @@ signal --> emitted
 - when done update, finish and clear all events from that tick
 
 """
-
-from ..gamesystem import layer
 from queue import deque
+from ..gamesystem import layer
+
 
 class Signal:
     def __init__(self, single=True, *args):
@@ -27,6 +27,7 @@ class Signal:
 
         self.handled = False
 
+
 class Event:
     def __init__(self, name):
         self.name = name
@@ -34,6 +35,7 @@ class Event:
     
     def handle_signal(self):
         pass
+
 
 class Eventhandler:
     def __init__(self, scene):

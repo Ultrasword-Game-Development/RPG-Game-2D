@@ -1,6 +1,9 @@
 import pygame
 from . import scenehandler
 
+from ..gamesystem import entity
+
+
 class Handler:
     """
     Handles all pygame.sprite.Sprite objects
@@ -40,8 +43,13 @@ class Handler:
     def add_entity(self, entity):
         """Add an entity"""
         entity.layer = self.layer
+        entity.start()
         self.to_add.append(entity)
-    
+
+    def get_entity(self, eid):
+        """Get an entity"""
+        return self.entity_buffer[eid]
+
     def handle_changes(self):
         """Handles adding + removal of entities"""
         for entity in self.to_add:

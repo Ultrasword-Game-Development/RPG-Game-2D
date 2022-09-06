@@ -23,15 +23,16 @@ class World:
     def add_chunk(self, chunk):
         """Adds a chunk to the world"""
         self.chunks[chunk.id] = chunk
+        chunk.world = self
     
     def get_chunk(self, x: int, y: int):
         """Get a chunk"""
         key = f"{x}-{y}"
         if key not in self.chunks:
-            self.chunks[key] = chunk.Chunk(x, y)
+            self.chunks[key] = chunk.Chunk(x, y, self)
         return self.chunks[key]
     
-    def handle_chunks(self, surface):
+    def handle_chunks(self, surface, center_chunk: list):
         """Handles rendering of chunks"""
         # print("handling chunks")
         # TODO - create system for rendering chunks
@@ -44,7 +45,7 @@ class World:
         # move x\
         entity.position.x += entity.motion.x
         # check for collisions with tilemap
-        
+
         # move y
         entity.position.y += entity.motion.y
         # check for collisions with tilemap
@@ -64,6 +65,4 @@ class World:
                 if not c: continue
                 for e in c.entities:
                     yield self.layer.handler.entity_buffer[e]
-
-
 

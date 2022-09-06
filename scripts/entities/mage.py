@@ -2,7 +2,7 @@ import pygame
 from engine.misc import clock, maths, user_input
 from engine.graphics import animation 
 from engine.handler import statehandler, scenehandler
-from engine.gamesystem import particle
+from engine.gamesystem import particle, entity
 
 from engine import singleton as EGLOB
 
@@ -311,4 +311,4 @@ class Mage(entityext.GameEntity):
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
 Mage.ANIM_CATEGORY = animation.Category.get_category(MAGE_ANIM_CAT)
 Mage.ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
-entityext.EntityTypes.register_entity_type(ENTITY_NAME, Mage)
+entity.EntityTypes.register_entity_type(ENTITY_NAME, Mage)

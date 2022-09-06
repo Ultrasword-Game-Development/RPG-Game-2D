@@ -72,7 +72,7 @@ ph.update_func = particle_scripts.GRAVITY_PARTICLE_UPDATE
 # STATE.add_entity(trunk)
 
 singleton.PLAYER = player.Player()
-singleton.PLAYER.rect.topleft = (10,10)
+singleton.PLAYER.rect.topleft = (10, 10)
 
 m = mage.Mage()
 m.position.xy = (100, 100)
@@ -94,7 +94,6 @@ STATE.add_entity(p)
 STATE.add_entity(p2)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
-
 
 
 # ----------------------------- #

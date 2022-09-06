@@ -3,7 +3,7 @@ import pygame
 from engine.misc import clock, maths
 from engine.handler.scenehandler import SceneHandler
 from engine import singleton as EGLOB
-from engine.gamesystem import particle
+from engine.gamesystem import particle, entity
 from engine.graphics import animation
 
 from scripts import animationext, singleton, entityext
@@ -106,6 +106,9 @@ class Fire(entityext.NonGameEntity):
         self.max_distance = DEFAULT_FIRE_MAX_DISTANCE
         self.distance_travelled = 0
 
+    def start(self):
+        pass
+
     def update(self):
         # standard stuff
         self.aregist.update()
@@ -140,4 +143,4 @@ class Fire(entityext.NonGameEntity):
 animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)
 Fire.ANIM_CATEGORY = animation.Category.get_category(FIRE_ANIM_CAT)
 skillhandler.SkillHandler.add_skill(FireBallSkill())
-entityext.EntityTypes.register_entity_type(ENTITY_NAME, Fire)
+entity.EntityTypes.register_entity_type(ENTITY_NAME, Fire)
