@@ -54,8 +54,8 @@ class Scene:
     def get_layer(self, index):
         return self.layers[index]
     
-    def update(self, surface):
+    def update(self, surface, debug=False):
         for layer in self.layers:
-            layer.handle(surface)
+            layer.handle(surface, debug=debug)
 
 

@@ -5,6 +5,7 @@ import pickle
 import os
 
 from . import client
+from . import network_obj
 
 # ----------------------------------- #
 
@@ -35,6 +36,9 @@ class Server:
             print(exc_type, fname, exc_tb.tb_lineno, "\n\n")
             # output error
             print(str(e))
+        result = network_obj.Connection(self.address[0], self.address[1])
+        result.link = self.link
+        self.link = result
         # ----------------------------------- #
         # running
         print("Connected!")

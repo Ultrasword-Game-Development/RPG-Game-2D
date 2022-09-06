@@ -6,16 +6,18 @@ import os
 from queue import deque
 
 import pygame
+
 from . import network_obj
 
 # ----------------------------------- #
 # constants
 HEADER = 16
 FORMAT = 'utf-8'
-MAX_SEND = 4096
-MAX_RECIEVE = 4096
+MAX_SEND = 2048
+MAX_RECEIVE = 2048
 
 CLOSING_CALL = "!CLOSING!"
+
 
 # ----------------------------------- #
 # client
@@ -27,7 +29,7 @@ class Client:
         self.address = (ip, port)
 
         # create connection
-        self.link = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.link = network_obj.Connection(ip, port)
         
         # receive queue
         self.recieved = deque()
@@ -35,16 +37,8 @@ class Client:
     def connect(self):
         # ----------------------------------- #
         # connect to the server
-        try:
-            self.link.connect(self.address)
-            print(f"Connected to {self.address[0]}:{self.address[1]}")
-        except socket.error as e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno, "\n\n")
-            # upload quit event
-            print(f"Quitting from: {__file__}")
-            pygame.event.post(pygame.QUIT)
+        if not self.link.connect():
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
     
     # ----------------------------------- #
     # to send data

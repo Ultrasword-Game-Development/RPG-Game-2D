@@ -95,14 +95,13 @@ STATE.add_entity(p2)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
 
-
 # ----------------------------- #
 
 clock.start()
 while Window.running:
     if scenehandler.SceneHandler.CURRENT:
         fb.fill(scenehandler.SceneHandler.CURRENT.data["bg_color"])
-        scenehandler.SceneHandler.CURRENT.update(fb)
+        scenehandler.SceneHandler.CURRENT.update(fb, debug=True)
         # scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
         # scenehandler.SceneHandler.CURRENT.handler.debug_handle_entities(fb)
         # scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)

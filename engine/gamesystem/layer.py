@@ -15,8 +15,11 @@ class Layer:
         self.world = world.World(self)
         self.camera = camera.Camera()
 
-    def handle(self, surface):
-        self.handler.handle_entities(surface)
+    def handle(self, surface, debug=False):
+        if debug:
+            self.handler.debug_handle_entities(surface)
+        else:
+            self.handler.handle_entities(surface)
         self.world.handle_chunks(surface, self.camera.chunkpos)
     
     def handle_signal(self, signal):
