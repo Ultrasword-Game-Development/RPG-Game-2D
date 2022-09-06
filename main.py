@@ -43,7 +43,6 @@ from scripts.entities import particle_scripts
 # CLIENT.connect()
 
 
-
 __scene = scenehandler.Scene()
 scenehandler.SceneHandler.push_state(__scene)
 __layer = __scene.add_layer()
