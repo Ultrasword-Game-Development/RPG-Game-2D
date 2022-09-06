@@ -53,7 +53,7 @@ class Server:
             # ----------------------------------- #
             # accept connections
             try:
-                conn, addr = self.link.accept()
+                conn, addr = self.link.link.accept()
                 # create a new thread
                 thread = threading.Thread(target=self.handle_client, args=(conn, addr,))
                 # add client to database
@@ -72,13 +72,13 @@ class Server:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print(exc_type, fname, exc_tb.tb_lineno, "\n\n", e)
-        slef.main_thread.kill()
+        self.main_thread.kill()
 
     def send(self, conn, data):
         bytedata = pickle.dumps(data)
         length = len(bytedata)
-        first = str(length).encode(FORMAT)
-        first += b' ' * (HEADAER-len(first))
+        first = str(length).encode(client.FORMAT)
+        first += b' ' * (client.HEADAER-len(first))
         conn.send(first)
         conn.send(bytedata)
 
