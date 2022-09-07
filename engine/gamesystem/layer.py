@@ -2,7 +2,7 @@
 Layer system -- handles events according to layer
 """
 
-from ..handler import handler
+from ..handler import handler, eventhandler
 from ..world import world
 from ..graphics import camera
 
@@ -21,7 +21,4 @@ class Layer:
         else:
             self.handler.handle_entities(surface)
         self.world.handle_chunks(surface, self.camera.chunkpos)
-    
-    def handle_signal(self, signal):
-        pass
 

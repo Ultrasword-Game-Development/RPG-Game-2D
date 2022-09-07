@@ -40,7 +40,7 @@ class Scene:
         """
         self.layers = []
         self.data = {}
-    
+
     def add_data(self, key, value):
         self.data[key] = value
     

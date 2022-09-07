@@ -6,6 +6,7 @@ import pygame
 from engine import singleton
 
 from engine.handler import filehandler, scenehandler
+from engine.handler.eventhandler import Eventhandler, Event
 from engine.world import world
 from engine.misc import clock, user_input
 from engine.handler.filehandler import *
@@ -95,10 +96,14 @@ STATE.add_entity(p2)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
 
+wrap = Eventhandler.register_to_signal("test", print)
+
 # ----------------------------- #
+Eventhandler.emit_signal(Event("test", "hello world"))
 
 clock.start()
 while Window.running:
+    Eventhandler.update()
     if scenehandler.SceneHandler.CURRENT:
         fb.fill(scenehandler.SceneHandler.CURRENT.data["bg_color"])
         scenehandler.SceneHandler.CURRENT.update(fb, debug=True)
@@ -136,6 +141,9 @@ while Window.running:
     
     pygame.display.flip()
     clock.update()
+
+Eventhandler.unregister_from_signal(wrap)
+Eventhandler.remove_signal("test")
 
 # CLIENT.close()
 pygame.quit()

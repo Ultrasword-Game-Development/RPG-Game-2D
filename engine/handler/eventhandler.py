@@ -16,53 +16,69 @@ signal --> emitted
 - when done update, finish and clear all events from that tick
 
 """
-from queue import deque
 from ..gamesystem import layer
+from . import scenehandler
 
-
-class Signal:
-    def __init__(self, single=True, *args):
-        self.single = single
-        self.args = args
-
-        self.handled = False
+from queue import deque
 
 
 class Event:
-    def __init__(self, name):
+    def __init__(self, name, data: dict):
         self.name = name
-        self.registered = {}
-    
-    def handle_signal(self):
-        pass
+        self.data = data
+
+
+class FunctionWrapper:
+    COUNTER = 0
+
+    @classmethod
+    def get_id(cls):
+        cls.COUNTER += 1
+        return cls.COUNTER
+
+    def __init__(self, ref, func):
+        self.ref = ref
+        self.func = func
+        self.fid = FunctionWrapper.get_id()
+
+    def __eq__(self, other):
+        return self.fid == other.fid
 
 
 class Eventhandler:
-    def __init__(self, scene):
-        self.events = {}
-        self.emitted = deque()
+    EMITTED = deque()
+    EVENTS = {}
 
-        self.scene = scene
-
-    def emit_signal(self, name):
+    @classmethod
+    def emit_signal(cls, name):
         """Emits a signal"""
-        self.emitted.append(name)
-    
-    def register_to_signal(self, name, function):
-        """Register a function to a signal"""
-        if name not in self.registrations:
-            self.registrations[name] = Event(name)
-        obj = function
-        self.registrations[name].append(obj)
+        cls.EMITTED.append(name)
 
-    def update(self):
-        for s in self.emitted:
-            for layer in self.scene.layers:
-                layer.handle_signal(s)
-                if s.handled:
-                    break
+    @classmethod
+    def register_to_signal(cls, name, function):
+        """Register a function to a signal"""
+        if name not in cls.EVENTS:
+            # create a new registry Event
+            cls.EVENTS[name] = []
+        wrapper = FunctionWrapper(name, function)
+        cls.EVENTS[name].append(wrapper)
+        return wrapper
+
+    @classmethod
+    def remove_signal(cls, name):
+        cls.EVENTS.pop(name)
+
+    @classmethod
+    def unregister_from_signal(cls, wrapper):
+        """Unregister a function from a signal"""
+        cls.EVENTS[wrapper.ref].remove(wrapper)
+
+    @classmethod
+    def update(cls):
+        for s in cls.EMITTED:
+            for wrap in cls.EVENTS[s.name]:
+                wrap.func(s)
+        cls.EMITTED.clear()
 
 # ----------------------------------- #
 # access world layers and update thorugh each layer
-
-
