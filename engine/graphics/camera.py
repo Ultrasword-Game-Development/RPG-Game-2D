@@ -24,8 +24,10 @@ class Camera:
             return
         # get world position
         wpos = self.target.rel_hitbox
+        # set position
         self.position.x = self.campos.x + EGLOB.FBWHALF
         self.position.y = self.campos.y + EGLOB.FBHHALF
+        # chunk pos
         self.chunkpos[0] = maths.__mod__(self.campos.x, singleton.CHUNK_PIX_WIDTH)
         self.chunkpos[1] = maths.__mod__(self.campos.y, singleton.CHUNK_PIX_HEIGHT)
 

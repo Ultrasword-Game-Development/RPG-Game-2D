@@ -3,7 +3,7 @@ import numpy as np
 
 from engine.gamesystem import entity
 from engine.misc import maths
-from engine.handler import scenehandler
+from engine.handler import scenehandler, eventhandler
 
 from . import singleton
 from .game import state
@@ -12,12 +12,13 @@ from .game import state
 
 # ---------- functions ---------- #
 
-def update_ani_and_hitbox(entity, ani_name):
+def update_ani_and_hitbox(entity, ani_name, handle=True):
     """This entity must contain an shandler"""
     entity.aregist[ani_name].update()
     entity.sprite = entity.aregist[ani_name].get_frame()
     entity.hitbox = entity.aregist[ani_name].get_hitbox()
-    entity.handle_pos = entity.aregist[ani_name].get_frame_data().get_point(singleton.HANDLE_IDENTIFIER)
+    if handle:
+        entity.handle_pos = entity.aregist[ani_name].get_frame_data().get_point(singleton.HANDLE_IDENTIFIER)
     entity.calculate_rel_hitbox()
 
 def find_idle_mot(MS):
@@ -75,7 +76,9 @@ class GameEntity(entity.Entity):
         # attacks --------- set to hold attack entity id (for particles)
         self.activeatk = set()
         self.position = pygame.math.Vector2()
-
+        # events
+        self.eventhandler = eventhandler.EventStorage()
+        # handle (where to hold weapons) position
         self.handle_pos = (0, 0)
 
     def start(self):
@@ -91,6 +94,9 @@ class GameEntity(entity.Entity):
         """Move rect to position vec"""
         self.rect.x = round(self.position.x)
         self.rect.y = round(self.position.y)
+
+    def kill(self):
+        super().kill()
 
 
 class NonGameEntity(entity.Entity):

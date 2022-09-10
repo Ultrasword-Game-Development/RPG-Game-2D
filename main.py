@@ -96,10 +96,7 @@ STATE.add_entity(p2)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
 
-wrap = Eventhandler.register_to_signal("test", print)
-
-# ----------------------------- #
-Eventhandler.emit_signal(Event("test", "hello world"))
+# -------------------------------------------------- #
 
 clock.start()
 while Window.running:
@@ -142,8 +139,7 @@ while Window.running:
     pygame.display.flip()
     clock.update()
 
-Eventhandler.unregister_from_signal(wrap)
-Eventhandler.remove_signal("test")
+scenehandler.SceneHandler.clean()
 
 # CLIENT.close()
 pygame.quit()

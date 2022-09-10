@@ -50,9 +50,9 @@ class Eventhandler:
     EVENTS = {}
 
     @classmethod
-    def emit_signal(cls, name):
+    def emit_signal(cls, event: Event):
         """Emits a signal"""
-        cls.EMITTED.append(name)
+        cls.EMITTED.append(event)
 
     @classmethod
     def register_to_signal(cls, name, function):
@@ -79,6 +79,25 @@ class Eventhandler:
             for wrap in cls.EVENTS[s.name]:
                 wrap.func(s)
         cls.EMITTED.clear()
+
+
+class EventStorage:
+    def __init__(self):
+        self.wrappers = {}
+
+    def emit_signal(self, event):
+        """Emit a Signal"""
+        Eventhandler.emit_signal(event)
+
+    def register_to_signal(self, signal, function):
+        """Register easily"""
+        wrap = Eventhandler.register_to_signal(signal, function)
+        self.wrappers[signal] = wrap
+
+    def unregister_from_signal(self, signal):
+        """Unregister easily"""
+        Eventhandler.unregister_from_signal(self.wrappers[signal])
+
 
 # ----------------------------------- #
 # access world layers and update thorugh each layer

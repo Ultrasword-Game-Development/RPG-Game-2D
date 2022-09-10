@@ -4,6 +4,7 @@ import pygame
 
 from ..singleton import *
 from ..handler.filehandler import Filehandler
+from ..handler.eventhandler import Eventhandler
 from ..misc import clock
 
 

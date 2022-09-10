@@ -8,6 +8,8 @@ RIGHT = pygame.math.Vector2(1,0)
 DOWN = pygame.math.Vector2(0,1)
 LEFT = pygame.math.Vector2(-1,0)
 
+ZERO = pygame.math.Vector2(0,0)
+
 # ---------- const values  ---------------- #
 
 HANDLE_IDENTIFIER = "handler"

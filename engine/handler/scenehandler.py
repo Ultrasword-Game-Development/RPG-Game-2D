@@ -26,6 +26,13 @@ class SceneHandler:
         if SceneHandler.QUEUE:
             SceneHandler.CURRENT = SceneHandler.QUEUE[-1]
 
+    @staticmethod
+    def clean():
+        """Cleans all scenes from queue"""
+        while SceneHandler.QUEUE:
+            scene = SceneHandler.QUEUE.pop()
+            scene.clean()
+
 
 class Scene:
     """
