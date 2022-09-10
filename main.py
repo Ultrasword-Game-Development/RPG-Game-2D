@@ -139,8 +139,6 @@ while Window.running:
     pygame.display.flip()
     clock.update()
 
-scenehandler.SceneHandler.clean()
-
 # CLIENT.close()
 pygame.quit()
 
