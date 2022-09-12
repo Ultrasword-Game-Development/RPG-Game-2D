@@ -1,4 +1,6 @@
 import pygame
+import json
+
 from .. singleton import *
 
 from ..handler import filehandler
@@ -30,7 +32,7 @@ class ParticleHandler(entity.Entity):
     handles particles and renders them accordingly
     - can be textured or non-textured
     """
-    def __init__(self):
+    def __init__(self, parent):
         """
         Constructor for ParticleHandler
         contains:
@@ -50,6 +52,7 @@ class ParticleHandler(entity.Entity):
         - update_func           = void func(self, particle, surface)
         """
         super().__init__()
+        self.parent = parent
         self.particles = {}
         self.rq = []
         self.p_count = 0
@@ -63,7 +66,20 @@ class ParticleHandler(entity.Entity):
         self.freq = DEFAULT_WAIT_TIME
         self.timer = clock.Timer(self.freq)
         self.start_life = 1.0
-    
+
+    def load_settings(self, file: str):
+        """Load settings from a file"""
+        with open(file, 'r') as f:
+            data = json.load(f)
+            f.close()
+        # get data
+        self.color = tuple(data["color"])
+        self.decay = data["decay"]
+        self.freq = data["freq"]
+        self.start_life = data["start_life"]
+        # set in clock
+        self.timer.wait_time = self.freq
+
     def create_particle(self):
         """Create particle"""
         self.create_func(self)

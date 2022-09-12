@@ -89,12 +89,12 @@ class EventStorage:
         """Emit a Signal"""
         Eventhandler.emit_signal(event)
 
-    def register_to_signal(self, signal, function):
+    def register_to_signal(self, signal: str, function):
         """Register easily"""
         wrap = Eventhandler.register_to_signal(signal, function)
         self.wrappers[signal] = wrap
 
-    def unregister_from_signal(self, signal):
+    def unregister_from_signal(self, signal: str):
         """Unregister easily"""
         Eventhandler.unregister_from_signal(self.wrappers[signal])
 

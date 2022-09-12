@@ -53,7 +53,7 @@ WORLD = __layer.world
 __scene.add_data("bg_color", (153, 220, 80))
 
 
-ph = particle.ParticleHandler()
+ph = particle.ParticleHandler(None)
 ph.rect.topleft = (100, 100)
 ph.color = (255, 0, 0)
 ph.set_freq(1/15)
@@ -138,8 +138,6 @@ while Window.running:
     
     pygame.display.flip()
     clock.update()
-
-scenehandler.SceneHandler.clean()
 
 # CLIENT.close()
 pygame.quit()

@@ -65,7 +65,7 @@ def particle_update(self, p, surface):
 
 class FireParticleHandler(particle.ParticleHandler):
     def __init__(self, parent):
-        super().__init__()
+        super().__init__(parent)
         self.parent = parent
         self.set_color(FIRE_PARTICLE_COLOR)
         self.set_freq(FIRE_PARTICLE_FREQ)

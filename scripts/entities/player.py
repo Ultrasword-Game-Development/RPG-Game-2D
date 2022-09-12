@@ -5,19 +5,12 @@ from engine.gamesystem.entity import EntityTypes
 from engine.graphics import animation
 from engine.misc import maths, user_input, clock
 
-
 from engine.handler.eventhandler import Event, Eventhandler
-
 
 from scripts import entityext, animationext, singleton
 
 
 # -------------------------------------------------- #
-# testing
-Eventhandler.register_to_signal("player-move", lambda x: print(x.name, x.data))
-
-# -------------------------------------------------- #
-
 
 
 class Player(entityext.GameEntity):
@@ -36,8 +29,16 @@ class Player(entityext.GameEntity):
     LC = 0.5
 
     # -------------------------------------------------- #
+    # signals
+    MOVEMENT_SIGNAL = "player-move"
+
+    # wrappers
+    MOVEMENT_WRAPPER = Eventhandler.register_to_signal(MOVEMENT_SIGNAL,
+                                                       lambda x: print(x.name, f"{x.data['x']:.2f}, {x.data['y']:.2f}"))
+
+    # -------------------------------------------------- #
     # buffered objects
-    MOVE_EVENT = Event("player-move", {'x':0, 'y':0})
+    MOVE_EVENT = Event(MOVEMENT_SIGNAL, {'x': 0, 'y': 0})
 
     # -------------------------------------------------- #
 
@@ -73,6 +74,9 @@ class Player(entityext.GameEntity):
         if user_input.is_key_pressed(pygame.K_s):
             self.motion.y += Player.MS * clock.delta_time
 
+        if user_input.is_key_pressed(pygame.K_k):
+            self.kill()
+
         # project movement to world
         self.layer.world.move_entity(self)
         self.move_to_position()
@@ -84,10 +88,11 @@ class Player(entityext.GameEntity):
         # event testing
         Player.MOVE_EVENT.data['x'] = self.motion.x
         Player.MOVE_EVENT.data['y'] = self.motion.y
-        self.eventhandler.emit_signal(Player.MOVE_EVENT)
+        # self.eventhandler.emit_signal(Player.MOVE_EVENT)
 
     def render(self, surface):
-        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, True, False), self.camera.get_target_rel_pos())
+        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, True, False),
+                     self.camera.get_target_rel_pos())
 
     def debug(self, surface):
         pass
@@ -102,7 +107,3 @@ animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
 Player.ANIM_CATEGORY = animation.Category.get_category(Player.ANIM_CAT)
 # register entity type
 EntityTypes.register_entity_type(Player.TYPE, Player)
-
-
-
-
