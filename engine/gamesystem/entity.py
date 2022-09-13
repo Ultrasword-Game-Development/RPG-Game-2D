@@ -1,11 +1,14 @@
 import pygame
 
-from .. import singleton as EGLOB
+from .. import singleton
 from ..handler import scenehandler
 
 E_COUNT = 0
 
-# ------------- classes ---------- #
+# -------------------------------------------------- #
+
+
+# entity types
 class EntityTypes:
     TYPES = {}
 
@@ -20,6 +23,7 @@ class EntityTypes:
         cls.TYPES[name] = etype
 
 
+# entities
 class Entity:
     """
     Entity object class
@@ -56,7 +60,8 @@ class Entity:
         self.id = E_COUNT
         self.data = {}
         # define other variables
-        self.name = str(self.id)
+        if 'name' not in self.__dict__:
+            self.name = str(self.id)
         self.dead = False
         self.visible = True
 
@@ -106,11 +111,11 @@ class Entity:
     
     def get_glob_pos(self):
         """Gets the position with global translation applied"""
-        return (self.rect.x + EGLOB.WORLD_OFFSET_X, self.rect.y + EGLOB.WORLD_OFFSET_Y)
+        return (self.rect.x + singleton.WORLD_OFFSET_X, self.rect.y + singleton.WORLD_OFFSET_Y)
 
     def get_glob_cpos(self):
         """Get the global center position"""
-        return (self.rel_hitbox.centerx + EGLOB.WORLD_OFFSET_X, self.rel_hitbox.centery + EGLOB.WORLD_OFFSET_Y)
+        return (self.rel_hitbox.centerx + singleton.WORLD_OFFSET_X, self.rel_hitbox.centery + singleton.WORLD_OFFSET_Y)
 
     def distance_to_other(self, other):
         """Get the distance to another entity"""
@@ -120,12 +125,13 @@ class Entity:
         return res
 
 
+# -------------------------------------------------- #
 
-HITBOX_COLOR = (255, 0, 0)
 
+# static functions
 def render_entity_hitbox(entity, window):
     """Render Entity Hitbox"""
     erect = entity.rect
     ehit = entity.hitbox
-    pygame.draw.lines(window, HITBOX_COLOR, True, ((erect.x + ehit.x, erect.y + ehit.y), (erect.x + ehit.right, erect.y + ehit.y), (erect.x + ehit.right, erect.y + ehit.bottom), (erect.x + ehit.x, erect.y + ehit.bottom)))
+    pygame.draw.lines(window, singleton.ENTITY_HITBOX_COLOR, True, ((erect.x + ehit.x, erect.y + ehit.y), (erect.x + ehit.right, erect.y + ehit.y), (erect.x + ehit.right, erect.y + ehit.bottom), (erect.x + ehit.x, erect.y + ehit.bottom)))
 

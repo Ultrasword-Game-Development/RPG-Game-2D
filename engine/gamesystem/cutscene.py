@@ -13,7 +13,16 @@ print("CutScene.py is not finished")
 
 import json
 
-from . import statehandler
+from ..handler import statehandler
+
+
+def load_cutscene(file):
+    """Load a cutscene"""
+    with open(file, 'r') as file:
+        data = json.load(file)
+        file.close()
+    # parse
+    print("make parsing")
 
 
 class CutScene:
@@ -33,15 +42,6 @@ class CutScene:
         - systems           = [CutSceneStates]
         """
         self.systems = []
-
-    def load_cutscene(self):
-        """Load a cutscene"""
-        with open(file, 'r') as file:
-            data = json.load(file)
-            file.close()
-        # parse
-        print("make parsing")
-
 
 
 class CutSceneState:

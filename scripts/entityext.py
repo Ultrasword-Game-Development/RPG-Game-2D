@@ -9,7 +9,6 @@ from . import singleton
 from .game import state
 
 
-
 # ---------- functions ---------- #
 
 def update_ani_and_hitbox(entity, ani_name, handle=True):
@@ -21,11 +20,13 @@ def update_ani_and_hitbox(entity, ani_name, handle=True):
         entity.handle_pos = entity.aregist[ani_name].get_frame_data().get_point(singleton.HANDLE_IDENTIFIER)
     entity.calculate_rel_hitbox()
 
+
 def find_idle_mot(MS):
-    dx = np.random.random()-.5
-    dy = np.random.random()-.5
+    dx = np.random.random() - .5
+    dy = np.random.random() - .5
     result = pygame.math.Vector2(dx * MS, dy * MS)
     return result
+
 
 def find_mot_with_weight_vec(vec, weight, MS):
     mot = find_idle_mot(MS)
@@ -33,6 +34,7 @@ def find_mot_with_weight_vec(vec, weight, MS):
     mot.x = maths.lerp(mot.x, vec.x, weight)
     mot.y = maths.lerp(mot.y, vec.y, weight)
     return mot
+
 
 # ------------- classes ------------- #
 
@@ -68,7 +70,7 @@ class GameEntity(entity.Entity):
         """
         super().__init__()
         # stats
-        self.ename = entity_name
+        self.name = entity_name
         self.health = health
         self.mana = mana
         self.level = 1
@@ -86,7 +88,7 @@ class GameEntity(entity.Entity):
 
     def add_active_attack(self, attack):
         self.activeatk.add(attack.id)
-    
+
     def remove_active_attack(self, attack):
         self.activeatk.remove(attack.id)
 
@@ -134,4 +136,3 @@ class NonGameEntity(entity.Entity):
         """Move rect to position vec"""
         self.rect.x = round(self.position.x)
         self.rect.y = round(self.position.y)
-

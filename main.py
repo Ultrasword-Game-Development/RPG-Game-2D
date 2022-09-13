@@ -100,14 +100,14 @@ STATE.add_entity(p2)
 
 clock.start()
 while Window.running:
-    Eventhandler.update()
     if scenehandler.SceneHandler.CURRENT:
         fb.fill(scenehandler.SceneHandler.CURRENT.data["bg_color"])
         scenehandler.SceneHandler.CURRENT.update(fb, debug=True)
         # scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
         # scenehandler.SceneHandler.CURRENT.handler.debug_handle_entities(fb)
         # scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)
-    
+    Eventhandler.update()
+
     # rescale framebuffer to window
     Window.instance.blit(pygame.transform.scale(fb, (Window.WIDTH, Window.HEIGHT)), (0,0))
 
@@ -135,7 +135,7 @@ while Window.running:
             Window.handle_resize(e)
             fbsize = fb.get_size()
             user_input.update_ratio(Window.WIDTH, Window.HEIGHT, fbsize[0], fbsize[1])
-    
+
     pygame.display.flip()
     clock.update()
 

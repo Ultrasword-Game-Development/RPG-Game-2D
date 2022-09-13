@@ -9,11 +9,9 @@ from scripts import singleton, entityext, skillext, animationext
 from scripts.game import state, skillhandler
 from scripts.entities import fireball
 
-
 # trailtest
 from scripts.entities import test
 from scripts.entities import particle_scripts, attacks
-
 
 # ---------- CONST VALUES ---------
 
@@ -60,13 +58,14 @@ RUN_STATE = "run"
 
 IDLE_MOVE_STATE = "idle-move"
 
+
 # --------- states ---------------
 
 class IdleState(state.EntityState):
     def __init__(self, parent):
         super().__init__(IDLE_STATE, parent)
         self.idle_move_timer = clock.Timer(IDLE_MOVE_PAUSE)
-    
+
     def start(self):
         self.parent.aregist[IDLE_ANIM].f_num = 0
         self.idle_move_timer.wait_time = 0
@@ -81,6 +80,7 @@ class IdleState(state.EntityState):
         self.idle_move_timer.update()
         if self.idle_move_timer.changed:
             self.handler.set_active_state(IDLE_MOVE_STATE)
+
 
 class IdleMoveState(state.EntityState):
     def __init__(self, parent):
@@ -97,7 +97,7 @@ class IdleMoveState(state.EntityState):
         self.pause_timer.st = 0
         self.c_ani = IDLE_ANIM
         self.is_making_dec = True
-    
+
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, self.c_ani)
         # case 1: entity comes into range
@@ -107,7 +107,7 @@ class IdleMoveState(state.EntityState):
             return
         # print(self.decision_timer.st, self.pause_timer.st)
         # print(self.parent.motion)
-        
+
         # if we are not making a decision, we can start moving the entity
         if not self.is_making_dec:
             # entity is deciding where to move
@@ -132,15 +132,16 @@ class IdleMoveState(state.EntityState):
                 if self.handler.nearby_mage:
                     self.move_vec += self.handler.nearby_mage.normalize() * clock.delta_time * MS * 1.3
 
+
 class AlertState(state.EntityState):
     def __init__(self, parent):
         super().__init__(ALERT_STATE, parent)
         self.pause = clock.Timer(ALERT_DECISION_PAUSE)
-    
+
     def start(self):
         self.parent.aregist[RUN_ANIM].f_num = 0
         self.pause.wait_time = 0
-    
+
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, IDLE_ANIM)
         self.pause.update()
@@ -154,13 +155,14 @@ class AlertState(state.EntityState):
                 # case 2 fulfilled - player leaves detected range
                 self.handler.set_active_state(IDLE_STATE)
 
+
 class ApproachState(state.EntityState):
     def __init__(self, parent):
         super().__init__(APPROACH_STATE, parent)
-    
+
     def start(self):
         pass
-    
+
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, RUN_ANIM)
         # move towards player
@@ -179,6 +181,7 @@ class ApproachState(state.EntityState):
             # case 3 fulfilled
             self.handler.set_active_state(RUN_STATE)
 
+
 class OrbitState(state.EntityState):
     def __init__(self, parent):
         super().__init__(ORBIT_STATE, parent)
@@ -186,15 +189,16 @@ class OrbitState(state.EntityState):
 
     def start(self):
         self.attack_timer.st = 0
-        self.runmode = -1 if maths.np.random.randint(0,2) else 1
+        self.runmode = -1 if maths.np.random.randint(0, 2) else 1
 
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, IDLE_ANIM)
         # move to stay in certain range
-        rot_vec = self.parent.player_dis.normalize().rotate(90*self.runmode)
+        rot_vec = self.parent.player_dis.normalize().rotate(90 * self.runmode)
         self.parent.motion += rot_vec * MS * clock.delta_time
         for pea in self.handler.nearby_peasants:
-            self.parent.motion -= self.parent.distance_to_other(pea).normalize().rotate(10) * MS * clock.delta_time * self.handler.peasant_avoid_weight / 2
+            self.parent.motion -= self.parent.distance_to_other(pea).normalize().rotate(
+                10) * MS * clock.delta_time * self.handler.peasant_avoid_weight / 2
         # attack timer update
         self.attack_timer.update()
         # case 1: timer is up
@@ -203,10 +207,11 @@ class OrbitState(state.EntityState):
             self.attack_timer.changed = False
             self.handler.set_active_state(ATTACK_STATE)
 
+
 class AttackState(state.EntityState):
     def __init__(self, parent):
         super().__init__(ATTACK_STATE, parent)
-    
+
     def start(self):
         pass
 
@@ -219,7 +224,9 @@ class AttackState(state.EntityState):
         pos = [self.parent.position.x, self.parent.position.y]
         if self.parent.position.x < singleton.PLAYER.position.x:
             pos[0] = self.parent.rect.w - self.parent.handle_pos[0] + self.parent.position.x
-        r = attacks.MeleeStab(pos[0], pos[1], self.parent.MELEE_ATTACK_CATEGORY.get_animation(MELEE_ATTACK_ANIM).get_registry())
+        r = attacks.MeleeStab(pos[0], pos[1],
+                              self.parent.MELEE_ATTACK_CATEGORY.get_animation(MELEE_ATTACK_ANIM).get_registry(),
+                              attacks.generate_attack_data(atk='2', pen='1', crit='0.2'))
         r.motion = self.parent.player_dis.normalize() * 10
         self.parent.layer.handler.add_entity(r)
         # p = test.TrailTest()
@@ -231,21 +238,23 @@ class AttackState(state.EntityState):
         # immediately dip
         self.handler.set_active_state(RUN_STATE)
 
+
 class RunState(state.EntityState):
     def __init__(self, parent):
         super().__init__(RUN_STATE, parent)
         self.run_timer = clock.Timer(RUN_TIME_PERIOD)
-    
+
     def start(self):
         self.run_timer.st = 0
-    
+
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, RUN_ANIM)
         # move entity away from player
         self.run_timer.update()
         self.parent.motion += self.handler.nearby_mage.normalize() * MS * clock.delta_time
         for pea in self.handler.nearby_peasants:
-            self.parent.motion -= self.parent.distance_to_other(pea).normalize() * MS * clock.delta_time * self.handler.peasant_avoid_weight
+            self.parent.motion -= self.parent.distance_to_other(
+                pea).normalize() * MS * clock.delta_time * self.handler.peasant_avoid_weight
         # case 1: run time is over
         if self.run_timer.changed:
             self.run_timer.changed = False
@@ -276,7 +285,7 @@ class StateHandler(statehandler.StateHandler):
         self.add_state(OrbitState(self.peasant))
         self.add_state(RunState(self.peasant))
         self.add_state(AttackState(self.peasant))
-    
+
     def update(self):
         super().update()
         self.search_timer.update()
@@ -290,8 +299,10 @@ class StateHandler(statehandler.StateHandler):
                     self.nearby_peasants.append(e)
             # handle the peasant_avoid_weight
             if self.nearby_peasants:
-                self.peasant_avoid_weight = 1/len(self.nearby_peasants)/2
-            else: self.peasant_avoid_weight = 0
+                self.peasant_avoid_weight = 1 / len(self.nearby_peasants) / 2
+            else:
+                self.peasant_avoid_weight = 0
+
 
 # --------------- peasant class -------------- #
 
@@ -308,7 +319,7 @@ class Peasant(entityext.GameEntity):
         self.player_dis = pygame.math.Vector2()
         # state handler
         self.shandler = StateHandler(self)
-        
+
     def update(self):
         self.player_dis.x = singleton.PLAYER.rect.centerx - self.rect.centerx
         self.player_dis.y = singleton.PLAYER.rect.centery - self.rect.centery
@@ -321,14 +332,16 @@ class Peasant(entityext.GameEntity):
         self.motion *= LERP_COEF
 
     def render(self, surface):
-        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0), self.get_glob_pos())
-    
+        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, True, False),
+                     self.get_glob_pos())
+
     def debug(self, surface):
         super().debug(surface)
-        pygame.draw.circle(surface, (0,255,0), self.get_glob_cpos(), DETECT_RANGE, 1)
+        pygame.draw.circle(surface, (0, 255, 0), self.get_glob_cpos(), DETECT_RANGE, 1)
         pygame.draw.circle(surface, (0, 100, 255), self.get_glob_cpos(), ATTACK_RANGE, 1)
 
-        pygame.draw.line(surface, (255, 0, 0), self.get_glob_cpos(), self.get_glob_cpos() - singleton.UP.rotate(180-self.motion.angle_to(singleton.UP)) * 10)
+        pygame.draw.line(surface, (255, 0, 0), self.get_glob_cpos(),
+                         self.get_glob_cpos() - singleton.UP.rotate(180 - self.motion.angle_to(singleton.UP)) * 10)
 
 
 # ----------- setup -------------- #
@@ -337,6 +350,4 @@ animation.load_and_parse_aseprite_animation("assets/sprites/particles/melee_swin
 Peasant.ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
 Peasant.ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
 Peasant.MELEE_ATTACK_CATEGORY = animation.Category.get_category(MELEE_ATTACK_ANIM_CAT)
-print(Peasant.MELEE_ATTACK_CATEGORY)
 entity.EntityTypes.register_entity_type(ENTITY_NAME, Peasant)
-

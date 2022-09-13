@@ -266,7 +266,7 @@ class Mage(entityext.GameEntity):
         Mage.MOVE_EVENT.data['x'] = self.motion.x
         Mage.MOVE_EVENT.data['y'] = self.motion.y
         # self.eventhandler.emit_signal(Mage.MOVE_EVENT)
-        print("mage", self.shandler.current_state)
+        # print("mage", self.shandler.current_state)
 
     def render(self, surface):
         surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, 1, 0),

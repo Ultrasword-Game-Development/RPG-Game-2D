@@ -1,14 +1,13 @@
 import pygame
 
 from engine.misc import clock, maths
-from engine.handler.scenehandler import SceneHandler
-from engine import singleton as EGLOB
+from engine import singleton
 from engine.gamesystem import particle, entity
 from engine.graphics import animation
 
-from scripts import animationext, singleton, entityext
+from scripts import animationext, singleton as EGLOB, entityext
 from scripts.game import skillhandler
-
+from scripts.entities.particle_scripts import AnimatedParticle
 
 # ---------- CONST VALUES ---------
 
@@ -23,7 +22,6 @@ FIRE_IDLE_ANIM = "fire"
 # --------- states ---------------
 
 
-
 # --------------------------------
 
 FIREBALL_ORIENTATION_COUNT = 8
@@ -35,12 +33,13 @@ DEFAULT_FIRE_MAX_DISTANCE = 150
 SMOKE_MOVE_SPEED = 10
 
 FIRE_PARTICLE_COLOR = (80, 10, 0)
-FIRE_PARTICLE_FREQ = 1/20
+FIRE_PARTICLE_FREQ = 1 / 20
 FIRE_PARTICLE_LIFE = 3
 
 CASTING_TIME = 2
 COOLDOWN_TIME = 3
 MANA_COST = 25
+
 
 # -------- fire particle handler -------------- #
 
@@ -51,16 +50,18 @@ def particle_create(self):
         self.p_count += 1
         self.particles[self.p_count] = self.parent.layer.handler.entity_buffer[item].create_particle(self.p_count)
 
+
 def particle_update(self, p, surface):
-    p[EGLOB.PARTICLE_LIFE] -= clock.delta_time
-    if p[EGLOB.PARTICLE_LIFE] < 0:
-        self.rq.append(p[EGLOB.PARTICLE_ID])
+    p[singleton.PARTICLE_LIFE] -= clock.delta_time
+    if p[singleton.PARTICLE_LIFE] < 0:
+        self.rq.append(p[singleton.PARTICLE_ID])
         return
     # update position
-    p[EGLOB.PARTICLE_X] += p[EGLOB.PARTICLE_MX] * clock.delta_time
-    p[EGLOB.PARTICLE_Y] += p[EGLOB.PARTICLE_MY] * clock.delta_time
+    p[singleton.PARTICLE_X] += p[singleton.PARTICLE_MX] * clock.delta_time
+    p[singleton.PARTICLE_Y] += p[singleton.PARTICLE_MY] * clock.delta_time
     # render
-    pygame.draw.circle(surface, self.color, (p[EGLOB.PARTICLE_X]+EGLOB.WORLD_OFFSET_X, p[EGLOB.PARTICLE_Y]+EGLOB.WORLD_OFFSET_Y), 1)
+    pygame.draw.circle(surface, self.color,
+                       (p[singleton.PARTICLE_X] + singleton.WORLD_OFFSET_X, p[singleton.PARTICLE_Y] + singleton.WORLD_OFFSET_Y), 1)
 
 
 class FireParticleHandler(particle.ParticleHandler):
@@ -79,20 +80,20 @@ class FireParticleHandler(particle.ParticleHandler):
 class FireBallSkill(skillhandler.Skill):
     def __init__(self):
         super().__init__(SKILL_NAME, CASTING_TIME, COOLDOWN_TIME, MANA_COST)
-    
+
     def activate(self, *args):
         return Fire(args[0], args[1])
 
 
 # ------------ fire class ------------- #
 
-class Fire(entityext.NonGameEntity):
+class Fire(AnimatedParticle):
     ANIM_CATEGORY = None
     ANGLE_CACHE = []
 
-    def __init__(self, r_ent, phandler=None):
-        super().__init__(ENTITY_NAME, r_ent)
-        self.aregist = Fire.ANIM_CATEGORY.get_animation(FIRE_IDLE_ANIM).get_registry()
+    def __init__(self, r_ent: entityext.GameEntity, phandler=None):
+        super().__init__(r_ent.position.x, r_ent.position.y, Fire.ANIM_CATEGORY.get_animation(FIRE_IDLE_ANIM).get_registry())
+        self.name = ENTITY_NAME
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
         # particle handler for smoke + embers
@@ -115,7 +116,7 @@ class Fire(entityext.NonGameEntity):
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
         self.calculate_rel_hitbox()
-        self.aregist.angle = self.motion.angle_to(singleton.DOWN)
+        self.aregist.angle = self.motion.angle_to(EGLOB.DOWN)
         self.aregist.update_angle()
         self.timer.update()
         if self.timer.changed:
@@ -136,7 +137,8 @@ class Fire(entityext.NonGameEntity):
         # pygame.draw.rect(surface, (255,0,0), self.get_glob_cpos())
 
     def create_particle(self, pid):
-        return [pid, self.rel_hitbox.centerx, self.rel_hitbox.centery, 1, FIRE_PARTICLE_LIFE, maths.normalized_random() * SMOKE_MOVE_SPEED, maths.normalized_random() * SMOKE_MOVE_SPEED]
+        return [pid, self.rel_hitbox.centerx, self.rel_hitbox.centery, 1, FIRE_PARTICLE_LIFE,
+                maths.normalized_random() * SMOKE_MOVE_SPEED, maths.normalized_random() * SMOKE_MOVE_SPEED]
 
 
 # ------------- setup ----------- #

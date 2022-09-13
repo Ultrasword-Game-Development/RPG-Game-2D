@@ -50,19 +50,20 @@ def GRAVITY_PARTICLE_UPDATE(ph, p, window):
 # animated particle
 ANIMATED_NAME = "ani_p"
 
+
 class AnimatedParticle(entityext.NonGameEntity):
     def __init__(self, x, y, registry):
         super().__init__(ANIMATED_NAME, None)
         # set position
         self.rect.center = (x, y)
-        self.registry = registry
+        self.aregist = registry
     
     def update(self):
-        self.registry.update()
-        self.sprite = self.registry.get_frame()
-        self.hitbox = self.registry.get_hitbox()
+        self.aregist.update()
+        self.sprite = self.aregist.get_frame()
+        self.hitbox = self.aregist.get_hitbox()
         self.calculate_rel_hitbox()
-        if self.registry.has_finished():
+        if self.aregist.has_finished():
             self.kill()
     
     def render(self, surface):
