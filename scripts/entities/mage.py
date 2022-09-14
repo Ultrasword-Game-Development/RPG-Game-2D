@@ -13,7 +13,7 @@ from engine.handler import statehandler
 from scripts import entityext, animationext, singleton as EGLOB, skillext
 from scripts.game import state, skillhandler
 
-from scripts.entities import fireball
+from scripts.attacks import fireball
 
 # -------------------------------------------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
@@ -125,7 +125,7 @@ class PostcastState(state.EntityState):
             if self.wparticle:
                 # case 1 fulfilled, begin alrt
                 # add finished spell to world
-                skill = self.parent.skhandler.get_skill(fireball.SKILL_NAME)
+                skill = self.parent.skhandler.get_skill(fireball.FireBallSkill.SKILL_NAME)
                 fire = skill.activate(self.parent, self.parent.atk_phandler)
                 self.parent.add_active_attack(fire)
                 fire.position = maths.convert_array_to_int(self.parent.rect.center)
@@ -247,7 +247,7 @@ class Mage(entityext.GameEntity):
         self.shandler = StateHandler(self)
         # particle handler
         self.phandler = MagicParticleHandler(self)
-        self.atk_phandler = fireball.FireParticleHandler(self)
+        self.atk_phandler = fireball.SmokeParticleHandler(self)
         # skill tree
         self.skhandler = Mage.SKILL_TREE.get_registry(self)
 
@@ -302,7 +302,7 @@ class MagicParticleHandler(particle.ParticleHandler):
         self.set_create_func(self._create)
         self.set_update_func(self._update)
 
-    def _create(self, _):
+    def _create(self):
         self.p_count += 1
         # calculate x and y
         theta = maths.normalized_random() * 3.14
@@ -314,7 +314,7 @@ class MagicParticleHandler(particle.ParticleHandler):
         my = maths.math.cos(theta + 3.14 / 2)
         self.particles[self.p_count] = [self.p_count, x, y, 1, self.start_life, mx, my]
 
-    def _update(self, _, p, surface):
+    def _update(self, p, surface):
         p[singleton.PARTICLE_LIFE] -= clock.delta_time
         if p[singleton.PARTICLE_LIFE] < 0:
             self.rq.append(p[singleton.PARTICLE_ID])

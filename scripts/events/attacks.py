@@ -1,10 +1,11 @@
 from engine.misc import clock
-from engine.graphics import animation
+from scripts import singleton
 from engine.handler.eventhandler import Event, Eventhandler
 from scripts.entities.particle_scripts import AnimatedParticle
 
 
 # -------------------------------------------------- #
+# functions + callbacks
 
 def generate_attack_data(**kwargs):
     return kwargs
@@ -12,6 +13,11 @@ def generate_attack_data(**kwargs):
 
 def handle_hit(event):
     print(event.data['a'].name, event.data['b'].name)
+
+
+# create attack event
+def create_attack_event(event):
+    print(event.data)
 
 
 # -------------------------------------------------- #
@@ -68,5 +74,12 @@ class RangedAttack(Attack):
     def update(self):
         super().update()
 
-# ---------------------------- #
-# ranged attacks
+
+# -------------------------------------------------- #
+# setup
+
+singleton.ATTACK_PARTICLE_CREATE = Eventhandler.register_to_signal(singleton.ATTACK_PARTICLE_CREATE_ID,
+                                                                   create_attack_event)
+
+
+

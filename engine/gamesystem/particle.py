@@ -1,29 +1,11 @@
 import pygame
 import json
 
-from .. singleton import *
+from engine.singleton import *
 
-from ..handler import filehandler
-from . import entity
-from ..misc import clock, maths
-
-
-def DEFAULT_CREATE_FUNC(ph):
-    """Creates a particle"""
-    ph.p_count+=1
-    ph.particles[ph.p_count] = [ph.p_count, ph.rect.x, ph.rect.y, 1, ph.start_life, maths.normalized_random()*10, maths.normalized_random()*10]
-
-def DEFAULT_UPDATE_FUNC(ph, p, window):
-    """Updates particles"""
-    p[PARTICLE_LIFE] -= clock.delta_time
-    if p[PARTICLE_LIFE] <= 0:
-        ph.rq.append(p[PARTICLE_ID])
-        return
-    # update position
-    p[PARTICLE_X] += p[PARTICLE_MX] * clock.delta_time
-    p[PARTICLE_Y] += p[PARTICLE_MY] * clock.delta_time
-    # render
-    pygame.draw.circle(window, ph.color, (p[PARTICLE_X], p[PARTICLE_Y]), 1)
+from engine.handler import filehandler
+from engine.gamesystem import entity
+from engine.misc import clock, maths
 
 
 class ParticleHandler(entity.Entity):
@@ -58,14 +40,37 @@ class ParticleHandler(entity.Entity):
         self.p_count = 0
         self.ap_count = 0
 
-        self.create_func = DEFAULT_CREATE_FUNC
-        self.update_func = DEFAULT_UPDATE_FUNC
+        self.create_func = self._create
+        self.update_func = self._update
 
         self.color = (255, 255, 255)
         self.decay = 0.1
         self.freq = DEFAULT_WAIT_TIME
         self.timer = clock.Timer(self.freq)
         self.start_life = 1.0
+
+    # -------------------------------------------------- #
+    # create
+    def _create(self):
+        """Creates a particle"""
+        self.p_count += 1
+        self.particles[self.p_count] = [self.p_count, self.rect.x, self.rect.y, 1, self.start_life, maths.normalized_random() * 10,
+                                    maths.normalized_random() * 10]
+
+    # update
+    def _update(self, p, window):
+        """Updates particles"""
+        p[PARTICLE_LIFE] -= clock.delta_time
+        if p[PARTICLE_LIFE] <= 0:
+            self.rq.append(p[PARTICLE_ID])
+            return
+        # update position
+        p[PARTICLE_X] += p[PARTICLE_MX] * clock.delta_time
+        p[PARTICLE_Y] += p[PARTICLE_MY] * clock.delta_time
+        # render
+        pygame.draw.circle(window, self.color, (p[PARTICLE_X], p[PARTICLE_Y]), 1)
+
+    # -------------------------------------------------- #
 
     def load_settings(self, file: str):
         """Load settings from a file"""
@@ -82,7 +87,7 @@ class ParticleHandler(entity.Entity):
 
     def create_particle(self):
         """Create particle"""
-        self.create_func(self)
+        self.create_func()
         self.ap_count += 1
 
     def update(self):
@@ -95,7 +100,7 @@ class ParticleHandler(entity.Entity):
     def render(self, surface):
         """Update particles"""
         for particle in self.particles.values():
-            self.update_func(self, particle, surface)
+            self.update_func(particle, surface)
         self.ap_count -= len(self.rq)
         for i in self.rq:
             self.particles.pop(i)

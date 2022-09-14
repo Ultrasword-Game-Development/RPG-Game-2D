@@ -1,19 +1,14 @@
-import pygame
 # from OpenGL.GL import *
 # from OpenGL.GLU import *
 # import numpy as np
 
-from engine import singleton
-
-from engine.handler import filehandler, scenehandler
-from engine.handler.eventhandler import Eventhandler, Event
-from engine.world import world
+from engine.handler import scenehandler
+from engine.handler.eventhandler import Eventhandler
 from engine.misc import clock, user_input
 from engine.handler.filehandler import *
 
-from engine.gamesystem import particle, entity
+from engine.gamesystem import particle
 
-import engine.window
 from engine.window import Window
 
 # --------- initialization -------------- #
@@ -35,7 +30,7 @@ fb = Window.create_framebuffer(FB_SIZE[0], FB_SIZE[1], flags=0, bits=32).convert
 
 from scripts import singleton
 
-from scripts.entities import player, mage, fireball, peasant, test
+from scripts.entities import player, mage, peasant, test
 from scripts.entities import particle_scripts
 
 # ----------------------------------- #

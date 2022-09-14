@@ -9,12 +9,14 @@ from engine.handler.eventhandler import Event, Eventhandler
 
 from scripts import entityext, animationext, singleton
 
+# -------------------------------------------------- #
+animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
+
 
 # -------------------------------------------------- #
 
 
 class Player(entityext.GameEntity):
-    ANIM_CATEGORY = None
     TYPE = "Player"
 
     # -------------------------------------------------- #
@@ -22,6 +24,9 @@ class Player(entityext.GameEntity):
     ANIM_CAT = "player"
     IDLE_ANIM = "idle"
     RUN_ANIM = "run"
+
+    # load
+    ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
 
     # -------------------------------------------------- #
     # statistics
@@ -103,7 +108,4 @@ class Player(entityext.GameEntity):
 
 # -------------------------------------------------- #
 # setup
-animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
-Player.ANIM_CATEGORY = animation.Category.get_category(Player.ANIM_CAT)
-# register entity type
 EntityTypes.register_entity_type(Player.TYPE, Player)
