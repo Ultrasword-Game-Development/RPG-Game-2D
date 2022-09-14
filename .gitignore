@@ -1,7 +1,6 @@
 \__pycache__
 .venv
 .vscode
-.idea
 
 *.pyc
 *.cpython-39.pyc

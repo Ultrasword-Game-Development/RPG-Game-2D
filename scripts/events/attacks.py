@@ -1,7 +1,7 @@
 from engine.misc import clock
 from engine.graphics import animation
 from engine.handler.eventhandler import Event, Eventhandler
-from .particle_scripts import AnimatedParticle
+from scripts.entities.particle_scripts import AnimatedParticle
 
 
 # -------------------------------------------------- #
@@ -27,15 +27,18 @@ class Attack(AnimatedParticle):
 
     # -------------------------------------------------- #
 
-    def __init__(self, x, y, registry, data):
+    def __init__(self, x, y, registry, data, sender=None):
         super().__init__(x, y, registry)
         self.data = data
+        self.sender = sender
 
     def update(self):
         super().update()
         # check if hit an object
         for entity in self.layer.world.find_nearby_entities(self.chunk, 0):
             if entity.id == self.id:
+                continue
+            elif self.sender and entity.id == self.sender.id:
                 continue
             if self.rel_hitbox.colliderect(entity.rel_hitbox):
                 Eventhandler.emit_signal(Event(Attack.HIT_SIGNAL, {'a': self, 'b': entity}))
@@ -46,8 +49,8 @@ class Attack(AnimatedParticle):
 
 # melee attacks
 class MeleeStab(Attack):
-    def __init__(self, x, y, registry, data):
-        super().__init__(x, y, registry, data)
+    def __init__(self, x, y, registry, data, sender):
+        super().__init__(x, y, registry, data, sender)
 
     def update(self):
         super().update()

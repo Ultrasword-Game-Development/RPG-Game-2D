@@ -6,8 +6,8 @@ from engine.gamesystem import particle, entity
 from engine.graphics import animation
 
 from scripts import animationext, singleton as EGLOB, entityext
+from scripts.events.attacks import Attack, generate_attack_data
 from scripts.game import skillhandler
-from scripts.entities.particle_scripts import AnimatedParticle
 
 # ---------- CONST VALUES ---------
 
@@ -87,12 +87,13 @@ class FireBallSkill(skillhandler.Skill):
 
 # ------------ fire class ------------- #
 
-class Fire(AnimatedParticle):
+class Fire(Attack):
     ANIM_CATEGORY = None
     ANGLE_CACHE = []
 
     def __init__(self, r_ent: entityext.GameEntity, phandler=None):
-        super().__init__(r_ent.position.x, r_ent.position.y, Fire.ANIM_CATEGORY.get_animation(FIRE_IDLE_ANIM).get_registry())
+        super().__init__(r_ent.position.x, r_ent.position.y, Fire.ANIM_CATEGORY.get_animation(FIRE_IDLE_ANIM).get_registry(),
+                        generate_attack_data(atk=5, pen=2), r_ent)
         self.name = ENTITY_NAME
         self.sprite = self.aregist.get_frame()
         self.hitbox = self.aregist.get_hitbox()
@@ -127,8 +128,8 @@ class Fire(AnimatedParticle):
         self.move_to_position()
         # kill check
         self.distance_travelled += self.motion.magnitude()
-        if self.distance_travelled > self.max_distance:
-            self.rentity.remove_active_attack(self)
+        if self.distance_travelled > self.max_distance and self.sender:
+            self.sender.remove_active_attack(self)
             self.kill()
 
     def render(self, surface):

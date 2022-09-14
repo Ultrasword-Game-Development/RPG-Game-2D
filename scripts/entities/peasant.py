@@ -1,17 +1,15 @@
 import pygame
 
 from engine.misc import clock, maths
-from engine.handler import statehandler, scenehandler
+from engine.handler import statehandler
 from engine.graphics import animation
 from engine.gamesystem import entity
 
-from scripts import singleton, entityext, skillext, animationext
-from scripts.game import state, skillhandler
-from scripts.entities import fireball
+from scripts import singleton, entityext, animationext
+from scripts.game import state
 
 # trailtest
-from scripts.entities import test
-from scripts.entities import particle_scripts, attacks
+from scripts.events import attacks
 
 # ---------- CONST VALUES ---------
 
@@ -226,7 +224,7 @@ class AttackState(state.EntityState):
             pos[0] = self.parent.rect.w - self.parent.handle_pos[0] + self.parent.position.x
         r = attacks.MeleeStab(pos[0], pos[1],
                               self.parent.MELEE_ATTACK_CATEGORY.get_animation(MELEE_ATTACK_ANIM).get_registry(),
-                              attacks.generate_attack_data(atk='2', pen='1', crit='0.2'))
+                              attacks.generate_attack_data(atk='2', pen='1', crit='0.2'), self.parent)
         r.motion = self.parent.player_dis.normalize() * 10
         self.parent.layer.handler.add_entity(r)
         # p = test.TrailTest()

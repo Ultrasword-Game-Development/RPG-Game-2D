@@ -44,6 +44,9 @@ class FunctionWrapper:
     def __eq__(self, other):
         return self.fid == other.fid
 
+# -------------------------------------------------- #
+# event handler
+
 
 class Eventhandler:
     EMITTED = deque()
@@ -79,6 +82,10 @@ class Eventhandler:
             for wrap in cls.EVENTS[s.name]:
                 wrap.func(s)
         cls.EMITTED.clear()
+
+
+# -------------------------------------------------- #
+# event storage - stored within entities
 
 
 class EventStorage:
