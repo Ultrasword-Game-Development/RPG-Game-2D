@@ -83,11 +83,10 @@ class IdleMoveState(state.EntityState):
                 self.pause_timer.changed = False
                 self.is_making_dec = False
                 # TODO - CHANGE TO DETECTING NEARBY MAGES
-                if not self.handler.nearby_mage:
-                    self.handler.nearby_mage.x = 0.1
                 self.move_vec = entityext.find_idle_mot(Peasant.MS)
                 if self.handler.nearby_mage:
                     self.move_vec += self.handler.nearby_mage.normalize() * clock.delta_time * Peasant.MS * 1.3
+                    self.move_vec.normalize_ip()
 
 
 class AlertState(state.EntityState):
