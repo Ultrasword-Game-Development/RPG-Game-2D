@@ -10,6 +10,8 @@ from scripts.game import state
 
 from scripts.events import attacks
 
+from .mage import Mage
+
 # -------------------------------------------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/peasant.json")
 animation.load_and_parse_aseprite_animation("assets/sprites/particles/melee_swing.json")
@@ -85,8 +87,11 @@ class IdleMoveState(state.EntityState):
                 # TODO - CHANGE TO DETECTING NEARBY MAGES
                 self.move_vec = entityext.find_idle_mot(Peasant.MS)
                 if self.handler.nearby_mage:
-                    self.move_vec += self.handler.nearby_mage.normalize() * clock.delta_time * Peasant.MS * 1.3
-                    self.move_vec.normalize_ip()
+                    if self.handler.nearby_mage_vec.magnitude() < Mage.DEF_DISTANCE:
+                        self.move_vec += -self.handler.nearby_mage_vec * clock.delta_time * Peasant.IDLE_MS * 3
+                    else:
+                        self.move_vec += self.handler.nearby_mage_vec * clock.delta_time * Peasant.IDLE_MS * 3
+                    self.move_vec.normalize()
 
 
 class AlertState(state.EntityState):
@@ -133,7 +138,7 @@ class ApproachState(state.EntityState):
             # case 2 fulfilled
             self.handler.set_active_state(Peasant.ORBIT_STATE)
         # case 3: peasant leaves mage 
-        elif self.handler.nearby_mage.magnitude() > Peasant.MAGE_HOVER_DIS:
+        elif self.handler.nearby_mage_vec.magnitude() > Peasant.MAGE_HOVER_DIS:
             # case 3 fulfilled
             self.handler.set_active_state(Peasant.RUN_STATE)
 
@@ -207,7 +212,7 @@ class RunState(state.EntityState):
         entityext.update_ani_and_hitbox(self.parent, Peasant.RUN_ANIM)
         # move entity away from player
         self.run_timer.update()
-        self.parent.motion += self.handler.nearby_mage.normalize() * Peasant.MS * clock.delta_time
+        self.parent.motion += self.handler.nearby_mage_vec * Peasant.MS * clock.delta_time
         for pea in self.handler.nearby_peasants:
             self.parent.motion -= self.parent.distance_to_other(
                 pea).normalize() * Peasant.MS * clock.delta_time * self.handler.peasant_avoid_weight
@@ -226,7 +231,8 @@ class StateHandler(statehandler.StateHandler):
 
         # peasants hover around mages
         # this is relative position to the peasant
-        self.nearby_mage = pygame.math.Vector2()
+        self.nearby_mage = None
+        self.nearby_mage_vec = pygame.math.Vector2()
         self.search_timer = clock.Timer(Peasant.ENVIRO_CHECK_TIMER)
         self.search_timer.st = Peasant.ENVIRO_CHECK_TIMER
 
@@ -244,13 +250,17 @@ class StateHandler(statehandler.StateHandler):
 
     def update(self):
         super().update()
+        # update search timer
         self.search_timer.update()
         if self.search_timer.changed:
             self.search_timer.changed = False
             self.nearby_peasants.clear()
             for e in self.peasant.layer.world.find_nearby_entities(self.peasant.p_chunk, 1):
-                if type(e) == entity.EntityTypes.get_entity_type("MAGE"):
-                    self.nearby_mage = self.peasant.distance_to_other(e)
+                if type(e) == entity.EntityTypes.get_entity_type(Mage.TYPE):
+                    self.nearby_mage = e
+                    self.nearby_mage_vec = self.peasant.distance_to_other(e)
+                    if self.nearby_mage_vec:
+                        self.nearby_mage_vec.normalize_ip()
                 elif type(e) == Peasant and e.id != self.peasant.id:
                     self.nearby_peasants.append(e)
             # handle the peasant_avoid_weight
@@ -356,7 +366,7 @@ class Peasant(entityext.GameEntity):
 
         pygame.draw.line(surface, (255, 0, 0), self.get_glob_cpos(),
                          self.get_glob_cpos() - singleton.UP.rotate(180 - self.motion.angle_to(singleton.UP)) * 10)
-
+        # pygame.draw.circle(surface, (0, 0, 0), self.distance_to_other(self.shandler.nearby_mage) + self.get_glob_cpos(), 5)
 
 # -------------------------------------------------- #
 # setup

@@ -24,8 +24,7 @@ def update_ani_and_hitbox(entity, ani_name, handle=True):
 def find_idle_mot(MS):
     dx = np.random.random() - .5
     dy = np.random.random() - .5
-    result = pygame.math.Vector2(dx * MS, dy * MS)
-    return result
+    return pygame.math.Vector2(dx * MS, dy * MS)
 
 
 def find_mot_with_weight_vec(vec, weight, MS):
