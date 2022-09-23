@@ -1,8 +1,12 @@
 import pygame
 from ..gamesystem import layer
+from . import statehandler
 
 from queue import deque
 
+
+# -------------------------------------------------- #
+# scenehandler class
 
 class SceneHandler:
     """
@@ -17,7 +21,7 @@ class SceneHandler:
         """Push a new scene onto the queue"""
         SceneHandler.QUEUE.append(scene)
         SceneHandler.CURRENT = scene
-    
+
     @staticmethod
     def pop_state():
         """Pop the last state off the queue"""
@@ -34,10 +38,32 @@ class SceneHandler:
             scene.clean()
 
 
+# -------------------------------------------------- #
+# scene state class
+
+class SceneState(statehandler.State):
+    # -------------------------------------------------- #
+    # class vars
+    NAME = "state"
+
+    # -------------------------------------------------- #
+    def __init__(self, scene, name="state"):
+        super().__init__(name)
+        self.scene = scene
+
+    def update_scene(self, surface, debug):
+        for layer in self.scene.layers:
+            layer.handle(surface, debug)
+
+
+# -------------------------------------------------- #
+# scene class
+
 class Scene:
     """
     Scene for handling different gamestates within an active game
     """
+
     def __init__(self):
         """
         Constructor for GameState
@@ -47,22 +73,21 @@ class Scene:
         """
         self.layers = []
         self.data = {}
+        self.state = None
 
     def add_data(self, key, value):
         self.data[key] = value
-    
+
     def get_data(self, key):
         return self.data[key]
 
     def add_layer(self):
         self.layers.append(layer.Layer(self))
         return self.layers[-1]
-    
+
     def get_layer(self, index):
         return self.layers[index]
-    
+
     def update(self, surface, debug=False):
-        for layer in self.layers:
-            layer.handle(surface, debug=debug)
-
-
+        # implement scene state handler
+        self.state.update(surface, debug)

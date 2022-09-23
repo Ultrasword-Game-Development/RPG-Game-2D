@@ -119,10 +119,8 @@ class Entity:
 
     def distance_to_other(self, other):
         """Get the distance to another entity"""
-        res = pygame.math.Vector2(other.rel_hitbox.x - self.rel_hitbox.x, other.rel_hitbox.y - self.rel_hitbox.y)
-        if not res:
-            res.x = 0.01
-        return res
+        self.calculate_rel_hitbox()
+        return pygame.math.Vector2(other.rel_hitbox.x - self.rel_hitbox.x, other.rel_hitbox.y - self.rel_hitbox.y)
 
 
 # -------------------------------------------------- #

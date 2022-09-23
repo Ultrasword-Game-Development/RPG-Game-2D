@@ -43,6 +43,11 @@ class CutScene:
         """
         self.systems = []
 
+    def add_system(self, entity, position_time):
+        """Add an entity to the system where its position is lerped across the position time"""
+        self.systems.append((entity, position_time))
+
+
 
 class CutSceneState:
     """

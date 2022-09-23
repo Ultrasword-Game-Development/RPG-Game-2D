@@ -16,7 +16,7 @@ from engine.window import Window
 WINDOW_CAPTION = "RPG Game"
 WW = 1280
 WINDOW_SIZE = [WW, int(WW/16*9)]
-WW//=3
+WW = 1280//3
 FB_SIZE = [WW, int(WW/16*9)]
 
 FPS = 60
@@ -97,7 +97,8 @@ clock.start()
 while Window.running:
     if scenehandler.SceneHandler.CURRENT:
         fb.fill(scenehandler.SceneHandler.CURRENT.data["bg_color"])
-        scenehandler.SceneHandler.CURRENT.update(fb, debug=True)
+        scenehandler.SceneHandler.CURRENT.update(fb)
+            # update(fb, debug=True)
         # scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
         # scenehandler.SceneHandler.CURRENT.handler.debug_handle_entities(fb)
         # scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)
