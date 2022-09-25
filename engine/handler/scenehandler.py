@@ -51,9 +51,9 @@ class SceneState(statehandler.State):
         super().__init__(name)
         self.scene = scene
 
-    def update_scene(self, surface, debug):
+    def update_scene(self, surface):
         for layer in self.scene.layers:
-            layer.handle(surface, debug)
+            layer.handle(surface)
 
 
 # -------------------------------------------------- #
@@ -73,7 +73,8 @@ class Scene:
         """
         self.layers = []
         self.data = {}
-        self.state = None
+        self.state = statehandler.StateHandler(SceneState.NAME)
+        self.state.add_state(SceneState(self))
 
     def add_data(self, key, value):
         self.data[key] = value
@@ -88,6 +89,6 @@ class Scene:
     def get_layer(self, index):
         return self.layers[index]
 
-    def update(self, surface, debug=False):
+    def update(self, surface):
         # implement scene state handler
-        self.state.update(surface, debug)
+        self.state.states[self.state.current_state].update_scene(surface)

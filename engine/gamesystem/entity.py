@@ -64,12 +64,13 @@ class Entity:
             self.name = str(self.id)
         self.dead = False
         self.visible = True
+        self.static = False
 
         self.sprite = None
 
         # physics
-        self.chunk = (0,0)
-        self.p_chunk = (0,0)
+        self.chunk = [0, 0]
+        self.p_chunk = [0, 0]
 
         self.touching = [False]*4
         self.tiles_area = (0, 0)
@@ -96,13 +97,19 @@ class Entity:
     
     def debug(self, surface):
         """Debug render"""
-        pass
+        rect = pygame.Rect(self.rel_hitbox.x + singleton.WORLD_OFFSET_X, self.rel_hitbox.y + singleton.WORLD_OFFSET_Y,
+                           self.rel_hitbox.w, self.rel_hitbox.h)
+        pygame.draw.rect(surface, singleton.DEBUG_COLOR, rect, 1)
 
     def calculate_rel_hitbox(self):
-        """Calcuale data for rel_hitbox"""
+        """Calculable data for rel_hitbox"""
         self.rel_hitbox.topleft = (self.rect.x + self.hitbox.x, self.rect.y + self.hitbox.y)
         self.rel_hitbox.w = self.hitbox.w
         self.rel_hitbox.h = self.hitbox.h
+        self.p_chunk[0] = int(self.rel_hitbox.centerx) // singleton.CHUNK_PIX_WIDTH
+        self.p_chunk[1] = int(self.rel_hitbox.centery) // singleton.CHUNK_PIX_HEIGHT
+        self.chunk[0] = self.p_chunk[0]
+        self.chunk[1] = self.p_chunk[1]
 
     def kill(self):
         """Kill an entity / remove it from the current state"""
@@ -111,17 +118,22 @@ class Entity:
     
     def get_glob_pos(self):
         """Gets the position with global translation applied"""
-        return (self.rect.x + singleton.WORLD_OFFSET_X, self.rect.y + singleton.WORLD_OFFSET_Y)
+        return self.rect.x + singleton.WORLD_OFFSET_X, self.rect.y + singleton.WORLD_OFFSET_Y
 
     def get_glob_cpos(self):
         """Get the global center position"""
-        return (self.rel_hitbox.centerx + singleton.WORLD_OFFSET_X, self.rel_hitbox.centery + singleton.WORLD_OFFSET_Y)
+        return self.rel_hitbox.centerx + singleton.WORLD_OFFSET_X, self.rel_hitbox.centery + singleton.WORLD_OFFSET_Y
 
     def distance_to_other(self, other):
         """Get the distance to another entity"""
         self.calculate_rel_hitbox()
         return pygame.math.Vector2(other.rel_hitbox.x - self.rel_hitbox.x, other.rel_hitbox.y - self.rel_hitbox.y)
 
+    def __eq__(self, other):
+        """Check between entities"""
+        if type(other) == self.__class__:
+            return other.id == self.id
+        return self == other
 
 # -------------------------------------------------- #
 

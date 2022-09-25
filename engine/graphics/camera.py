@@ -14,6 +14,10 @@ class Camera:
         self.campos = pygame.math.Vector2(0, 0)
         self.position = pygame.math.Vector2(0, 0)
         self.chunkpos = [0, 0]
+        self.screenchunkpos = [0, 0]
+        # ----------------------------------- #
+        # viewport size
+        self.viewport = pygame.rect.Rect(0, 0, EGLOB.FB_WIDTH, EGLOB.FB_HEIGHT)
 
         # target info + cache
         self.target = None
@@ -28,8 +32,12 @@ class Camera:
         self.position.x = self.campos.x + EGLOB.FBWHALF
         self.position.y = self.campos.y + EGLOB.FBHHALF
         # chunk pos
-        self.chunkpos[0] = maths.__mod__(self.campos.x, singleton.CHUNK_PIX_WIDTH)
-        self.chunkpos[1] = maths.__mod__(self.campos.y, singleton.CHUNK_PIX_HEIGHT)
+        self.screenchunkpos[0] = int(self.campos.x) // singleton.CHUNK_PIX_WIDTH
+        self.screenchunkpos[1] = int(self.campos.y) // singleton.CHUNK_PIX_HEIGHT
+        self.chunkpos[0] = -self.screenchunkpos[0]
+        self.chunkpos[1] = -self.screenchunkpos[1]
+        # viewport position
+        self.viewport.topleft = -self.position.xy
 
     def set_target(self, target):
         """Set a target"""

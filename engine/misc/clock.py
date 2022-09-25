@@ -9,6 +9,7 @@ start_time = 0
 end_time = 0
 wait_time = 0
 frame_time = 0
+run_time = 0
 
 
 def start(fps=30):
@@ -23,11 +24,12 @@ def start(fps=30):
 
 def update():
     """Update clock and delta time"""
-    global delta_time, start_time, end_time, frame_time, FPS, PG_CLOCK
+    global delta_time, start_time, end_time, frame_time, run_time, FPS, PG_CLOCK
     PG_CLOCK.tick(FPS)
     end_time = time.time()
     delta_time = end_time - start_time
     start_time = time.time()
+    run_time += delta_time
 
 
 # TODO - create a timer object

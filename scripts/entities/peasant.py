@@ -48,7 +48,8 @@ class IdleMoveState(state.EntityState):
         self.pause_timer = clock.Timer(Peasant.IDLE_MOVE_WAIT)
         self.c_ani = Peasant.IDLE_ANIM
         self.is_making_dec = True
-        self.move_vec = None
+        self.offset = pygame.math.Vector2()
+        self.move_vec = pygame.math.Vector2()
 
     def start(self):
         self.parent.aregist[Peasant.IDLE_ANIM].f_num = 0
@@ -56,6 +57,8 @@ class IdleMoveState(state.EntityState):
         self.pause_timer.st = 0
         self.c_ani = Peasant.IDLE_ANIM
         self.is_making_dec = True
+        self.offset = pygame.math.Vector2()
+        self.move_vec = pygame.math.Vector2()
 
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, self.c_ani)
@@ -64,15 +67,12 @@ class IdleMoveState(state.EntityState):
             # case 1 fulfilled:
             self.handler.set_active_state(Peasant.ALERT_STATE)
             return
-        # print(self.decision_timer.st, self.pause_timer.st)
-        # print(self.parent.motion)
-
         # if we are not making a decision, we can start moving the entity
         if not self.is_making_dec:
             # entity is deciding where to move
             self.move_timer.update()
             # add motion to entity
-            self.parent.motion += self.move_vec * clock.delta_time
+            self.parent.motion += (self.move_vec + self.offset) * clock.delta_time
             # check if time is over
             if self.move_timer.changed:
                 self.move_timer.changed = False
@@ -87,11 +87,14 @@ class IdleMoveState(state.EntityState):
                 # TODO - CHANGE TO DETECTING NEARBY MAGES
                 self.move_vec = entityext.find_idle_mot(Peasant.MS)
                 if self.handler.nearby_mage:
+                    # print("has nearby", self.parent.id)
                     if self.handler.nearby_mage_vec.magnitude() < Mage.DEF_DISTANCE:
-                        self.move_vec += -self.handler.nearby_mage_vec * clock.delta_time * Peasant.IDLE_MS * 3
+                        self.move_vec *= -1
+                        self.offset = -self.handler.nearby_mage_vec * clock.delta_time * Peasant.IDLE_MS * 3
                     else:
-                        self.move_vec += self.handler.nearby_mage_vec * clock.delta_time * Peasant.IDLE_MS * 3
-                    self.move_vec.normalize()
+                        self.offset = self.handler.nearby_mage_vec * clock.delta_time * Peasant.IDLE_MS * 3
+                    if self.offset:
+                        self.offset.normalize_ip()
 
 
 class AlertState(state.EntityState):
@@ -155,10 +158,15 @@ class OrbitState(state.EntityState):
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, Peasant.IDLE_ANIM)
         # move to stay in certain range
-        rot_vec = self.parent.player_dis.normalize().rotate(90 * self.runmode)
+        rot_vec = self.parent.player_dis
+        if not rot_vec: return
+        rot_vec.normalize_ip()
+        rot_vec.rotate_ip(90 * self.runmode)
         self.parent.motion += rot_vec * Peasant.MS * clock.delta_time
         for pea in self.handler.nearby_peasants:
-            self.parent.motion -= self.parent.distance_to_other(pea).normalize().rotate(
+            dis = self.parent.distance_to_other(pea)
+            if not dis: continue
+            self.parent.motion -= dis.normalize().rotate(
                 10) * Peasant.MS * clock.delta_time * self.handler.peasant_avoid_weight / 2
         # attack timer update
         self.attack_timer.update()
@@ -214,8 +222,9 @@ class RunState(state.EntityState):
         self.run_timer.update()
         self.parent.motion += self.handler.nearby_mage_vec * Peasant.MS * clock.delta_time
         for pea in self.handler.nearby_peasants:
-            self.parent.motion -= self.parent.distance_to_other(
-                pea).normalize() * Peasant.MS * clock.delta_time * self.handler.peasant_avoid_weight
+            dis = self.parent.distance_to_other(pea)
+            if not dis: continue
+            self.parent.motion -= dis.normalize() * Peasant.MS * clock.delta_time * self.handler.peasant_avoid_weight
         # case 1: run time is over
         if self.run_timer.changed:
             self.run_timer.changed = False
@@ -237,7 +246,7 @@ class StateHandler(statehandler.StateHandler):
         self.search_timer.st = Peasant.ENVIRO_CHECK_TIMER
 
         self.nearby_peasants = []
-        self.peasant_avoid_weight = 0
+        self.peasant_avoid_weight = 0.1
 
         # add all states
         self.add_state(IdleState(self.peasant))
@@ -367,6 +376,7 @@ class Peasant(entityext.GameEntity):
         pygame.draw.line(surface, (255, 0, 0), self.get_glob_cpos(),
                          self.get_glob_cpos() - singleton.UP.rotate(180 - self.motion.angle_to(singleton.UP)) * 10)
         # pygame.draw.circle(surface, (0, 0, 0), self.distance_to_other(self.shandler.nearby_mage) + self.get_glob_cpos(), 5)
+
 
 # -------------------------------------------------- #
 # setup

@@ -26,3 +26,7 @@ PLAYER = None
 # event + function wrappers
 ATTACK_PARTICLE_CREATE_ID = "attack-create"
 ATTACK_PARTICLE_CREATE = None
+
+# -------------------------------------------------- #
+#
+

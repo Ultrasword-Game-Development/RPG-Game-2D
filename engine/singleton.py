@@ -1,4 +1,8 @@
+# ----------------------------------- #
+# game settings
 
+DEBUG = False
+DEBUG_COLOR = (255, 0, 0)
 
 # -------------------------------------------------- #
 # window
@@ -17,8 +21,8 @@ FBHHALF = 0
 # chunks + world
 TILEMAP_WIDTH = 8
 TILEMAP_HEIGHT = 8
-TILE_WIDTH = 16
-TILE_HEIGHT = 16
+TILE_WIDTH = 18
+TILE_HEIGHT = 18
 
 CHUNK_PIX_WIDTH = TILE_WIDTH * TILEMAP_WIDTH
 CHUNK_PIX_HEIGHT = TILE_HEIGHT * TILEMAP_HEIGHT
@@ -28,6 +32,8 @@ CHUNK_PIX_HEIGHT = TILE_HEIGHT * TILEMAP_HEIGHT
 # camera
 WORLD_OFFSET_X = 0
 WORLD_OFFSET_Y = 0
+
+RENDER_DIS = [0, 0]
 
 # -------------------------------------------------- #
 # animation

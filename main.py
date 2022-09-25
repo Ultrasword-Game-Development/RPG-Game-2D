@@ -1,15 +1,17 @@
 # from OpenGL.GL import *
 # from OpenGL.GLU import *
 # import numpy as np
+import random
 
 from engine.handler import scenehandler
 from engine.handler.eventhandler import Eventhandler
-from engine.misc import clock, user_input
+from engine.misc import clock, user_input, maths
 from engine.handler.filehandler import *
 
 from engine.gamesystem import particle
-
 from engine.window import Window
+
+from engine import singleton as EGLOB
 
 # --------- initialization -------------- #
 
@@ -32,18 +34,21 @@ from scripts import singleton
 
 from scripts.entities import player, mage, peasant, test
 from scripts.entities import particle_scripts
+from scripts.environment import grass, ambient, wind
 
 # ----------------------------------- #
 
 # CLIENT = client.Client(client.socket.gethostbyname(client.socket.gethostname()))
 # CLIENT.connect()
 
+EGLOB.DEBUG = False
+EGLOB.RENDER_DIS = [3, 2]
 
 __scene = scenehandler.Scene()
 scenehandler.SceneHandler.push_state(__scene)
 __layer = __scene.add_layer()
-STATE = __layer.handler
-WORLD = __layer.world
+_HANDLER = __layer.handler
+_WORLD = __layer.world
 
 __scene.add_data("bg_color", (153, 220, 80))
 
@@ -56,16 +61,7 @@ ph.set_life(3)
 ph.create_func = particle_scripts.GRAVITY_PARTICLE_CREATE
 ph.update_func = particle_scripts.GRAVITY_PARTICLE_UPDATE
 
-# tree = entity.Entity()
-# tree.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_leaves1.png", (0.2, 0.2))
-# tree.rect = tree.sprite.get_rect()
-# trunk = entity.Entity()
-# trunk.sprite = Filehandler.get_image_and_scale_float("assets/environment/tree_trunk_base1.png", (0.2, 0.2))
-# trunk.rect = trunk.sprite.get_rect()
-# trunk.rect.center = (tree.rect.centerx, tree.rect.bottom + trunk.rect.height)
-
-# STATE.add_entity(tree)
-# STATE.add_entity(trunk)
+# ----------------------------------- #
 
 singleton.PLAYER = player.Player()
 singleton.PLAYER.rect.topleft = (10, 10)
@@ -74,7 +70,7 @@ m = mage.Mage()
 m.position.xy = (100, 100)
 
 p = peasant.Peasant()
-p.position.xy = (200, 200)
+p.position.xy = (120, 120)
 p2 = peasant.Peasant()
 p2.position.xy = (100, 100)
 
@@ -83,25 +79,78 @@ ph.data['player'] = singleton.PLAYER
 # f = fireball.Fire()
 # f.rect.topleft = (30, 30)
 
-STATE.add_entity(test.Test())
-STATE.add_entity(singleton.PLAYER)
-STATE.add_entity(m)
-STATE.add_entity(p)
-STATE.add_entity(p2)
+_HANDLER.add_entity(test.Test())
+_HANDLER.add_entity(singleton.PLAYER)
+_HANDLER.add_entity(m)
+_HANDLER.add_entity(p)
+_HANDLER.add_entity(p2)
 # STATE.add_entity(f)
 # STATE.add_entity(ph)
 
 # -------------------------------------------------- #
+# testing zone
+
+# grass
+left = -2
+right = 3
+grass_count = 300
+
+left = 0
+right = 1
+grass_count = 100
+for x in range(left, right):
+    for y in range(left, right):
+        GG = grass.GrassHandler("assets/sprites/grass.json")
+        GG.position.xy = (x * EGLOB.CHUNK_PIX_WIDTH, y * EGLOB.CHUNK_PIX_HEIGHT)
+        GG.move_to_position()
+        GG.calculate_rel_hitbox()
+        for i in range(grass_count):
+            GG.add_grass(random.randint(0, EGLOB.CHUNK_PIX_WIDTH), random.randint(0, EGLOB.CHUNK_PIX_HEIGHT))
+        # print(GG.chunk, GG.p_chunk)
+        _WORLD.add_env_obj(GG)
+
+
+# ambience
+AMB = ambient.Ambience()
+# _WORLD.add_env_obj(AMB)
+_HANDLER.add_entity(AMB)
+
+WH = wind.WindHandler()
+AMB.add_system(WH)
+
+WH.add_wind(wind.Wind(0, 50, 20))
+
+# spawning enemies
+TIMER = clock.Timer(wait_time=3.0)
+
+# -------------------------------------------------- #
+
+_HANDLER.handle_changes()
 
 clock.start()
 while Window.running:
+    # chagne this eventually to another class that handles ui and system related things
+    if user_input.is_key_pressed(pygame.K_LSHIFT) and user_input.is_key_clicked(pygame.K_d):
+        EGLOB.DEBUG = not EGLOB.DEBUG
+    # ----------------------------------- #
+    # update current scene
     if scenehandler.SceneHandler.CURRENT:
         fb.fill(scenehandler.SceneHandler.CURRENT.data["bg_color"])
+        # ----------------------------------- #
+        # testing
+        TIMER.update()
+        if TIMER.changed:
+            TIMER.changed = False
+            if len(m.layer.handler.entities) < 10:
+                o = peasant.Peasant()
+                o.position.xy = m.position.xy + (
+                maths.normalized_random() * m.DETECT_RADIUS, maths.normalized_random() * m.DETECT_RADIUS)
+                m.layer.handler.add_entity(o)
+        # ----------------------------------- #
+        # update and render everything
         scenehandler.SceneHandler.CURRENT.update(fb)
-            # update(fb, debug=True)
-        # scenehandler.SceneHandler.CURRENT.handler.handle_entities(fb)
-        # scenehandler.SceneHandler.CURRENT.handler.debug_handle_entities(fb)
-        # scenehandler.SceneHandler.CURRENT.world.handle_chunks(fb)
+
+    # eventhandler updates
     Eventhandler.update()
 
     # rescale framebuffer to window

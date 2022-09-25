@@ -1,8 +1,5 @@
-import pygame
-from . import scenehandler
-
-from ..gamesystem import entity
-
+# -------------------------------------------------- #
+# handler class
 
 class Handler:
     """
@@ -25,19 +22,22 @@ class Handler:
     
     def handle_entities(self, window):
         """Update and render entities to supplied window"""
+        # entities
         for i in self.entities:
             self.entity_buffer[i].update()
             if i not in self.to_remove:
+                # update some data
                 self.entity_buffer[i].render(window)
         self.handle_changes()
     
     def debug_handle_entities(self, window):
         """Update and render entities to supplied window + debug"""
+        # entities
         for i in self.entities:
             self.entity_buffer[i].update()
             if i not in self.to_remove:
                 self.entity_buffer[i].render(window)
-            self.entity_buffer[i].debug(window)
+                self.entity_buffer[i].debug(window)
         self.handle_changes()
 
     def add_entity(self, entity):

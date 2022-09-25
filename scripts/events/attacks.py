@@ -12,7 +12,7 @@ def generate_attack_data(**kwargs):
 
 
 def handle_hit(event):
-    print(event.data['a'].name, event.data['b'].name)
+    print("Handle Event:", event.data['a'].name, event.data['b'].name)
 
 
 # create attack event
@@ -42,12 +42,14 @@ class Attack(AnimatedParticle):
         super().update()
         # check if hit an object
         for entity in self.layer.world.find_nearby_entities(self.chunk, 0):
-            if entity.id == self.id:
+            if entity.id == self.id or (self.sender and entity.id == self.sender.id):
                 continue
-            elif self.sender and entity.id == self.sender.id:
-                continue
+            # TODO - swap out this is temporary
             if self.rel_hitbox.colliderect(entity.rel_hitbox):
                 Eventhandler.emit_signal(Event(Attack.HIT_SIGNAL, {'a': self, 'b': entity}))
+
+    def debug(self, surface):
+        super().debug(surface)
 
 
 # -------------------------------------------------- #
@@ -55,6 +57,7 @@ class Attack(AnimatedParticle):
 
 # melee attacks
 class MeleeStab(Attack):
+
     def __init__(self, x, y, registry, data, sender):
         super().__init__(x, y, registry, data, sender)
 

@@ -96,11 +96,12 @@ class Player(entityext.GameEntity):
         # self.eventhandler.emit_signal(Player.MOVE_EVENT)
 
     def render(self, surface):
+        # surface.blit(self.sprite, self.get_glob_pos())
         surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, True, False),
                      self.camera.get_target_rel_pos())
 
     def debug(self, surface):
-        pass
+        super().debug(surface)
 
     def kill(self):
         super().kill()
