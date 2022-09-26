@@ -248,7 +248,7 @@ class Category:
 # -------------------------------------------------- #
 # functions
 
-def load_and_parse_aseprite_animation(filepath):
+def load_and_parse_aseprite_animation(filepath) -> dict:
     """Loads and parses an asesprite animation"""
     # don't load things twice
     if filepath in Category.LOADED_JSONS:

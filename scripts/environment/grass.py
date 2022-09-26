@@ -19,14 +19,10 @@ class GrassAssets:
     ASSETS = {}
 
     @classmethod
-    def add_asset(cls, name: str, file: str):
+    def get_asset(cls, name: str, file: str):
         if name not in cls.ASSETS:
             cls.ASSETS[name] = GrassAssets(file)
-        return cls.get_asset(name)
-
-    @classmethod
-    def get_asset(cls, name: str):
-        return cls.ASSETS.get(name)
+        return cls.ASSETS[name]
 
     # -------------------------------------------------- #
     # class
@@ -41,7 +37,6 @@ class GrassAssets:
         self.skip = int(self.load_range[1] - self.load_range[0]) // 16
         for i in range(self.load_range[0], self.load_range[1], self.skip):
             angle = i
-            print(angle)
             for c in range(self.aregist.parent.length):
                 self.images[c].append(pygame.transform.rotate(self.aregist.parent.frames[c].oframe, -angle))
         # variations
@@ -59,7 +54,7 @@ class GrassAssets:
 class GrassHandler(entityext.NonGameEntity):
     def __init__(self, grass_assets: str):
         super().__init__("grass-handler", None)
-        self.assets = GrassAssets(grass_assets)
+        self.assets = GrassAssets.get_asset("general", "assets/sprites/grass.json")
         self.aregist = self.assets.aregist
 
         # -------------------------------------------------- #
@@ -81,7 +76,7 @@ class GrassHandler(entityext.NonGameEntity):
 
     def update_blade(self, blade: list):
         b = self.grass[blade]
-        b[2] = sin(clock.run_time + b[0]) * 30
+        b[2] = sin(clock.run_time + b[0]) * 30 - 45
         # print(b[2])
 
     def render(self, surface):
@@ -92,8 +87,8 @@ class GrassHandler(entityext.NonGameEntity):
             surface.blit(self.assets.get_sprite(self.grass[blade][3], self.grass[blade][2]),
                          (cpos[0] + self.grass[blade][0], cpos[1] + self.grass[blade][1]))
 
-        for i in range(self.assets.var_length):
-            surface.blit(self.assets.images[0][i], (EGLOB.WORLD_OFFSET_X + i * 16, EGLOB.WORLD_OFFSET_Y))
+        # for i in range(self.assets.var_length):
+        #     surface.blit(self.assets.images[0][i], (EGLOB.WORLD_OFFSET_X + i * 16, EGLOB.WORLD_OFFSET_Y))
 
     def debug(self, surface):
         pass

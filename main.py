@@ -95,9 +95,9 @@ left = -2
 right = 3
 grass_count = 300
 
-left = 0
-right = 1
-grass_count = 100
+# left = 0
+# right = 1
+# grass_count = 300
 for x in range(left, right):
     for y in range(left, right):
         GG = grass.GrassHandler("assets/sprites/grass.json")
