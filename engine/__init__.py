@@ -8,7 +8,7 @@ from .world import *
 from . import singleton
 from . import window
 
-from .gl import *
+# from .gl import *
 
 
 print("Initialized Engine")
