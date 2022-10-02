@@ -141,7 +141,7 @@ while Window.running:
         TIMER.update()
         if TIMER.changed:
             TIMER.changed = False
-            if len(m.layer.handler.entities) < 10:
+            if len(m.layer.handler.entities) < 100:
                 o = peasant.Peasant()
                 o.position.xy = m.position.xy + (
                 maths.normalized_random() * m.DETECT_RADIUS, maths.normalized_random() * m.DETECT_RADIUS)
