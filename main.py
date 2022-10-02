@@ -105,7 +105,7 @@ for x in range(left, right):
         GG.move_to_position()
         GG.calculate_rel_hitbox()
         for i in range(grass_count):
-            GG.add_grass(random.randint(0, EGLOB.CHUNK_PIX_WIDTH), random.randint(0, EGLOB.CHUNK_PIX_HEIGHT))
+            GG.add_grass(random.randint(0, EGLOB.CHUNK_PIX_WIDTH-GG.assets.get_dimensions(0)[0]//3), random.randint(0, EGLOB.CHUNK_PIX_HEIGHT - GG.assets.get_dimensions(0)[1]//3))
         # print(GG.chunk, GG.p_chunk)
         _WORLD.add_env_obj(GG)
 

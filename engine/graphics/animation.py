@@ -207,13 +207,13 @@ class AnimationDataSet:
 
 class Category:
     CATEGORIES = {}
-    LOADED_JSONS = set()
+    LOADED_JSONS = {}
 
     @classmethod
     def get_category(cls, name):
         return Category.CATEGORIES.get(name)
 
-    def __init__(self, name: str, related_animations: dict):
+    def __init__(self, name: str, related_animations: dict, raw_data: dict):
         """
         An animation category
         contains:
@@ -225,6 +225,7 @@ class Category:
         """
         self.name = name
         self.anims = related_animations
+        self.raw_data = raw_data
 
     def get_animation(self, name):
         """Get an animation"""
@@ -252,8 +253,8 @@ def load_and_parse_aseprite_animation(filepath) -> dict:
     """Loads and parses an asesprite animation"""
     # don't load things twice
     if filepath in Category.LOADED_JSONS:
-        return
-    Category.LOADED_JSONS.add(filepath)
+        return {"file": filepath, "cat": list(Category.get_category(filepath))}
+    # get data
     with open(filepath, 'r') as file:
         filedata = json.load(file)
         file.close()
@@ -264,6 +265,10 @@ def load_and_parse_aseprite_animation(filepath) -> dict:
     parsedframedata = parse_frame_data(framedata)
     # create AnimationDataSet and Category Objects
     load_categories(metadata, filepath, parsedframedata)
+
+    # add important info to buffer -- get first animation bc aseprite only holds one cat
+    Category.LOADED_JSONS[filepath] = list(parsedframedata.keys())[0]
+
     # important info
     info = {"file": filepath, "cat": list(parsedframedata.keys()), "meta": metadata}
     return info
@@ -274,7 +279,7 @@ def load_categories(metadata, filepath, parsedframedata):
     image = metadata['image']
     for category in parsedframedata:
         # create object
-        result = Category(category, {})
+        result = Category(category, {}, parsedframedata)
         # for every animation (layer) in aseprite -- create a dataset
         for animation in parsedframedata[category]:
             result.anims[animation] = AnimationDataSet(animation, Filehandler.get_image(

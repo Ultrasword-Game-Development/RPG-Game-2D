@@ -46,6 +46,15 @@ def rot_rect_90deg(rect, orect):
 # -------------------------------------------------- #
 # load and parse animations with rotations
 def load_and_parse_aseprite_animation_wrotations(filepath, rotations, rot_range=(0, 360)):
+    """
+    Load and parse and aseprite animatino with rotations!
+
+    !!!! WARNING !!!!!
+    Susceptible to Multiple loads!
+    Use with care...
+    Use with this in mind!
+    """
+    # load file
     with open(filepath, 'r') as file:
         filedata = json.load(file)
         file.close()
@@ -55,7 +64,7 @@ def load_and_parse_aseprite_animation_wrotations(filepath, rotations, rot_range=
     # load animations with rotations
     image = metadata['image']
     for category in parsedframedata:
-        result = animation.Category(category, {})
+        result = animation.Category(category, {}, parsedframedata)
         for ani in parsedframedata[category]:
             result.anims[ani] = RotatedAnimationDataSet(ani, Filehandler.get_image(
                 os.path.join(os.path.dirname(filepath), image)), parsedframedata[category][ani], result, rotations,

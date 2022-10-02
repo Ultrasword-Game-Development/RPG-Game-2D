@@ -31,7 +31,7 @@ class Test(entityext.NonGameEntity):
         self.test_angle += 30 * clock.delta_time
 
     def render(self, surface):
-        surface.blit(pygame.transform.rotate(self.test_img, -self.test_angle).convert(), (EGLOB.WORLD_OFFSET_X-50, EGLOB.WORLD_OFFSET_Y))
+        # surface.blit(pygame.transform.rotate(self.test_img, -self.test_angle).convert(), (EGLOB.WORLD_OFFSET_X-50, EGLOB.WORLD_OFFSET_Y))
         pygame.draw.line(surface, (255,0,0), self.position+self.get_glob_cpos(), self.position+singleton.UP * 10+self.get_glob_cpos())
         pygame.draw.line(surface, (255, 100, 0), self.position+self.get_glob_cpos(), self.position + self.vec*10+self.get_glob_cpos())
         pygame.draw.circle(surface, (255, 0, 0), self.start_pos+self.get_glob_cpos(), 1)

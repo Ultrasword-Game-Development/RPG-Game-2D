@@ -42,6 +42,12 @@ class GrassAssets:
         # variations
         self.variations = len(self.images)
         self.var_length = len(self.images[0])
+        # get dimension data from each image set
+        self.dimensions = [self.images[i][0].get_size() for i in range(len(self.images))]
+
+    def get_dimensions(self, image_set: int):
+        """Get image dimensions for the i-th image set"""
+        return self.dimensions[image_set]
 
     def get_sprite(self, var: int, angle: float):
         return self.images[var][int(angle - self.load_range[0]) // self.skip]
