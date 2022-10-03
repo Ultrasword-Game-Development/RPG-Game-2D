@@ -1,3 +1,6 @@
+import pygame
+pygame.init()
+
 from .handler import *
 from .misc import *
 from .network import *
@@ -12,3 +15,7 @@ from . import window
 
 
 print("Initialized Engine")
+
+
+def end():
+    pygame.quit()

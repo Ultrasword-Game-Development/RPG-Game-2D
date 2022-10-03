@@ -49,15 +49,6 @@ class GrassAssets:
         """Get image dimensions for the i-th image set"""
         return self.dimensions[image_set]
 
-        self.aregist.parent.apply_func_to_frames(self.cringe)
-
-    def cringe(self, fdata):
-        size = fdata.oframe.get_size()
-        for i in range(size[0]):
-            for j in range(size[1]):
-                rgb = fdata.oframe.get_at((i, j))
-                fdata.oframe.set_at((i, j), (255, rgb[1], rgb[2]))
-
     def get_sprite(self, var: int, angle: float):
         return self.images[var][int(angle - self.load_range[0]) // self.skip]
 
