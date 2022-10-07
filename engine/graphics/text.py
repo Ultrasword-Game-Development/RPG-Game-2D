@@ -61,16 +61,24 @@ class TextManager:
         self.updated = False
         self.update_text()
 
-    def render_text(self, surface, center):
+    def render_text(self, surface, center, rel=False):
         """Renders directly to a surface given a center position"""
         # paragraphs --> words (allows for paragraph separation and individual text formatting
-        pass
+        area = [0, 0]
+        for part in self.parts:
+            iarea = part.get_area()
+            # print(iarea)
+            area[0] += iarea[0]
+            area[1] += iarea[1]
 
-    def render_static(self):
-        """Renders text to a surface and returns it"""
-        for par in self.parts:
-            img = par.render_static()
-
+        # render
+        top = 0
+        for part in self.parts:
+            if rel:
+                surface.blit(part.render_static(), (center[0] + singleton.WORLD_OFFSET_X, top + center[1] + singleton.WORLD_OFFSET_Y))
+            else:
+                surface.blit(part.render_static(), (center[0], top + center[1]))
+            top += part.get_area()[1]
 
     def update_text(self):
         """Update the self.parts cache for text"""
@@ -98,6 +106,7 @@ class Paragraph:
     def __init__(self, text: str, config: dict):
         self.text = text
         self.config = config
+        self.area = [0, 0]
 
     def render_static(self):
         """Return a surface with rendered text"""
@@ -106,7 +115,7 @@ class Paragraph:
         width = 0
         # just render all in a line -- but also remember to consider text coloring
         rendered = []
-        print(self.text.split(self.config["newsection"]))
+        # print(self.text.split(self.config["newsection"]))
         for line in self.text.split(self.config["newsection"]):
             rendered.append([])
             width = 0
@@ -170,12 +179,31 @@ class Paragraph:
                 left += col.get_size()[0] + space_area[0]
             # move down
             top += line_area[i][1]
+        self.area = area
 
         # finished finally
+        result.set_colorkey((0, 0, 0))
         return result
 
+    def get_area(self) -> list:
+        """Get the area of the rendered text"""
+        result = [0, 0]
 
+        for line in self.text.split(self.config["newsection"]):
+            size = [0, 0]
+            for word in line.split():
+                # each word if they start with the special sequence
+                if word.startswith(TextManager.COLOR_CHANGE_SYMBOL):
+                    size = self.config["font"].size(word[TextManager.COLOR_CHANGE_LEN + TextManager.HEX_SIZE:])
+                else:
+                    # just normal words :)
+                    size = self.config["font"].size(word)
 
+                # increment size
+                result[0] = max(result[0], size[0])
+            result[1] += size[1]
+
+        return result
 
 
 

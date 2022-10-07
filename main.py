@@ -113,12 +113,6 @@ for x in range(left, right):
 from engine.graphics import text
 
 TM = text.TextManager(Filehandler.load_font("assets/font.ttf", 30), "Hello World\nHello World", text.TextManager.ALIGN_CENTER)
-RT = TM.render_static()
-
-RT = PG.render_static()
-
-TM.config["align"] = TM.ALIGN_RIGHT
-RT2 = PG.render_static()
 
 # ambience
 AMB = ambient.Ambience()
@@ -160,8 +154,7 @@ while Window.running:
         # update and render everything
         scenehandler.SceneHandler.CURRENT.update(fb)
 
-        fb.blit(RT, (10, 10))
-        fb.blit(RT2, (10, 10+RT.get_size()[1]))
+        TM.render_text(fb, (100, 100), True)
 
     # eventhandler updates
     Eventhandler.update()
