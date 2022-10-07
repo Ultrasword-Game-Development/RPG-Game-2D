@@ -112,8 +112,8 @@ for x in range(left, right):
 # text
 from engine.graphics import text
 
-TM = text.TextManager(Filehandler.load_font("assets/font.ttf", 30), "Hello World", text.TextManager.ALIGN_CENTER)
-PG = text.Paragraph("Hello\nWorld", TM.config)
+TM = text.TextManager(Filehandler.load_font("assets/font.ttf", 30), "Hello World\nHello World", text.TextManager.ALIGN_CENTER)
+RT = TM.render_static()
 
 RT = PG.render_static()
 

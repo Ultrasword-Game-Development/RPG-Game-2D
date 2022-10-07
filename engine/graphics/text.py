@@ -57,6 +57,7 @@ class TextManager:
         self.font.set_bold(self.bold)
         self.font.set_italic(self.italic)
         # quick cache
+        self.parts = []
         self.updated = False
         self.update_text()
 
@@ -67,7 +68,9 @@ class TextManager:
 
     def render_static(self):
         """Renders text to a surface and returns it"""
-        pass
+        for par in self.parts:
+            img = par.render_static()
+
 
     def update_text(self):
         """Update the self.parts cache for text"""
