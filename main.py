@@ -89,7 +89,7 @@ _HANDLER.add_entity(p2)
 # grass
 left = -2
 right = 3
-grass_count = 300
+grass_count = 150
 
 # left = 0
 # right = 1
