@@ -35,10 +35,11 @@ class TextManager:
 
     def __init__(self, font, text: str, align: int, spacingx: int = 0, spacingy: int = 0, underline: bool = False,
                  bold: bool = False, italic: bool = False, newsection: str = '\n', maxwidth: int = 0, aa: bool = False,
-                 def_col: tuple = (255, 255, 255), background: tuple = (0, 0, 0, 0)):
+                 def_col: tuple = (255, 255, 255), background: tuple = (0, 0, 0, 0), buffer_is_text: bool=True):
         # text manager data
         self.font = font
         self.text = text
+        self.text_buffer = self.text if buffer_is_text else ""
         self.align = align
         self.spacing = [spacingx, spacingy]
         self.newsection = newsection
@@ -61,8 +62,17 @@ class TextManager:
         self.updated = False
         self.update_text()
 
+        # text effects
+        self.effects = []
+
     def render_text(self, surface, center, rel=False):
         """Renders directly to a surface given a center position"""
+        self.update_text()
+        # -------------------------------------------------- #
+        # update the text effects
+        for e in self.effects:
+            e.update()
+        # -------------------------------------------------- #
         # paragraphs --> words (allows for paragraph separation and individual text formatting
         area = [0, 0]
         for part in self.parts:
@@ -84,11 +94,12 @@ class TextManager:
         """Update the self.parts cache for text"""
         if not self.updated:
             self.updated = True
-            self.parts = [Paragraph(paragraph, self.config) for paragraph in self.text.split(self.newsection)]
+            self.parts = [Paragraph(paragraph, self.config) for paragraph in self.text_buffer.split(self.newsection)]
 
     def set_text(self, text: str) -> None:
         """Change the current text"""
         self.text = text
+        self.updated = False
 
     def get_text(self) -> str:
         """Return the current text string"""
@@ -97,6 +108,20 @@ class TextManager:
     def append_text(self, app: str) -> None:
         """Add text to current text string"""
         self.text += app
+        # print(self.text)
+
+    def append_to_buffer(self, app: str) -> None:
+        """Add text to the rendering buffer"""
+        self.text_buffer += app
+        self.updated = False
+
+    def add_effect(self, effect):
+        """Add an effect to the text manager"""
+        self.effects.append(effect)
+
+    def remove_effect(self, effect):
+        """Removes an effect given an effect"""
+        self.effects.remove(effect)
 
 
 # -------------------------------------------------- #
@@ -206,9 +231,32 @@ class Paragraph:
         return result
 
 
+# -------------------------------------------------- #
+# typewriter effect text
 
+class TextEffect:
+    # -------------------------------------------------- #
+    # static
+    CID = 0
 
+    # -------------------------------------------------- #
+    def __init__(self, text_manager):
+        self.tm = text_manager
+        TextEffect.CID += 1
+        self.tid = f"effect{TextEffect.CID}"
 
+    def update(self):
+        pass
+
+    def __eq__(self, other):
+        """Comparison function :)"""
+        if type(other) != TextEffect:
+            return False
+        return self.tid == other.tid
+
+    def __hash__(self):
+        """Hash the effect"""
+        return hash(self.tid)
 
 
 

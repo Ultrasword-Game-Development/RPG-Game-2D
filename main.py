@@ -111,8 +111,12 @@ for x in range(left, right):
 
 # text
 from engine.graphics import text
+from engine.graphics.teffects import TypeWriter
 
-TM = text.TextManager(Filehandler.load_font("assets/font.ttf", 30), "Hello World\nHello World", text.TextManager.ALIGN_CENTER)
+TM = text.TextManager(Filehandler.load_font("assets/font.ttf", 30), "Hello World\nHello World",
+                      text.TextManager.ALIGN_CENTER, buffer_is_text=False)
+
+TM.add_effect(TypeWriter.TypeWriter(TM, 1/15))
 
 # ambience
 AMB = ambient.Ambience()
@@ -133,7 +137,7 @@ _HANDLER.handle_changes()
 
 clock.start()
 while Window.running:
-    # chagne this eventually to another class that handles ui and system related things
+    # change this eventually to another class that handles ui and system related things
     if user_input.is_key_pressed(pygame.K_LSHIFT) and user_input.is_key_clicked(pygame.K_d):
         EGLOB.DEBUG = not EGLOB.DEBUG
     # ----------------------------------- #
@@ -154,7 +158,7 @@ while Window.running:
         # update and render everything
         scenehandler.SceneHandler.CURRENT.update(fb)
 
-        TM.render_text(fb, (100, 100), True)
+        TM.render_text(fb, (0, 0), True)
 
     # eventhandler updates
     Eventhandler.update()
