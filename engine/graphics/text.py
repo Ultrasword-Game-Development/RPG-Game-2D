@@ -89,6 +89,8 @@ class TextManager:
             else:
                 surface.blit(part.render_static(), (center[0], top + center[1]))
             top += part.get_area()[1]
+        for e in self.effects:
+            e.post_update()
 
     def update_text(self):
         """Update the self.parts cache for text"""
@@ -246,6 +248,10 @@ class TextEffect:
         self.tid = f"effect{TextEffect.CID}"
 
     def update(self):
+        pass
+
+    def post_update(self):
+        """Update after the render has been finished!"""
         pass
 
     def __eq__(self, other):

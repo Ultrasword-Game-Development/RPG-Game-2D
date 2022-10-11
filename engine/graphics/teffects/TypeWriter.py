@@ -18,4 +18,4 @@ class TypeWriter(TextEffect):
             if self.index < len(self.tm.text):
                 self.tm.append_to_buffer(self.tm.text[self.index])
                 self.index += 1
-                print(self.tm.text_buffer)
+                # print(self.tm.text_buffer)
