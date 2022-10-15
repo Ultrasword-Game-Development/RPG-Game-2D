@@ -55,6 +55,7 @@ class Player(entityext.GameEntity):
         self.hitbox = self.aregist[Player.IDLE_ANIM].get_hitbox()
         # camera and events
         self.camera = None
+        self.priority = True
 
     def start(self):
         # grab camera from layer

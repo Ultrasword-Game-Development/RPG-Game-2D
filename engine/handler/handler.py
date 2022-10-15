@@ -13,7 +13,9 @@ class Handler:
         """
         self.entity_buffer = {}
         self.entities = set()
+        self.priority_entities = set()
         self.to_add = []
+        self.prio_to_add = []
         self.to_remove = []
 
         # world
@@ -22,7 +24,13 @@ class Handler:
     
     def handle_entities(self, window):
         """Update and render entities to supplied window"""
-        # entities
+        # priority entities :)
+        for i in self.priority_entities:
+            self.entity_buffer[i].update()
+            if i not in self.to_remove:
+                # update some data
+                self.entity_buffer[i].render(window)
+        # update and render entities
         for i in self.entities:
             self.entity_buffer[i].update()
             if i not in self.to_remove:
@@ -44,7 +52,10 @@ class Handler:
         """Add an entity"""
         entity.layer = self.layer
         entity.start()
-        self.to_add.append(entity)
+        if entity.priority:
+            self.prio_to_add.append(entity)
+        else:
+            self.to_add.append(entity)
 
     def get_entity(self, eid):
         """Get an entity"""
@@ -52,6 +63,10 @@ class Handler:
 
     def handle_changes(self):
         """Handles adding + removal of entities"""
+        for entity in self.prio_to_add:
+            self.entity_buffer[entity.id] = entity
+            self.priority_entities.add(entity.id)
+            self.layer.world.get_chunk(entity.p_chunk[0], entity.p_chunk[1]).add_entity(entity)
         for entity in self.to_add:
             self.entity_buffer[entity.id] = entity
             self.entities.add(entity.id)

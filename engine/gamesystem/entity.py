@@ -64,7 +64,7 @@ class Entity:
             self.name = str(self.id)
         self.dead = False
         self.visible = True
-        self.static = False
+        self.priority = False
 
         self.sprite = None
 
