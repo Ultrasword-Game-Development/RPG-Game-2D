@@ -40,6 +40,12 @@ class Handler:
     
     def debug_handle_entities(self, window):
         """Update and render entities to supplied window + debug"""
+        # priority entities :)
+        for i in self.priority_entities:
+            self.entity_buffer[i].update()
+            if i not in self.to_remove:
+                # update some data
+                self.entity_buffer[i].render(window)
         # entities
         for i in self.entities:
             self.entity_buffer[i].update()
