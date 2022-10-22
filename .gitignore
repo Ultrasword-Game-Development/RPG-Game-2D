@@ -4,3 +4,7 @@
 
 *.pyc
 *.cpython-39.pyc
+
+.mypy_cache
+
+.idea
