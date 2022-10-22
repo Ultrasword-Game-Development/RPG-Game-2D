@@ -1,15 +1,18 @@
-import time, pygame
+import time
+from pygame.time import Clock
 
+PG_CLOCK: Clock = Clock()
 
-PG_CLOCK = pygame.time.Clock()
+FPS: float = 0
+delta_time: float = 0
+start_time: float = 0
+end_time: float = 0
+wait_time: float = 0
+frame_time: float = 0
+run_time: float = 0
 
-FPS = 0
-delta_time = 0
-start_time = 0
-end_time = 0
-wait_time = 0
-frame_time = 0
-run_time = 0
+engine_start_time: float = time.time()
+engine_uptime: float = 0
 
 
 def start(fps=30):
@@ -20,6 +23,7 @@ def start(fps=30):
     delta_time = 0
     start_time = time.time()
     end_time = start_time
+    print(f"[Engine Initialization Time] Finished in {get_engine_uptime():.2f}s!")
 
 
 def update():
@@ -32,14 +36,21 @@ def update():
     run_time += delta_time
 
 
+def get_engine_uptime() -> float:
+    """Get engine uptime"""
+    global engine_start_time, engine_uptime
+    engine_uptime = time.time() - engine_start_time
+    return engine_uptime
+
+
 # TODO - create a timer object
 class Timer:
-    def __init__(self, wait_time):
-        self.st = 0
-        self.wait_time = wait_time
-        self.changed = False
+    def __init__(self, wait_time: float):
+        self.st: float = 0
+        self.wait_time: float = wait_time
+        self.changed: bool = False
 
-    def update(self):
+    def update(self) -> None:
         self.st += delta_time
         if self.st > self.wait_time:
             self.st = 0
