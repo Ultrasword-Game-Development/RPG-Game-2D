@@ -113,8 +113,8 @@ for x in range(left, right):
 from engine.graphics import text
 from engine.graphics.teffects import TypeWriter
 
-TM = text.TextManager(Filehandler.load_font("assets/font.ttf", 30), "Hello World\nHello World",
-                      text.TextManager.ALIGN_CENTER, buffer_is_text=False)
+TM = text.TextManager(Filehandler.load_font("assets/font.ttf", 30), "Hello World\nHello World\pThis is a longer sentence becasue I need words",
+                      text.TextManager.ALIGN_LEFT, buffer_is_text=False)
 
 TM.add_effect(TypeWriter.TypeWriter(TM, 1/15))
 

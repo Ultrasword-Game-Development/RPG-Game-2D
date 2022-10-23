@@ -34,7 +34,7 @@ class TextManager:
     # -------------------------------------------------- #
 
     def __init__(self, font, text: str, align: int, spacingx: int = 0, spacingy: int = 0, underline: bool = False,
-                 bold: bool = False, italic: bool = False, newsection: str = '\n', maxwidth: int = 0, aa: bool = False,
+                 bold: bool = False, italic: bool = False, newsection: str = '\p', newline: str = '\n', maxwidth: int = 0, aa: bool = False,
                  def_col: tuple = (255, 255, 255), background: tuple = (0, 0, 0, 0), buffer_is_text: bool=True):
         # text manager data
         self.font = font
@@ -43,6 +43,7 @@ class TextManager:
         self.align = align
         self.spacing = [spacingx, spacingy]
         self.newsection = newsection
+        self.newline = newline
         self.maxwidth = maxwidth
         self.color = def_col
         # vfx
@@ -50,7 +51,7 @@ class TextManager:
         self.bold = bold
         self.italic = italic
         self.aa = aa
-        self.config = {"font": font, "align": align, "spacing": self.spacing, "newsection": newsection,
+        self.config = {"font": font, "align": align, "spacing": self.spacing, "newsection": newsection, "newline": newline,
                        "underline": underline, "bold": bold, "italic": italic, "maxwidth": maxwidth, "aa": aa,
                        "color": def_col, "background": background}
         # give font settings
@@ -130,6 +131,8 @@ class TextManager:
 # paragraph objects
 
 class Paragraph:
+    NEW_LINE = "$nl"
+
     def __init__(self, text: str, config: dict):
         self.text = text
         self.config = config
@@ -143,7 +146,7 @@ class Paragraph:
         # just render all in a line -- but also remember to consider text coloring
         rendered = []
         # print(self.text.split(self.config["newsection"]))
-        for line in self.text.split(self.config["newsection"]):
+        for line in self.text.split(self.config["newline"]):
             rendered.append([])
             width = 0
             for word in line.split():
@@ -215,8 +218,7 @@ class Paragraph:
     def get_area(self) -> list:
         """Get the area of the rendered text"""
         result = [0, 0]
-
-        for line in self.text.split(self.config["newsection"]):
+        for line in self.text.split(self.config["newline"]):
             size = [0, 0]
             for word in line.split():
                 # each word if they start with the special sequence
