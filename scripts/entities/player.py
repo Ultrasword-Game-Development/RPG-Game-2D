@@ -92,8 +92,8 @@ class Player(entityext.GameEntity):
         self.camera.update()
 
         # event testing
-        Player.MOVE_EVENT.data['x'] = self.motion.x
-        Player.MOVE_EVENT.data['y'] = self.motion.y
+        # Player.MOVE_EVENT.data['x'] = self.motion.x
+        # Player.MOVE_EVENT.data['y'] = self.motion.y
         # self.eventhandler.emit_signal(Player.MOVE_EVENT)
 
     def render(self, surface):

@@ -2,9 +2,9 @@ from ..text import TextEffect
 
 
 # -------------------------------------------------- #
-# typewriter effect
+# shadw effect
 
-class TypeWriter(TextEffect):
+class Shadow(TextEffect):
     def __init__(self, textmanager, freq: float):
         super().__init__(textmanager)
 

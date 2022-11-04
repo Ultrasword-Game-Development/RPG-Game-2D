@@ -239,6 +239,18 @@ class Paragraph:
 # typewriter effect text
 
 class TextEffect:
+    """
+    update:
+    - called before rendering
+    - usually performs changes to the text -- like spell check if you want or whatever :)
+
+    post_update:
+    - called after rendering
+    - you can add shadows and stuff
+    - post-processing requires direct access to the text surface which should be:
+    - TBD
+    """
+    print("text.py fix post update and text surface access please :)")
     # -------------------------------------------------- #
     # static
     CID = 0

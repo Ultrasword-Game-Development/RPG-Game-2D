@@ -1,9 +1,10 @@
 import math
 import numpy as np
 
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Any
 
 INT_OR_FLOAT = Union[int, float]
+
 
 def __mod__(val: INT_OR_FLOAT, mod: INT_OR_FLOAT) -> INT_OR_FLOAT:
     """Mod but better"""
@@ -11,7 +12,7 @@ def __mod__(val: INT_OR_FLOAT, mod: INT_OR_FLOAT) -> INT_OR_FLOAT:
     return val % mod
 
 
-def lerp(start: INT_OR_FLOAT, end: INT_OR_FLOAT, co: INT_OR_FLOAT) -> INT_OR_FLOAT:
+def lerp(start: Any, end: Any, co: INT_OR_FLOAT) -> Any:
     """Linear interpolation"""
     return (end - start) * co + start
 
@@ -40,5 +41,4 @@ def convert_rectxy_to_cartesian(point: List[INT_OR_FLOAT], area: List[INT_OR_FLO
 
 def hex_to_tuple(hex: str) -> List[INT_OR_FLOAT]:
     """Convert hex to tuple (rgb)"""
-    return [int(hex[i*2:i*2+2], base=16) for i in range(3)]
-
+    return [int(hex[i * 2:i * 2 + 2], base=16) for i in range(3)]

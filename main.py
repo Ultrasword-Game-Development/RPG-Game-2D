@@ -134,6 +134,8 @@ TIMER = clock.Timer(wait_time=3.0)
 # -------------------------------------------------- #
 
 _HANDLER.handle_changes()
+eid = list(_HANDLER.priority_entities)[0]
+print(_HANDLER.get_entity(eid))
 
 clock.start()
 while Window.running:
@@ -191,7 +193,7 @@ while Window.running:
             fbsize = fb.get_size()
             user_input.update_ratio(Window.WIDTH, Window.HEIGHT, fbsize[0], fbsize[1])
 
-    pygame.display.flip()
+    pygame.display.update()
     clock.update()
 
 # CLIENT.close()
