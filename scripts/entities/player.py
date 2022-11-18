@@ -5,6 +5,7 @@ from engine.gamesystem.entity import EntityTypes
 from engine.graphics import animation
 from engine.misc import maths, user_input, clock
 
+from engine.handler import scenehandler
 from engine.handler.eventhandler import Event, Eventhandler
 
 from scripts import entityext, animationext, singleton
@@ -95,6 +96,9 @@ class Player(entityext.GameEntity):
         # Player.MOVE_EVENT.data['x'] = self.motion.x
         # Player.MOVE_EVENT.data['y'] = self.motion.y
         # self.eventhandler.emit_signal(Player.MOVE_EVENT)
+        # for e in self.layer.world.find_nearby_entities(self.chunk, 1):
+        #     if e.id == self.id: continue
+        #     print(e, e.chunk, self.chunk)
 
     def render(self, surface):
         # surface.blit(self.sprite, self.get_glob_pos())

@@ -135,7 +135,6 @@ TIMER = clock.Timer(wait_time=3.0)
 
 _HANDLER.handle_changes()
 eid = list(_HANDLER.priority_entities)[0]
-print(_HANDLER.get_entity(eid))
 
 clock.start()
 while Window.running:

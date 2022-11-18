@@ -92,8 +92,6 @@ class World:
         for ix in range(cpos[0] - crange, cpos[0] + crange + 1):
             for iy in range(cpos[1] - crange, cpos[1] + crange + 1):
                 c = self.get_chunk(ix, iy)
-                # check if chunk is valid
-                if not c: continue
                 # find entities in chunk
                 for e in c.entities:
                     if e in self.layer.handler.entities:

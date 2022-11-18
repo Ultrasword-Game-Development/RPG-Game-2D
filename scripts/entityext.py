@@ -19,10 +19,6 @@ def update_ani_and_hitbox(entity, ani_name, handle=True):
     entity.hitbox = entity.aregist[ani_name].get_hitbox()
     if handle:
         entity.handle_pos = entity.aregist[ani_name].get_frame_data().get_point(singleton.HANDLE_IDENTIFIER)
-    entity.p_chunk[0] = int(entity.position.x) // EGLOB.CHUNK_PIX_WIDTH
-    entity.p_chunk[1] = int(entity.position.y) // EGLOB.CHUNK_PIX_HEIGHT
-    entity.chunk[0] = entity.p_chunk[0]
-    entity.chunk[1] = entity.p_chunk[1]
     entity.calculate_rel_hitbox()
 
 

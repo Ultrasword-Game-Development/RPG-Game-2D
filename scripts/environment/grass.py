@@ -60,7 +60,7 @@ class GrassAssets:
 class GrassHandler(entityext.NonGameEntity):
     def __init__(self, grass_assets: str):
         super().__init__("grass-handler", None)
-        self.assets = GrassAssets.get_asset("general", "assets/sprites/grass.json")
+        self.assets = GrassAssets.get_asset("general", grass_assets)
         self.aregist = self.assets.aregist
 
         # -------------------------------------------------- #

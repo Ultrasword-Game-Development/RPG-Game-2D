@@ -106,10 +106,10 @@ class Entity:
         self.rel_hitbox.topleft = (self.rect.x + self.hitbox.x, self.rect.y + self.hitbox.y)
         self.rel_hitbox.w = self.hitbox.w
         self.rel_hitbox.h = self.hitbox.h
-        self.p_chunk[0] = int(self.rel_hitbox.centerx) // singleton.CHUNK_PIX_WIDTH
-        self.p_chunk[1] = int(self.rel_hitbox.centery) // singleton.CHUNK_PIX_HEIGHT
-        self.chunk[0] = self.p_chunk[0]
-        self.chunk[1] = self.p_chunk[1]
+        self.p_chunk[0] = self.chunk[0]
+        self.p_chunk[1] = self.chunk[1]
+        self.chunk[0] = int(self.rel_hitbox.centerx) // singleton.CHUNK_PIX_WIDTH
+        self.chunk[1] = int(self.rel_hitbox.centery) // singleton.CHUNK_PIX_HEIGHT
 
     def kill(self):
         """Kill an entity / remove it from the current state"""
