@@ -89,7 +89,7 @@ _HANDLER.add_entity(p2)
 # grass
 left = -2
 right = 3
-grass_count = 150
+grass_count = 1000
 
 # left = 0
 # right = 1
@@ -160,7 +160,7 @@ while Window.running:
         # update and render everything
         scenehandler.SceneHandler.CURRENT.update(fb)
 
-        TM.render_text(fb, (0, 0), True)
+        # TM.render_text(fb, (0, 0), True)
 
     # eventhandler updates
     Eventhandler.update()

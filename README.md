@@ -1,5 +1,7 @@
 # RPG-Game-2D
 
+![sample1](docs/sample1.png)
+
 An RPG Game made in python using the pygame engine
 
 # Design
