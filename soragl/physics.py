@@ -286,6 +286,7 @@ class ParticleHandler(Entity):
         """Update the Particle Handler"""
         # print(self._function_data)
         self.create_timer_func(self)
+        # update particles
         for particle in self._particles.values():
             self.update_func(self, particle)
         # remove timer

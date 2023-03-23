@@ -21,6 +21,11 @@ def __clamp__(val, low, high):
     return val
 
 
+def normalized_random():
+    """Return a random number between -1 and 1"""
+    return 2 * np.random.random() - 1
+
+
 # ------------------------------------------------------------ #
 # curve functions
 # ------------------------------------------------------------ #

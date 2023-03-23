@@ -36,9 +36,9 @@ SORA.create_context()
 
 from scripts import singleton
 
-from scripts.entities import player, mage, peasant, test
+# from scripts.entities import player, mage, peasant, test
 from scripts.entities import particle_scripts
-from scripts.environment import grass, ambient, wind
+# from scripts.environment import grass, ambient, wind
 
 # ------------------------------- #
 
@@ -48,23 +48,16 @@ scw = sc.make_layer(sc.get_config(), 1)
 BG_COL = (153, 220, 80)
 
 # -- add entities
-ph = scw.add_entity(particlescripts.ParticleHandler(None))
-ph.rect.topleft = (100, 100)
-ph.color = (255, 0, 0)
-ph.set_freq(1 / 15)
-ph.set_life(3)
-ph.create_func = particle_scripts.GRAVITY_PARTICLE_CREATE
-ph.update_func = particle_scripts.GRAVITY_PARTICLE_UPDATE
-
-
-
+ph = scw.add_entity(particle_scripts.GravityParticleHandler(color=(255, 0, 0), life=3))
+ph.position += (20, 20)
+ph['interval'] = 1/15
 
 
 # aspects
 # scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
 scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
-scw.add_aspect(base_objects.Area2DAspect())
+# scw.add_aspect(base_objects.Area2DAspect())
 scw.add_aspect(base_objects.RenderableAspect())
 
 # push scene
@@ -83,11 +76,6 @@ while SORA.RUNNING:
 
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
-    if SORA.is_mouse_clicked(0):
-        # add a ball object
-        b = ball.Ball(smath.randint(5, 20))
-        b.position.xy = SORA.get_mouse_rel()
-        scw.add_entity(b)
     
     # update signals
     signal.handle_signals()

@@ -13,8 +13,6 @@ from engine import singleton as EGLOB
 
 # --------- initialization -------------- #
 
-
-
 WINDOW_CAPTION = "RPG Game"
 WW = 1280
 WINDOW_SIZE = [WW, int(WW/16*9)]

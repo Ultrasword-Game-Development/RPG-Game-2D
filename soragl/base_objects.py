@@ -516,7 +516,16 @@ Particle systems are very cool
 
 
 def create_square_particle(parent, **kwargs):
-    """Create a square particle"""
+    """
+    Create a square particle
+    - parameters: {
+            radius: int,
+            vel: Vector2,
+            angv: float,
+            color: Color,
+            life: float
+        }
+    """
     r = kwargs["radius"] if "radius" in kwargs else 10
     return [
         parent.position.xy,
