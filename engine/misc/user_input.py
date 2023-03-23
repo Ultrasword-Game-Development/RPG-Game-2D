@@ -80,7 +80,6 @@ def is_mouse_button_press(key: int) -> bool:
 def get_mouse_pos():
     """Get mouse position relative to the screen"""
     # convert to framebuffer area?
-    
     return x_pos * x_ratio, y_pos * y_ratio
 
 

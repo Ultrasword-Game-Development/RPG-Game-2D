@@ -92,6 +92,8 @@ class GrassHandler(entityext.NonGameEntity):
             self.update_blade(blade)
             surface.blit(self.assets.get_sprite(self.grass[blade][3], self.grass[blade][2]),
                          (cpos[0] + self.grass[blade][0], cpos[1] + self.grass[blade][1]))
+            # pygame.transform.rotate(self.assets.images[0][0], 
+            #           self.grass[blade][2])
 
         # for i in range(self.assets.var_length):
         #     surface.blit(self.assets.images[0][i], (EGLOB.WORLD_OFFSET_X + i * 16, EGLOB.WORLD_OFFSET_Y))

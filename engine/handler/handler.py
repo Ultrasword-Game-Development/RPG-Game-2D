@@ -1,6 +1,8 @@
 # -------------------------------------------------- #
 # handler class
 
+from .. import singleton as EGLOB
+
 class Handler:
     """
     Handles all pygame.sprite.Sprite objects
@@ -80,9 +82,13 @@ class Handler:
         for eid in self.to_remove:
             entity = self.entity_buffer[eid]
             self.entity_buffer[eid] = None
-            self.entities.remove(eid)
+            if entity.priority:
+                self.priority_entities.remove(eid)
+            else:
+                self.entities.remove(eid)
             self.layer.world.get_chunk(entity.p_chunk[0], entity.p_chunk[1]).remove_entity(entity)
         self.to_add.clear()
+        self.prio_to_add.clear()
         self.to_remove.clear()
 
     def remove_entity(self, i):

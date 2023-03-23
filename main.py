@@ -93,7 +93,7 @@ grass_count = 1000
 
 # left = 0
 # right = 1
-# grass_count = 300
+grass_count = 400
 for x in range(left, right):
     for y in range(left, right):
         GG = grass.GrassHandler("assets/sprites/grass.json")
