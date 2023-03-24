@@ -128,6 +128,7 @@ WBITS = 32
 FFLAGS = pygame.SRCALPHA
 FPREVSIZE = [1280, 720]
 FSIZE = [1280, 720]
+FHSIZE = [FSIZE[0]//2, FSIZE[1]//2]
 FBITS = 32
 
 MODERNGL = False
@@ -174,6 +175,8 @@ FRAMEBUFFER = None
 DEBUGBUFFER = None
 CLOCK = None
 RUNNING = False
+
+OFFSET = [0, 0]
 
 
 def create_context():

@@ -279,7 +279,6 @@ class World:
         if comp_hash not in self._components:
             self._components[comp_hash] = set()
         # find parent classes
-        print(__file__, "please find parent clases lmao")
         self._components[comp_hash].add(hash(entity))
         # add to entity
         entity._components[comp_hash] = component

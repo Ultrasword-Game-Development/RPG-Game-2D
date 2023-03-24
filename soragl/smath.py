@@ -21,9 +21,19 @@ def __clamp__(val, low, high):
     return val
 
 
+def lerp(start, end, coef):
+    """Lerp from start to end"""
+    return (end - start) * coef + start
+
+
+def v2lerp(start, end, coef):
+    """Lerp vectors"""
+    return Vector2(lerp(start[0], end[0], coef), lerp(start[1], end[1], coef))
+
+
 def normalized_random():
     """Return a random number between -1 and 1"""
-    return 2 * np.random.random() - 1
+    return np.random.random() * 2 - 1
 
 
 # ------------------------------------------------------------ #

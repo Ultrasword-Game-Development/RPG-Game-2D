@@ -1,113 +1,86 @@
 # -------------------------------------------------- #
 # imports
 import pygame
-from engine.gamesystem.entity import EntityTypes
-from engine.graphics import animation
-from engine.misc import maths, user_input, clock
 
-from engine.handler.eventhandler import Event, Eventhandler
-
-from scripts import entityext, animationext, singleton
+import soragl as SORA
+from soragl import animation, base_objects, physics, signal, smath
 
 # -------------------------------------------------- #
-animation.load_and_parse_aseprite_animation("assets/sprites/player.json")
+# animations
+ANIM_CAT = "assets/sprites/player.json"
+IDLE_ANIM = "idle"
+RUN_ANIM = "run"
 
+animation.Category.load_category("assets/sprites/player.json")
 
 # -------------------------------------------------- #
+# statistics
+MS = 300
+LC = 0.1
+
+AREA = (20, 20)
+
+# -------------------------------------------------- #
+# signals
+MOVEMENT_SIGNAL = signal.register_signal(signal.SignalRegister("player-move"))
+
+# wrappers
+MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
+    signal.Receiver(lambda data: print(data))
+)
+
+# -------------------------------------------------- #
+# player
 
 
-class Player(entityext.GameEntity):
-    TYPE = "Player"
-
-    # -------------------------------------------------- #
-    # animations
-    ANIM_CAT = "player"
-    IDLE_ANIM = "idle"
-    RUN_ANIM = "run"
-
-    # load
-    ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
-
-    # -------------------------------------------------- #
-    # statistics
-    MS = 30
-    LC = 0.5
-
-    # -------------------------------------------------- #
-    # signals
-    MOVEMENT_SIGNAL = "player-move"
-
-    # wrappers
-    MOVEMENT_WRAPPER = Eventhandler.register_to_signal(MOVEMENT_SIGNAL,
-                                                       lambda x: print(x.name, f"{x.data['x']:.2f}, {x.data['y']:.2f}"))
-
-    # -------------------------------------------------- #
-    # buffered objects
-    MOVE_EVENT = Event(MOVEMENT_SIGNAL, {'x': 0, 'y': 0})
-
-    # -------------------------------------------------- #
-
+class Player(physics.Entity):
     def __init__(self):
         # mana will change in future
-        super().__init__("Player", 100, 100)
-        self.aregist = Player.ANIM_CATEGORY.create_registry_for_all()
-        self.sprite = self.aregist[Player.IDLE_ANIM].get_frame()
-        self.hitbox = self.aregist[Player.IDLE_ANIM].get_hitbox()
+        super().__init__()
+        self.aregist = animation.Category.get_registries_for_all(ANIM_CAT)
+        self.c_sprite = base_objects.AnimatedSprite(0, 0, self.aregist[IDLE_ANIM])
+        self.c_collision = base_objects.Collision2DComponent()
         # camera and events
         self.camera = None
         self.priority = True
 
-    def start(self):
-        # grab camera from layer
+    def on_ready(self):
+        self.rect.w = AREA[0]
+        self.rect.h = AREA[1]
+        self.add_component(self.c_sprite)
+        self.add_component(self.c_collision)
+        return
+        # TODO - grab camera from layer
         self.camera = self.layer.camera
         self.camera.set_target(self)
         # tell camera to calculate motion
         self.camera.track_target()
 
     def update(self):
-        # animations - etc
-        entityext.update_ani_and_hitbox(self, Player.IDLE_ANIM, handle=False)
-        # smooth motion
-        self.motion = maths.lerp(self.motion, singleton.ZERO, Player.LC)
+        # TODO -- consider removing
+        self.velocity = smath.v2lerp(self.velocity, (0, 0), LC)
 
         # movement
-        if user_input.is_key_pressed(pygame.K_d):
-            self.motion.x += Player.MS * clock.delta_time
-        if user_input.is_key_pressed(pygame.K_a):
-            self.motion.x -= Player.MS * clock.delta_time
-        if user_input.is_key_pressed(pygame.K_w):
-            self.motion.y -= Player.MS * clock.delta_time
-        if user_input.is_key_pressed(pygame.K_s):
-            self.motion.y += Player.MS * clock.delta_time
-
-        if user_input.is_key_pressed(pygame.K_k):
+        if SORA.is_key_pressed(pygame.K_d):
+            self.velocity.x += MS * SORA.DELTA
+        if SORA.is_key_pressed(pygame.K_a):
+            self.velocity.x -= MS * SORA.DELTA
+        if SORA.is_key_pressed(pygame.K_w):
+            self.velocity.y -= MS * SORA.DELTA
+        if SORA.is_key_pressed(pygame.K_s):
+            self.velocity.y += MS * SORA.DELTA
+        if SORA.is_key_pressed(pygame.K_k):
             self.kill()
 
-        # project movement to world
-        self.layer.world.move_entity(self)
-        self.move_to_position()
-        # update camera
-        self.camera.campos -= self.motion
-        self.camera.track_target()
-        self.camera.update()
+        # TODO - update camera
+        # self.camera.campos -= self.motion
+        # self.camera.track_target()
+        # self.camera.update()
 
         # event testing
         # Player.MOVE_EVENT.data['x'] = self.motion.x
         # Player.MOVE_EVENT.data['y'] = self.motion.y
         # self.eventhandler.emit_signal(Player.MOVE_EVENT)
 
-    def render(self, surface):
-        # surface.blit(self.sprite, self.get_glob_pos())
-        surface.blit(self.sprite if self.motion.x < 0 else pygame.transform.flip(self.sprite, True, False),
-                     self.camera.get_target_rel_pos())
-
-    def debug(self, surface):
-        super().debug(surface)
-
-    def kill(self):
-        super().kill()
-
-
-# -------------------------------------------------- #
-# setup
-EntityTypes.register_entity_type(Player.TYPE, Player)
+        # set sprite flipping
+        self.c_sprite.flip = self.velocity.x < 0

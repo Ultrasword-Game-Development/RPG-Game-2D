@@ -10,16 +10,17 @@ from queue import deque, Queue
 SIGNALS = {}
 EMIT_QUEUE = Queue(100)
 
-def register_signal(signal_register: "SignalRegister"):
+def register_signal(signal_register: "SignalRegister") -> "Signal Register":
     """Register a signal to the system"""
     SIGNALS[signal_register.id] = signal_register
+    return signal_register
 
 def handle_signals():
     """Handle all emitted signals"""
     while not EMIT_QUEUE.empty():
         # get and update
         s, args = EMIT_QUEUE.get()
-        s._emit_signal(*args)
+        s._emit_signal(args)
 
 # ------------------------------------------------------------ #
 # signal receivers
@@ -36,16 +37,17 @@ class Receiver:
     object to a signal
     - thus signals can essentially be activated and deactivated
     """
+    
     def __init__(self, function):
         """Initialize a receiveer object"""
         self.id = id(self)
         self._call = function
         self.active = True
     
-    def call(self, args: tuple):
+    def call(self, args: dict):
         """Call a receiver"""
         if not self.active: return
-        self._call(*args)
+        self._call(args)
 
 
 # ------------------------------------------------------------ #
@@ -77,15 +79,15 @@ class SignalRegister:
             return self.receivers.pop(receiver)
         return self.receivers.pop(receiver.id)
     
-    def emit_signal(self, *args):
+    def emit_signal(self, **kwargs):
         """Queue a signal to be emitted -- the one to actually call"""
-        EMIT_QUEUE.put((self, args))
+        EMIT_QUEUE.put((self, kwargs))
 
-    def _emit_signal(self, *args):
+    def _emit_signal(self, args: dict):
         """Call all receiver functions"""
         for rec in self.receivers:
             self.receivers[rec].call(args)
-        
+    
     def __repr__(self):
         """Represent the signal as a string"""
         return f"signal: {self.name} | id: {self.id}"

@@ -36,8 +36,11 @@ SORA.create_context()
 
 from scripts import singleton
 
+from scripts.entities import player
+
 # from scripts.entities import player, mage, peasant, test
 from scripts.entities import particle_scripts
+
 # from scripts.environment import grass, ambient, wind
 
 # ------------------------------- #
@@ -48,13 +51,19 @@ scw = sc.make_layer(sc.get_config(), 1)
 BG_COL = (153, 220, 80)
 
 # -- add entities
+# particle handler test
 ph = scw.add_entity(particle_scripts.GravityParticleHandler(color=(255, 0, 0), life=3))
-ph.position += (20, 20)
-ph['interval'] = 1/15
+ph.position += (100, 100)
+ph["interval"] = 1 / 15
 
+# player
+animation.Category.load_category("assets/sprites/player.json")
+singleton.PLAYER = scw.add_entity(player.Player())
+singleton.PLAYER.position += (100, 100)
+ph.add_collider(singleton.PLAYER.rect)
 
 # aspects
-# scw.add_aspect(base_objects.TileMapDebug())
+scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
 scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
 # scw.add_aspect(base_objects.Area2DAspect())
@@ -76,7 +85,7 @@ while SORA.RUNNING:
 
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
-    
+
     # update signals
     signal.handle_signals()
     # push frame

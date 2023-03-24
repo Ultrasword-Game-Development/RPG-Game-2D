@@ -1,5 +1,5 @@
 import soragl as SORA
-from soragl import scene, physics, mgl, animation, smath
+from soragl import scene, physics, mgl, animation, smath, signal
 
 import random
 import math
@@ -41,7 +41,9 @@ class MissingSprite(Exception):
 
 
 class Sprite(scene.Component):
-    def __init__(self, width: int = 0, height: int = 0, sprite=None, scale_size:tuple=None):
+    def __init__(
+        self, width: int = 0, height: int = 0, sprite=None, scale_size: tuple = None
+    ):
         super().__init__()
         self.width = width
         self.height = height
@@ -65,6 +67,19 @@ class Sprite(scene.Component):
         # print(self.width, self.height, self._sprite)
         # scaling size
         self.scale_size = scale_size
+
+        # flipping
+        self._flip = False
+    
+    @property
+    def flip(self):
+        """Get flip?"""
+        return self._flip
+
+    @flip.setter
+    def flip(self, value: bool):
+        """Set flip"""
+        self._flip = value
 
     @property
     def sprite(self):
@@ -133,6 +148,7 @@ class SpriteRenderer(scene.Component):
             self._sprite = self._entity.get_component(AnimatedSprite)
         # print(self._sprite)
 
+
 class SpriteRendererAspect(scene.Aspect):
     def __init__(self):
         super().__init__(SpriteRenderer)
@@ -189,6 +205,76 @@ class SpriteRendererAspectDebug(scene.Aspect):
 
 
 # ------------------------------ #
+# area2d
+
+
+class Area2D(scene.Component):
+    def __init__(self, width: int, height: int):
+        super().__init__()
+        self.enter_signal_register = signal.SignalRegister("Area2D-enter")
+        self.overlap_signal_register = signal.SignalRegister("Area2D-overlap")
+        self.exit_signal_register = signal.SignalRegister("Area2D-exit")
+
+    def on_add(self):
+        """On add"""
+        # set position
+        self._entity.rect.center = self._entity.position
+
+    def detect_collision(self, other):
+        """Detect collision with another shape"""
+        pass
+
+
+class Area2DAspect(scene.Aspect):
+    def __init__(self):
+        super().__init__(Area2D)
+        # ensures runs after collsion2D aspect
+        # since we want to use updated positions of entities in world -- for area2D detection
+        self.priority = 18
+        self.a_collision2D = None
+        self.overlapped = set()
+
+    def on_add(self):
+        """On add"""
+        # grab aspect
+        self.a_collision2D = self._world.get_aspect(
+            Collision2DAspect, Collision2DRendererAspectDebug
+        )
+        if not self.a_collision2D:
+            raise NotImplementedError(
+                "Please add the Collision2DAspect before the Area2DAspect"
+            )
+
+    def handle(self):
+        """Handle area2Ds"""
+        for entity in self.iterate_entities():
+            # check for collision with each of the active collision2D components
+            for other in self.a_collision2D.iterate_entities():
+                # rect collision between entities
+                if other.static:
+                    continue
+                if other.rect.colliderect(entity.rect):
+                    # raise a signal?
+                    # how to retrieve the component object faster?
+                    if id(other) in self.overlapped:
+                        entity.get_component(
+                            Area2D
+                        ).overlap_signal_register.emit_signal(other)
+                    else:
+                        entity.get_component(Area2D).enter_signal_register.emit_signal(
+                            other
+                        )
+                        self.overlapped.add(id(other))
+                    # print(f"signal: {SORA.ENGINE_UPTIME:.2f}", entity)
+                elif id(other) in self.overlapped:
+                    entity.get_component(Area2D).exit_signal_register.emit_signal(other)
+                    self.overlapped.remove(id(other))
+
+
+# TODO:
+# add in - circle + polygon
+
+# ------------------------------ #
 # collision2d
 
 
@@ -198,6 +284,7 @@ class Collision2DComponent(scene.Component):
         # private
         self._offset = pgmath.Vector2(offset) if offset else pgmath.Vector2(0, 0)
         self._rect = None
+        self.signal_register = signal.SignalRegister("Collision2D")
 
     def on_add(self):
         """On add"""
@@ -516,16 +603,7 @@ Particle systems are very cool
 
 
 def create_square_particle(parent, **kwargs):
-    """
-    Create a square particle
-    - parameters: {
-            radius: int,
-            vel: Vector2,
-            angv: float,
-            color: Color,
-            life: float
-        }
-    """
+    """Create a square particle"""
     r = kwargs["radius"] if "radius" in kwargs else 10
     return [
         parent.position.xy,
@@ -699,6 +777,60 @@ For use in opengl based applications / games! -- not pygame 2D
 # ------------------------------------------------------------ #
 
 
+# 2D camera
+class Camera2D:
+    def __init__(self):
+        """
+        Camera Constructor:
+        contains:
+        - position
+        """
+        self.campos = pygame.math.Vector2(0, 0)
+        self.position = pygame.math.Vector2(0, 0)
+        self.chunkpos = [0, 0]
+        self.screenchunkpos = [0, 0]
+        # ----------------------------------- #
+        # viewport size
+        self.viewport = pygame.rect.Rect(0, 0, SORA.FSIZE[0], SORA.FSIZE[1])
+
+        # target info + cache
+        self.target = None
+
+    def track_target(self):
+        """Track an entity target and center them"""
+        if not self.target:
+            return
+        # get world position
+        wpos = self.target.position
+        # set position
+        self.position.x = self.campos.x - SORA.FHSIZE[0]
+        self.position.y = self.campos.y - SORA.FHSIZE[1]
+        # chunk pos
+        self.screenchunkpos[0] = (
+            int(self.campos.x) // self.target._world.config["chunkpixw"]
+        )
+        self.screenchunkpos[1] = (
+            int(self.campos.y) // self.target._world.config["chunkpixh"]
+        )
+        self.chunkpos[0] = -self.screenchunkpos[0]
+        self.chunkpos[1] = -self.screenchunkpos[1]
+        # viewport position
+        self.viewport.topleft = -self.position.xy
+
+        # update eglob offset
+        SORA.OFFSET[0] = self.position.x
+        SORA.OFFSET[1] = self.position.y
+
+    def set_target(self, target):
+        """Set a target"""
+        self.target = target
+
+    def get_target_rel_pos(self):
+        """Get the raget relative position"""
+        return -self.target.position + SORA.OFFSET
+
+
+# ortho
 class OrthoCamera(mgl.Camera):
     def __init__(self, pos, front, up):
         super().__init__(pos, front, up, (0, 0, 0))
@@ -709,6 +841,7 @@ class OrthoCamera(mgl.Camera):
         )
 
 
+# frustum
 class FrustCamera(mgl.Camera):
     def __init__(
         self,
