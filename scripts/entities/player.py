@@ -13,12 +13,13 @@ RUN_ANIM = "run"
 
 animation.Category.load_category("assets/sprites/player.json")
 
+
 # -------------------------------------------------- #
 # statistics
 MS = 300
 LC = 0.1
 
-AREA = (20, 20)
+AREA = (10, 15)
 
 # -------------------------------------------------- #
 # signals
@@ -32,13 +33,19 @@ MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
 # -------------------------------------------------- #
 # player
 
-
+# TODO -- create game entity for rpg game
 class Player(physics.Entity):
     def __init__(self):
         # mana will change in future
         super().__init__()
+
+        # private
+        self._current_anim = RUN_ANIM
+
+        # objects
         self.aregist = animation.Category.get_registries_for_all(ANIM_CAT)
-        self.c_sprite = base_objects.AnimatedSprite(0, 0, self.aregist[IDLE_ANIM])
+
+        self.c_sprite = base_objects.AnimatedSprite(0, 0, self.aregist[self._current_anim])
         self.c_collision = base_objects.Collision2DComponent()
         # camera and events
         self.camera = None
@@ -48,6 +55,7 @@ class Player(physics.Entity):
         self.rect.w = AREA[0]
         self.rect.h = AREA[1]
         self.add_component(self.c_sprite)
+        self.add_component(base_objects.SpriteRenderer())
         self.add_component(self.c_collision)
         return
         # TODO - grab camera from layer
@@ -58,6 +66,7 @@ class Player(physics.Entity):
 
     def update(self):
         # TODO -- consider removing
+        self.aregist[self._current_anim].update()
         self.velocity = smath.v2lerp(self.velocity, (0, 0), LC)
 
         # movement
@@ -83,4 +92,4 @@ class Player(physics.Entity):
         # self.eventhandler.emit_signal(Player.MOVE_EVENT)
 
         # set sprite flipping
-        self.c_sprite.flip = self.velocity.x < 0
+        self.c_sprite.flip = self.velocity.x > 0

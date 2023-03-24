@@ -5,9 +5,9 @@ from engine import singleton
 from engine.gamesystem import particle, entity
 from engine.graphics import animation
 
-from scripts import animationext, singleton as EGLOB, entityext
-from scripts.events.attacks import Attack, generate_attack_data
-from scripts.game import skillhandler
+from oscripts import animationext, singleton as EGLOB, entityext
+from oscripts.events.attacks import Attack, generate_attack_data
+from oscripts.game import skillhandler
 
 # -------------------------------------------------- #
 animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)

@@ -18,7 +18,7 @@ FB_SIZE = [WW, int(WW / 16 * 9)]
 # mac version -- since no opengl
 SORA.initialize(
     {
-        "fps": 60,
+        "fps": 30,
         "window_size": WINDOW_SIZE,
         "window_flags": pygame.RESIZABLE | pygame.DOUBLEBUF,
         "window_bits": 32,
@@ -58,6 +58,8 @@ ph["interval"] = 1 / 15
 
 # player
 animation.Category.load_category("assets/sprites/player.json")
+print(animation.Category.get_registries_for_all(player.ANIM_CAT))
+
 singleton.PLAYER = scw.add_entity(player.Player())
 singleton.PLAYER.position += (100, 100)
 ph.add_collider(singleton.PLAYER.rect)
@@ -85,6 +87,11 @@ while SORA.RUNNING:
 
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
+    
+    # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
+    for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):
+        for x, frame in enumerate(anim.parent.sprite_sheet.frames):
+            SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
 
     # update signals
     signal.handle_signals()

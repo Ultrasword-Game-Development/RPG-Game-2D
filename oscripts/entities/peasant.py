@@ -5,10 +5,10 @@ from engine.handler import statehandler
 from engine.graphics import animation
 from engine.gamesystem import entity
 
-from scripts import singleton, entityext, animationext
-from scripts.game import state
+from oscripts import singleton, entityext, animationext
+from oscripts.game import state
 
-from scripts.events import attacks
+from oscripts.events import attacks
 
 from .mage import Mage
 

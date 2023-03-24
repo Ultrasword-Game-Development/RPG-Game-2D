@@ -108,6 +108,10 @@ class Sprite(scene.Component):
 
 
 class AnimatedSprite(Sprite):
+    """
+    AnimatedSprite
+    - must call register update EXTERNALLY
+    """
     def __init__(self, width: int, height: int, registry, scale_size: tuple = None):
         super().__init__(width, height, registry.get_frame(), scale_size=scale_size)
         self._registry = registry
@@ -163,15 +167,19 @@ class SpriteRendererAspect(scene.Aspect):
                 continue
             # get the position
             pos = e.position.xy
+            # get sprite
+            _sprite = c_sprite.sprite if not c_sprite.flip else pgtrans.flip(
+                c_sprite.sprite, True, False
+            )
             # render the sprite
             if c_sprite.scale_size:
                 SORA.FRAMEBUFFER.blit(
-                    pgtrans.scale(c_sprite.sprite, c_sprite.scale_size),
+                    pgtrans.scale(_sprite, c_sprite.scale_size),
                     pos - (c_sprite.hwidth, c_sprite.hheight),
                 )
                 continue
             SORA.FRAMEBUFFER.blit(
-                c_sprite.sprite, pos - (c_sprite.hwidth, c_sprite.hheight)
+                _sprite, pos - (c_sprite.hwidth, c_sprite.hheight)
             )
 
 

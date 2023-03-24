@@ -1,7 +1,7 @@
 from engine.misc import clock
-from scripts import singleton
 from engine.handler.eventhandler import Event, Eventhandler
-from scripts.entities.particle_scripts import AnimatedParticle
+from oscripts import singleton
+from oscripts.entities.particle_scripts import AnimatedParticle
 
 
 # -------------------------------------------------- #

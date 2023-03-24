@@ -100,7 +100,7 @@ class GravityParticleHandler(physics.ParticleHandler):
 
     def update(self):
         """Gravity particle update"""
-        print(self["rects"])
+        # print(self["rects"])
         super().update()
 
     def add_collider(self, rect):

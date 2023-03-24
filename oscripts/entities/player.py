@@ -7,7 +7,7 @@ from engine.misc import maths, user_input, clock
 
 from engine.handler.eventhandler import Event, Eventhandler
 
-from scripts import entityext, animationext, singleton
+from oscripts import entityext, animationext, singleton
 
 # -------------------------------------------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/player.json")

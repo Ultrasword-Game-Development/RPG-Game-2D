@@ -6,7 +6,7 @@ from engine.misc import clock, maths
 from engine.handler import scenehandler, filehandler
 from engine import singleton as EGLOB
 
-from scripts import entityext, singleton
+from oscripts import entityext, singleton
 
 ENTITY_NAME = "test"
 

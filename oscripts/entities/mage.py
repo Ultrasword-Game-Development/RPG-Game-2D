@@ -10,10 +10,10 @@ from engine import singleton
 from engine.handler.eventhandler import Event, Eventhandler
 from engine.handler import statehandler
 
-from scripts import entityext, animationext, singleton as EGLOB, skillext
-from scripts.game import state, skillhandler
+from oscripts import entityext, animationext, singleton as EGLOB, skillext
+from oscripts.game import state, skillhandler
 
-from scripts.attacks import fireball
+from oscripts.attacks import fireball
 
 # -------------------------------------------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
