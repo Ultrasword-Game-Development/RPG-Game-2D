@@ -36,7 +36,7 @@ SORA.create_context()
 
 from scripts import singleton
 
-from scripts.entities import player
+from scripts.entities import player, mage
 
 # from scripts.entities import player, mage, peasant, test
 from scripts.entities import particle_scripts
@@ -57,12 +57,14 @@ ph.position += (100, 100)
 ph["interval"] = 1 / 15
 
 # player
-animation.Category.load_category("assets/sprites/player.json")
-print(animation.Category.get_registries_for_all(player.ANIM_CAT))
-
 singleton.PLAYER = scw.add_entity(player.Player())
 singleton.PLAYER.position += (100, 100)
 ph.add_collider(singleton.PLAYER.rect)
+
+# mage
+_mage = scw.add_entity(mage.Mage())
+_mage.position += (200, 200)
+ph.add_collider(_mage.rect)
 
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())

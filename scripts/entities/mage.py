@@ -1,28 +1,36 @@
 # -------------------------------------------------- #
 # imports
 import pygame
-from engine.gamesystem.entity import EntityTypes
-from engine.gamesystem import particle
-from engine.graphics import animation
-from engine.misc import maths, clock
-from engine import singleton
 
-from engine.handler.eventhandler import Event, Eventhandler
-from engine.handler import statehandler
-
-from scripts import entityext, animationext, singleton as EGLOB, skillext
-from scripts.game import state, skillhandler
-
-from scripts.attacks import fireball
+import soragl as SORA
+from soragl import physics, base_objects, animation, smath, misc
+from soragl import signal, statesystem
+from scripts import singleton
 
 # -------------------------------------------------- #
-animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
+# mage 
+ANIM_CAT = "mage"
+IDLE_ANIM = "idle"
+RUN_ANIM = "run"
+PRECAST_ANIM = "pre_attack"
+CASTING_ANIM = "casting"
+POSTCAST_ANIM = "end_cast"
 
+animation.load_and_parse_aseprite_animation("assets/sprites/mage.json")
 
 # -------------------------------------------------- #
 # mage state handler
 
-class IdleState(state.EntityState):
+IDLE_STATE = "idle"
+ALERT_STATE = "alert"
+FLIGHT_STATE = "flight"
+PRECAST_STATE = "precast"
+CASTING_STATE = "casting"
+POSTCAST_STATE = "postcast"
+ATTACK_STATE = "firing"
+
+
+class IdleState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(Mage.IDLE_STATE, parent)
 
@@ -37,7 +45,7 @@ class IdleState(state.EntityState):
         # also calculate for idle movement
 
 
-class AlertState(state.EntityState):
+class AlertState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(Mage.ALERT_STATE, parent)
         self.countdown = Mage.ALERT_PRECAST_CD
@@ -64,7 +72,7 @@ class AlertState(state.EntityState):
             self.handler.set_active_state(Mage.IDLE_STATE)
 
 
-class PrecastState(state.EntityState):
+class PrecastState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(Mage.PRECAST_STATE, parent)
 
@@ -82,7 +90,7 @@ class PrecastState(state.EntityState):
         # case 2: what if casting fails? what if player interrupts?
 
 
-class CastingState(state.EntityState):
+class CastingState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(Mage.CASTING_STATE, parent)
         self.casting_cdr = Mage.DEFAULT_CAST_CD
@@ -104,7 +112,7 @@ class CastingState(state.EntityState):
             self.handler.set_active_state(Mage.POSTCAST_STATE)
 
 
-class PostcastState(state.EntityState):
+class PostcastState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(Mage.POSTCAST_STATE, parent)
         self.cani = Mage.POSTCAST_ANIM
@@ -135,7 +143,7 @@ class PostcastState(state.EntityState):
         # case 2: interrupted -> backlash
 
 
-class FlightState(state.EntityState):
+class FlightState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(Mage.FLIGHT_STATE, parent)
 
@@ -162,7 +170,7 @@ class FlightState(state.EntityState):
             self.handler.set_active_state(Mage.ALERT_STATE)
 
 
-class StateHandler(statehandler.StateHandler):
+class StateHandler(statesystem.StateHandler):
     def __init__(self, mage):
         super().__init__(Mage.IDLE_STATE)
         self.mage = mage
@@ -176,63 +184,39 @@ class StateHandler(statehandler.StateHandler):
         self.add_state(FlightState(self.mage))
         self.add_state(PostcastState(self.mage))
 
+# -------------------------------------------------- #
+# statistics
+MS = 150
+LC = 0.1
+
+DETECT_RADIUS = 130
+PREF_DIS = 70
+DEF_DISTANCE = 30
+
+# cdt
+ALERT_PRECAST_CD = 1.0
+DEFAULT_CAST_CD = 2.3
 
 # -------------------------------------------------- #
+# signals
+
+
+MOVEMENT_SIGNAL = signal.register_signal(signal.SignalRegister("mage-move"))
+
+# wrappers
+MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
+    signal.Receiver(lambda data: print(data))
+)
+
+# -------------------------------------------------- #
+# buffered objects
+# SKILL_TREE = skillhandler.SkillTree(skillext.SkillTreeLoader("assets/skilltree/mage.json"))
+
+# SKILLS = skillhandler.SkillHandler()
+# SKILLS.add_skill(fireball.FireBallSkill())
+
 # mage
-
 class Mage(entityext.GameEntity):
-    TYPE = "Mage"
-
-    # -------------------------------------------------- #
-    # animations
-    ANIM_CAT = "mage"
-    IDLE_ANIM = "idle"
-    RUN_ANIM = "run"
-    PRECAST_ANIM = "pre_attack"
-    CASTING_ANIM = "casting"
-    POSTCAST_ANIM = "end_cast"
-
-    # load
-    ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
-    ANIM_CATEGORY.apply_func_to_animations(animationext.handle_handle_position)
-
-    # -------------------------------------------------- #
-    # states
-    IDLE_STATE = "idle"
-    ALERT_STATE = "alert"
-    FLIGHT_STATE = "flight"
-    PRECAST_STATE = "precast"
-    CASTING_STATE = "casting"
-    POSTCAST_STATE = "postcast"
-    ATTACK_STATE = "firing"
-
-    # -------------------------------------------------- #
-    # statistics
-    MS = 20
-    LC = 0.3
-
-    DETECT_RADIUS = 130
-    PREF_DIS = 70
-    DEF_DISTANCE = 30
-
-    # cdt
-    ALERT_PRECAST_CD = 1.0
-    DEFAULT_CAST_CD = 2.3
-
-    # -------------------------------------------------- #
-    # signals
-    MOVEMENT_SIGNAL = "mage-move"
-
-    # wrappers
-    MOVEMENT_WRAPPER = Eventhandler.register_to_signal(MOVEMENT_SIGNAL, lambda x: print(x.name, f"{x.data['x']:.2f}, {x.data['y']:.2f}"))
-    # -------------------------------------------------- #
-    # buffered objects
-    SKILL_TREE = skillhandler.SkillTree(skillext.SkillTreeLoader("assets/skilltree/mage.json"))
-
-    SKILLS = skillhandler.SkillHandler()
-    SKILLS.add_skill(fireball.FireBallSkill())
-
-    MOVE_EVENT = Event(MOVEMENT_SIGNAL, {'x': 0, 'y': 0})
 
     # -------------------------------------------------- #
     def __init__(self):

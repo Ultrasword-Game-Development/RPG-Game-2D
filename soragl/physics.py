@@ -101,6 +101,10 @@ class Entity:
         """Default update function"""
         pass
 
+    def debug(self):
+        """Debug render for entity objects"""
+        pass
+
     def kill(self):
         """Kill the entity"""
         self._alive = False

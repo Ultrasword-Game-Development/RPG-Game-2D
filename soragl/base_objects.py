@@ -30,6 +30,7 @@ class MissingComponent(Exception):
 # base aspect objects
 # ------------------------------------------------------------ #
 
+
 # ------------------------------ #
 # sprite
 # NOTE: sprite / animated sprite must be added before renderer!
@@ -215,7 +216,6 @@ class SpriteRendererAspectDebug(scene.Aspect):
 # ------------------------------ #
 # area2d
 
-
 class Area2D(scene.Component):
     def __init__(self, width: int, height: int):
         super().__init__()
@@ -263,7 +263,6 @@ class Area2DAspect(scene.Aspect):
                     continue
                 if other.rect.colliderect(entity.rect):
                     # raise a signal?
-                    # how to retrieve the component object faster?
                     if id(other) in self.overlapped:
                         entity.get_component(
                             Area2D
