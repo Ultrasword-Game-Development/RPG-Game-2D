@@ -22,6 +22,7 @@ def handle_signals():
         s, args = EMIT_QUEUE.get()
         s._emit_signal(args)
 
+
 # ------------------------------------------------------------ #
 # signal receivers
 # ------------------------------------------------------------ #
@@ -57,7 +58,7 @@ class Receiver:
 class SignalRegister:
     """
     Signal
-    - name: str
+    - name: str (these should be unique for each signal)
     - receivers: dict
 
     an object that is instantiated to hold data about different types of signals

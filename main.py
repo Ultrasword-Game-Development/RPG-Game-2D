@@ -5,7 +5,7 @@ import struct
 from pygame import draw as pgdraw
 from pygame import math as pgmath
 
-from soragl import animation, scene, physics, base_objects, mgl, smath, signal
+from soragl import animation, scene, physics, base_objects, mgl, smath, signal, statesystem
 
 # ------------------------------ #
 # setup
@@ -72,6 +72,7 @@ scw.add_aspect(base_objects.SpriteRendererAspect())
 scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
 # scw.add_aspect(base_objects.Area2DAspect())
 scw.add_aspect(base_objects.RenderableAspect())
+scw.add_aspect(statesystem.StatehandlerAspect())
 
 # push scene
 scene.SceneHandler.push_scene(sc)

@@ -120,7 +120,7 @@ class Entity:
         """set a new area"""
         if len(new_area) != 2:
             raise NotImplementedError(f"The area {new_area} is not supported yet! {__file__} {__package__}")
-        self.rect.w, self.rect.h= new_area
+        self.rect.w, self.rect.h = new_area
     
     @property
     def position(self):
@@ -245,7 +245,7 @@ class ParticleHandler(Entity):
         return cls.TIMER_FUNC[name] if name in cls.TIMER_FUNC else cls.TIMER_FUNC[cls.DEFAULT_TIMER]
     
     @classmethod
-    def register_particle_type(cls, name, create_func, update_func, timer_func):
+    def register_particle_type(cls, name, create_func, update_func, timer_func=None):
         """Register a particle type"""
         cls.register_create_function(name, create_func)
         cls.register_update_function(name, update_func)
@@ -253,8 +253,10 @@ class ParticleHandler(Entity):
 
     # ------------------------------ #
 
-    def __init__(self, args: dict = {}, max_particles: int = 100, create_func: str = None, update_func: str = None, create_timer_func: str = None):
+    def __init__(self, args: dict = {}, max_particles: int = 100, create_func: str = None, update_func: str = None, create_timer_func: str = None, handler_type: str = None):
         super().__init__()
+        if handler_type:
+            create_func = update_func = create_timer_func = handler_type
         # private
         self._particles = {}
         self._particle_count = 0
@@ -264,7 +266,6 @@ class ParticleHandler(Entity):
         }
         self._timer = 0
         self._remove = []
-        self.args = args
 
         # public
         self._function_data = [create_func, update_func, create_timer_func]
@@ -297,7 +298,7 @@ class ParticleHandler(Entity):
     def update(self):
         """Update the Particle Handler"""
         # print(self._function_data)
-        self.create_timer_func(self)
+        self.create_timer_func(self, **self.args)
         for particle in self._particles.values():
             self.update_func(self, particle)
         # remove timer

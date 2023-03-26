@@ -427,7 +427,6 @@ class Collision2DRendererAspectDebug(Collision2DAspect):
 # ------------------------------ #
 # renderable
 
-
 class Renderable(scene.Component):
     def __init__(self):
         super().__init__()
@@ -450,7 +449,7 @@ class RenderableAspect(scene.Aspect):
 
 
 # ------------------------------ #
-# ---
+# 
 
 
 # ------------------------------------------------------------ #

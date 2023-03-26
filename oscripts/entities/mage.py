@@ -95,6 +95,13 @@ class CastingState(state.EntityState):
     def update(self):
         entityext.update_ani_and_hitbox(self.parent, Mage.CASTING_ANIM)
 
+        # skill = self.parent.skhandler.get_skill(fireball.FireBallSkill.SKILL_NAME)
+        # fire = skill.activate(self.parent, self.parent.atk_phandler)
+        # self.parent.add_active_attack(fire)
+        # fire.position = maths.convert_array_to_int(self.parent.rect.center)
+        # fire.motion = self.parent.player_dis.normalize() * 2
+        # self.parent.layer.handler.add_entity(fire)
+
         self.parent.phandler.create_particle()
         # case 1: finish casting
         self.casting_cdr -= clock.delta_time

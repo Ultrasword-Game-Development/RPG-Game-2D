@@ -52,8 +52,7 @@ class Player(physics.Entity):
         self.priority = True
 
     def on_ready(self):
-        self.rect.w = AREA[0]
-        self.rect.h = AREA[1]
+        self.area = AREA
         self.add_component(self.c_sprite)
         self.add_component(base_objects.SpriteRenderer())
         self.add_component(self.c_collision)
@@ -85,11 +84,6 @@ class Player(physics.Entity):
         # self.camera.campos -= self.motion
         # self.camera.track_target()
         # self.camera.update()
-
-        # event testing
-        # Player.MOVE_EVENT.data['x'] = self.motion.x
-        # Player.MOVE_EVENT.data['y'] = self.motion.y
-        # self.eventhandler.emit_signal(Player.MOVE_EVENT)
 
         # set sprite flipping
         self.c_sprite.flip = self.velocity.x > 0

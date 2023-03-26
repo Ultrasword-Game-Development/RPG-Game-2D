@@ -1,57 +1,56 @@
 import pygame
+from pygame import math as pgmath, draw as pgdraw
 
-from engine.misc import clock, maths
-from engine import singleton
-from engine.gamesystem import particle, entity
-from engine.graphics import animation
-
-from scripts import animationext, singleton as EGLOB, entityext
-from scripts.events.attacks import Attack, generate_attack_data
-from scripts.game import skillhandler
+import soragl as SORA
+from soragl import animation, base_objects, physics, signal, smath
 
 # -------------------------------------------------- #
-animationext.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)
+
+animation.Category.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)
 
 
 # -------------------------------------------------- #
 # smoke particle handler
+SPH_DEFAULT_FIRE_MAX_DISTANCE = 150
+SPH_SMOKE_MOVE_SPEED = 10
+SPH_RADIUS = 1
 
-class SmokeParticleHandler(particle.ParticleHandler):
-    DEFAULT_FIRE_MAX_DISTANCE = 150
-    SMOKE_MOVE_SPEED = 10
+SPH_FIRE_PARTICLE_COLOR = (80, 10, 0)
+SPH_FIRE_PARTICLE_FREQ = 1 / 20
+SPH_FIRE_PARTICLE_LIFE = 3
 
-    FIRE_PARTICLE_COLOR = (80, 10, 0)
-    FIRE_PARTICLE_FREQ = 1 / 20
-    FIRE_PARTICLE_LIFE = 3
+SPH_POSITION = 0
+SPH_VELOCITY = 1
+SPH_LIFE = 2
+SPH_RADIUS = 3
+SPH_ID = 4
 
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent = parent
-        self.set_color(SmokeParticleHandler.FIRE_PARTICLE_COLOR)
-        self.set_freq(SmokeParticleHandler.FIRE_PARTICLE_FREQ)
-        self.set_life(SmokeParticleHandler.FIRE_PARTICLE_LIFE)
-        self.set_create_func(self._create)
-        self.set_update_func(self._update)
+def sph_create(parent, **kwargs):
+    """Create a new particle."""
+    return [
+        pgmath.Vector2(parent.position.xy),
+        pgmath.Vector2(smath.normalized_random(),smath.normalized_random()).normalize() * SPH_SMOKE_MOVE_SPEED * smath.normalized_random(),
+        SPH_FIRE_PARTICLE_LIFE,
+        SPH_RADIUS,
+        parent.get_new_particle_id()
+    ]
 
-    def _create(self):
-        for item in self.parent.activeatk:
-            if item not in self.parent.layer.handler.entities:
-                continue
-            self.p_count += 1
-            self.particles[self.p_count] = self.parent.layer.handler.entity_buffer[item].create_particle(self.p_count)
+def sph_update(particle, surface):
+    """Update a particle."""
+    particle[SPH_LIFE] -= clock.delta_time
+    if particle[SPH_LIFE] < 0:
+        particle[SPH_ID] = None
+        return
+    # update position
+    particle[SPH_POSITION] += particle[SPH_VELOCITY] * clock.delta_time
+    # render
+    pgdraw.circle(surface, SPH_FIRE_PARTICLE_COLOR,
+                    (particle[SPH_POSITION].x + SORA.OFFSET[0],
+                    particle[SPH_POSITION].y + SORA.OFFSET[1]), 
+                    particle[SPH_RADIUS])
 
-    def _update(self, p, surface):
-        p[singleton.PARTICLE_LIFE] -= clock.delta_time
-        if p[singleton.PARTICLE_LIFE] < 0:
-            self.rq.append(p[singleton.PARTICLE_ID])
-            return
-        # update position
-        p[singleton.PARTICLE_X] += p[singleton.PARTICLE_MX] * clock.delta_time
-        p[singleton.PARTICLE_Y] += p[singleton.PARTICLE_MY] * clock.delta_time
-        # render
-        pygame.draw.circle(surface, self.color,
-                           (p[singleton.PARTICLE_X] + singleton.WORLD_OFFSET_X,
-                            p[singleton.PARTICLE_Y] + singleton.WORLD_OFFSET_Y), 1)
+# register
+particle.ParticleHandler.register_handler("fire", sph_create, sph_update)
 
 
 # -------------------------------------------------- #
@@ -79,8 +78,6 @@ class FireBallSkill(skillhandler.Skill):
 # fire class
 
 class Fire(Attack):
-    TYPE = "fire-attack"
-
     # -------------------------------------------------- #
     # animation
     ANIM_CAT = "fire"

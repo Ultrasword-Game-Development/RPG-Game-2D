@@ -18,7 +18,7 @@ class State:
         self.name = name
         self.handler = None
     
-    def on_ready(self):
+    def start(self):
         """Start function"""
         pass
     
@@ -77,10 +77,10 @@ class StateHandlerAspect(scene.Aspect):
 
 # -------------------------------------------------- #
 # entity state
-class EntityState(statehandler.State):
+class EntityState(State):
     def __init__(self, name, entity):
         super().__init__(name)
-        self.entity = entity
+        self.parent = entity
 
 
 
