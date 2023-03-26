@@ -1,45 +1,32 @@
-from engine.misc import clock
+import soragl as SORA
+from soragl import animation, base_objects, physics, signal, smath
+
 from scripts import singleton
-from engine.handler.eventhandler import Event, Eventhandler
-from scripts.entities.particle_scripts import AnimatedParticle
-
-
-# -------------------------------------------------- #
-# functions + callbacks
-
-def generate_attack_data(**kwargs):
-    return kwargs
-
-
-def handle_hit(event):
-    print("Handle Event:", event.data['a'].name, event.data['b'].name)
-
-
-# create attack event
-def create_attack_event(event):
-    print(event.data)
 
 
 # -------------------------------------------------- #
 # attack class
 
-class Attack(AnimatedParticle):
-    # -------------------------------------------------- #
-    # signals
-    HIT_SIGNAL = "-hit"
+# signals
+HIT_SIGNAL = "-hit"
 
-    # wrappers
-    HIT_WRAPPER = Eventhandler.register_to_signal(HIT_SIGNAL, handle_hit)
 
-    # -------------------------------------------------- #
-
-    def __init__(self, x, y, registry, data, sender=None):
-        super().__init__(x, y, registry)
+class Attack(physics.Entity):
+    def __init__(self, aregist, data: dict, sender=None):
+        super().__init__()
         self.data = data
         self.sender = sender
+        self._aregist = aregist
+        # signal
+        self._hit_signal = signal.SignalRegister(HIT_SIGNAL)
+    
+    def on_ready(self):
+        """Called when the attack is ready to be used"""
+        # components
+        self.add_component(base_objects.AnimatedSprite(0, 0, self.aregist))
+        self.add_component(base_objects.Area2D(self.area[0], self.area[1]))
 
     def update(self):
-        super().update()
         # check if hit an object
         for entity in self.layer.world.find_nearby_entities(self.chunk, 0):
             if entity.id == self.id or (self.sender and entity.id == self.sender.id):
@@ -50,6 +37,18 @@ class Attack(AnimatedParticle):
 
     def debug(self, surface):
         super().debug(surface)
+    
+    @property
+    def aregist(self):
+        """Returns the animation registry"""
+        return self._aregist
+    
+    @aregist.setter
+    def aregist(self, value):
+        """Sets the animation registry"""
+        self._aregist = value
+        self.get_component(base_objects.AnimatedSprite).aregist = value
+        
 
 
 # -------------------------------------------------- #

@@ -1,18 +1,20 @@
+# ------------------------------ #
+
 import soragl as SORA
 
 if SORA.DEBUG:
     print("Activated animation.py")
 
 import pygame
+from pygame import transform as pgtrans
+
 import json
 import os
 
-from soragl import misc
-
+from soragl import misc, smath
 
 # ------------------------------ #
 # frame data
-
 
 class FrameData:
     def __init__(self, frame: int, duration: float, order: int):
@@ -36,10 +38,8 @@ class FrameData:
         """Get a rotated and scaled version of the frame"""
         return pygame.transform.rotozoom(self.frame, angle, scale)
 
-
 # ------------------------------ #
 # spritesheet!
-
 
 class SpriteSheet:
     """
@@ -83,7 +83,10 @@ class SpriteSheet:
                 i += 1
             x = self.spacex
             y += self.height + self.spacey
-        # easy :D
+
+    def get_frame_data(self, index: int):
+        """Get the frame data at a specified index"""
+        return self.frames[index]
 
     def __len__(self):
         """Get the number of frames"""
@@ -94,18 +97,12 @@ class SpriteSheet:
         # print(self.frames)
         return self.frames[index].get_frame()
 
-    def get_frame_data(self, index: int):
-        """Get the frame data at a specified index"""
-        return self.frames[index]
-
     def __iter__(self):
         """Iterate over the frames"""
         return iter(self.frames)
 
-
 # ------------------------------ #
 # frame registry
-
 
 class SequenceRegistry:
     def __init__(self, parent):
@@ -128,14 +125,38 @@ class SequenceRegistry:
         """Get the current animation frame"""
         return self.fdata.frame
 
+# ------------------------------ #
+# rotated-sequences
+
+class RotatedSequence(Sequence):
+    @classmethod
+    def generate_angles(cls, start: int, end: int, skip: int):
+        """Generate angles"""
+        return list(range(start, end, skip))
+    # ------------------------------ #
+    def __init__(self, frames: list, metadata: dict, time_range: tuple (0, 360, 30)):
+        super().__init__([], metadata)
+        self.angles = angles
+        # time range
+        self.time_range = time_range
+        # rotate frames - angles
+        for i, a in enumerate(range(self.time_range[0], self.time_range[1], self.time_range[2])):
+            r_frame = pgtrans.rotate(frames[i].frame, a)
+            r_data = FrameData(r_frame, frames[i].duration, frames[i].order)
+            self.sprite_sheet.frames.append(r_data)
+        # duration
+        self.duration = sum([f.duration for f in frames])
+    
+    def get_frame(self, index: int, angle:float=0):
+        """Get a frame at a specified index and angle"""
+        # prob fix this 1:15am code
+        offset = round(smath.__clamp__(angle, 0, 360) / self.time_range[2]) % self.time_range[1] + self.time_range[0]
+        return super().get_frame(index * len(self.angles) + offset)
 
 # ------------------------------ #
 # sequence
 
-
 class Sequence:
-    # ------------------------------ #
-    # animation sequence
     def __init__(self, frames: list, metadata: dict):
         # cannot manipulate this
         self.sprite_sheet = SpriteSheet(None, 0, 0, 0, 0)
@@ -155,6 +176,10 @@ class Sequence:
         """Get the total duration of the animation sequence"""
         return self.duration
 
+    def get_registry(self):
+        """Get a sequence registry"""
+        return SequenceRegistry(self)
+
     def __len__(self):
         """Get the number of frames in the sequence"""
         return len(self.sprite_sheet)
@@ -163,14 +188,8 @@ class Sequence:
         """Iterate over the frames in the sequence"""
         return iter(self.sprite_sheet)
 
-    def get_registry(self):
-        """Get a sequence registry"""
-        return SequenceRegistry(self)
-
-
 # ------------------------------ #
 # animation categories
-
 
 class Category:
     SEQUENCES = {}
@@ -241,3 +260,4 @@ class Category:
         return {
             k: v.get_registry() for k, v in cls.get_category_framedata(filename).items()
         }
+

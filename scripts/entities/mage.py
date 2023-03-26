@@ -18,7 +18,7 @@ PRECAST_ANIM = "pre_attack"
 CASTING_ANIM = "casting"
 POSTCAST_ANIM = "end_cast"
 
-animation.Category.load_category("assets/sprites/mage.json")
+animation.Category.load_category(ANIM_CAT)
 
 # -------------------------------------------------- #
 # mage states
@@ -30,7 +30,6 @@ PRECAST_STATE = "precast"
 CASTING_STATE = "casting"
 POSTCAST_STATE = "postcast"
 ATTACK_STATE = "firing"
-
 
 # -------------------------------------------------- #
 # statistics
@@ -57,16 +56,14 @@ MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
 
 # -------------------------------------------------- #
 # buffered objects
+
 # SKILL_TREE = skillhandler.SkillTree(skillext.SkillTreeLoader("assets/skilltree/json"))
 
 # SKILLS = skillhandler.SkillHandler()
 # SKILLS.add_skill(fireball.FireBallSkill())
 
-
-
 # -------------------------------------------------- #
 # mage state handler
-
 
 class IdleState(statesystem.EntityState):
     def __init__(self, parent):
@@ -81,7 +78,6 @@ class IdleState(statesystem.EntityState):
         if self.handler.player_dis < DETECT_RADIUS:
             self.handler.set_active_state(ALERT_STATE)
         # also calculate for idle movement
-
 
 class AlertState(statesystem.EntityState):
     def __init__(self, parent):
@@ -109,7 +105,6 @@ class AlertState(statesystem.EntityState):
             # case 3 fulfilled, begin idle
             self.handler.set_active_state(IDLE_STATE)
 
-
 class PrecastState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(PRECAST_STATE, parent)
@@ -126,7 +121,6 @@ class PrecastState(statesystem.EntityState):
             # case 1 fulfilled, begin casting
             self.handler.set_active_state(CASTING_STATE)
         # case 2: what if casting fails? what if player interrupts?
-
 
 class CastingState(statesystem.EntityState):
     def __init__(self, parent):
@@ -148,7 +142,6 @@ class CastingState(statesystem.EntityState):
             # case 1 fulfilled, begin alert state
             # print("attacking")
             self.handler.set_active_state(POSTCAST_STATE)
-
 
 class PostcastState(statesystem.EntityState):
     def __init__(self, parent):
@@ -180,7 +173,6 @@ class PostcastState(statesystem.EntityState):
                 self.handler.set_active_state(ALERT_STATE)
         # case 2: interrupted -> backlash
 
-
 class FlightState(statesystem.EntityState):
     def __init__(self, parent):
         super().__init__(FLIGHT_STATE, parent)
@@ -207,7 +199,6 @@ class FlightState(statesystem.EntityState):
             # case 2 fulfilled, begin alert state
             self.handler.set_active_state(ALERT_STATE)
 
-
 class StateHandler(statesystem.StateHandler):
     def __init__(self, mage):
         super().__init__(IDLE_STATE)
@@ -224,6 +215,7 @@ class StateHandler(statesystem.StateHandler):
 
 # -------------------------------------------------- #
 # mage
+
 class Mage(physics.Entity):
 
     # -------------------------------------------------- #
@@ -283,7 +275,6 @@ class Mage(physics.Entity):
         pygame.draw.circle(surface, (0, 0, 255), self.get_glob_cpos(), PREF_DIS, width=1)
         pygame.draw.circle(surface, (0, 100, 100), self.get_glob_cpos(), DEF_DISTANCE, width=1)
 
-
 # -------------------------------------------------- #
 # particle handler
 
@@ -320,7 +311,6 @@ def mage_particle_create(parent, **kwargs):
     my = smath.math.cos(theta + 3.14/2)
     return [pgmath.Vector2(x, y), pgmath.Vector2(mx, my), MP_LIFE, MP_COLOR, parent.get_new_particle_id()]
 
-
 def mage_particle_update(parent, particle):
     """
     update a magic particle
@@ -340,5 +330,5 @@ def mage_particle_update(parent, particle):
     # render the particle
     pgdraw.circle(SORA.FRAMEBUFFER, particle[MG_COLOR], particle[MG_POSITION], 1)
 
-# reigster particel handler
+# register particle handler
 physics.ParticleHandler.register_particle_type(MG_PARTICLE_FUNC, mage_particle_create, mage_particle_update)

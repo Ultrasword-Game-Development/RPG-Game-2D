@@ -7,7 +7,7 @@ from pygame import math as pgmath
 
 from soragl import animation, scene, physics, base_objects, mgl, smath, signal, statesystem
 
-# ------------------------------ #
+# -------------------------------------------------------------- #
 # setup
 
 WW = 1280
@@ -31,19 +31,18 @@ SORA.initialize(
 
 SORA.create_context()
 
-# ------------------------------- #
+# -------------------------------------------------------------- #
 # imports
 
 from scripts import singleton
 
 from scripts.entities import player, mage
-
 # from scripts.entities import player, mage, peasant, test
 from scripts.entities import particle_scripts
 
 # from scripts.environment import grass, ambient, wind
 
-# ------------------------------- #
+# -------------------------------------------------------------- #
 
 sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
 scw = sc.make_layer(sc.get_config(), 1)
@@ -77,7 +76,7 @@ scw.add_aspect(statesystem.StatehandlerAspect())
 # push scene
 scene.SceneHandler.push_scene(sc)
 
-# ------------------------------ #
+# -------------------------------------------------------------- #
 # game loop
 SORA.start_engine_time()
 while SORA.RUNNING:
@@ -107,5 +106,7 @@ while SORA.RUNNING:
     # clock tick
     SORA.CLOCK.tick(SORA.FPS)
     SORA.update_time()
+
+# ------------------------------- #
 
 pygame.quit()

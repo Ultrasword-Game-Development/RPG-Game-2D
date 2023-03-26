@@ -77,38 +77,29 @@ class FireBallSkill(skillhandler.Skill):
 # -------------------------------------------------- #
 # fire class
 
+# animation
+ANIM_CAT = "assets/particles/fire.json"
+IDLE_ANIM = "fire"
+
+animation.Category.load_category(ANIM_CAT)
+
+
+# statistics
+MS = 25
+LC = 0.3
+
+MAX_DISTANCE = 150
+
+FIREBALL_ORIENTATION_COUNT = 8
+
+# ----------------------- #
+# buffered objects
+ANGLE_CACHE = []
+
+
 class Fire(Attack):
     # -------------------------------------------------- #
-    # animation
-    ANIM_CAT = "fire"
-
-    IDLE_ANIM = "fire"
-
-    # load
-    ANIM_CATEGORY = animation.Category.get_category(ANIM_CAT)
-
-    # -------------------------------------------------- #
-    # states
-
-    # -------------------------------------------------- #
-    # statistics
-    MS = 25
-    LC = 0.3
-
-    MAX_DISTANCE = 150
-
-    FIREBALL_ORIENTATION_COUNT = 8
-
-    # cdt
-
-    # -------------------------------------------------- #
-    # signals
-
-    # wrappers
-
-    # -------------------------------------------------- #
-    # buffered objects
-    ANGLE_CACHE = []
+    
 
     # -------------------------------------------------- #
 
@@ -128,7 +119,7 @@ class Fire(Attack):
         # self.shandler = FireStateHandler(self)
         self.distance_travelled = 0
 
-    def start(self):
+    def on_ready(self):
         pass
 
     def update(self):
