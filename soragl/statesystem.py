@@ -1,5 +1,5 @@
 import pygame
-from soragl import scene
+from soragl import scene, misc
 
 # -------------------------------------------------- #
 # state
@@ -29,12 +29,14 @@ class State:
 
 # -------------------------------------------------- #
 # state handler
-class StateHandler(scene.Component):
+class StateHandler(scene.Component, misc.Dictionary):
     """
     A component class that wraps up the entity state system
     """
     def __init__(self):
         """Initialzie the Statehandler object"""
+        super(scene.Component, self).__init__()
+        super(misc.Dictionary, self).__init__()
         self.states = {}
         self._current = None
     
@@ -73,7 +75,9 @@ class StateHandlerAspect(scene.Aspect):
         """Handles the components"""
         for ent in self.iterate_entities():
             c_shandler = ent.get_component(StateHandler)
-            c_handler.states[c_hander._current].update()
+            if not c_shandler._current:
+                continue
+            c_shandler.states[c_shandler._current].update()
 
 
 # -------------------------------------------------- #

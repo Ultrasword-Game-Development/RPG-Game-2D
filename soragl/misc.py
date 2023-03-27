@@ -39,6 +39,25 @@ def recursive_retrieve_parent_classes(obj, level=0):
             result += recursive_retrieve_parent_classes(base, level + 1)
     return result
 
+
+# ------------------------------------------------------------ #
+# misc classes
+"""
+Misc Classes
+- good base classes for random functional components
+"""
+# ------------------------------------------------------------ #
+
+class Dictionary:
+    def __init__(self):
+        self._dict = {}
+    
+    def __getitem__(self, key):
+        return self._dict[key]
+
+    def __setitem__(self, key, value):
+        self._dict[key] = value
+
 # ------------------------------------------------------------ #
 # misc user input options
 """

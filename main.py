@@ -69,9 +69,9 @@ ph.add_collider(_mage.rect)
 scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
 scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
-# scw.add_aspect(base_objects.Area2DAspect())
+scw.add_aspect(base_objects.Area2DAspect())
 scw.add_aspect(base_objects.RenderableAspect())
-scw.add_aspect(statesystem.StatehandlerAspect())
+scw.add_aspect(statesystem.StateHandlerAspect())
 
 # push scene
 scene.SceneHandler.push_scene(sc)

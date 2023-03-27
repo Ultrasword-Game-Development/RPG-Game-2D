@@ -14,7 +14,6 @@ from queue import deque
 # ------------------------------ #
 # scenehandler
 
-
 class SceneHandler:
     _STACK = deque()
     CURRENT = None
@@ -41,10 +40,8 @@ class SceneHandler:
         """Update the current scene"""
         cls._STACK[-1].update()
 
-
 # ------------------------------ #
 # scene -- handlers
-
 
 class EntityHandler:
     """
@@ -93,10 +90,8 @@ class EntityHandler:
         """Clear the entity handler"""
         self._entities.clear()
 
-
 # ------------------------------ #
 # scene - chunks
-
 
 class Chunk:
     def __init__(self, x: int, y: int, world, options: dict):
@@ -123,10 +118,8 @@ class Chunk:
         if SORA.DEBUG:
             pygame.draw.rect(SORA.FRAMEBUFFER, (255, 0, 0), self.rect, 1)
 
-
 # ------------------------------ #
 # scene - aspects
-
 
 class Aspect:
     def __init__(self, target_component_class: list, priority: int = 0):
@@ -158,7 +151,6 @@ class Aspect:
         for t in self._targets:
             for entity in self._world._components[t]:
                 yield self._world._scene.get_entity(hash(entity))
-
 
 # ------------------------------ #
 # components
@@ -349,6 +341,14 @@ class World:
         for i in self._aspects:
             if isinstance(i, aspect_class):
                 return i
+        return None
+
+    def get_aspects(self, *aspect_class):
+        """Get an aspect"""
+        for _ in aspect_class:
+            for i in self._aspects:
+                if isinstance(i, _):
+                    yield i
         return None
 
     def remove_aspect(self, aspect_type):

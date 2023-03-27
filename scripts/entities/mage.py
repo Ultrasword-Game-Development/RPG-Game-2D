@@ -7,7 +7,8 @@ from soragl import physics, base_objects, animation, smath, misc
 from soragl import signal, statesystem
 
 from scripts.attacks import fireball
-from scripts import singleton
+from scripts.game import skillhandler
+from scripts import singleton, skillext
 
 # -------------------------------------------------- #
 # mage 
@@ -46,10 +47,8 @@ DEFAULT_CAST_CD = 2.3
 
 # -------------------------------------------------- #
 # signals
-
 MOVEMENT_SIGNAL = signal.register_signal(signal.SignalRegister("mage-move"))
-
-# wrappers
+# receiver
 MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
     signal.Receiver(lambda data: print(data))
 )
@@ -57,10 +56,10 @@ MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
 # -------------------------------------------------- #
 # buffered objects
 
-# SKILL_TREE = skillhandler.SkillTree(skillext.SkillTreeLoader("assets/skilltree/json"))
+SKILL_TREE = skillhandler.SkillTree(skillext.SkillTreeLoader("assets/skilltree/mage.json"))
 
-# SKILLS = skillhandler.SkillHandler()
-# SKILLS.add_skill(fireball.FireBallSkill())
+SKILLS = skillhandler.SkillHandler()
+SKILLS.add_skill(fireball.FireBallSkill())
 
 # -------------------------------------------------- #
 # mage state handler
@@ -217,8 +216,6 @@ class StateHandler(statesystem.StateHandler):
 # mage
 
 class Mage(physics.Entity):
-
-    # -------------------------------------------------- #
     def __init__(self):
         super().__init__()
 
@@ -231,13 +228,10 @@ class Mage(physics.Entity):
         self.c_sprite = base_objects.AnimatedSprite(0, 0, self.aregist[self._current_anim])
         self.c_collision = base_objects.Collision2DComponent()
         self.c_statehandler = statesystem.StateHandler()
-
-        # distance from player
-        self.player_dis = pgmath.Vector2()
+        self.c_statehandler["player_dis"] = pgmath.Vector2()
         
         # particle handler
         self.ph_magic = physics.ParticleHandler(handler_type=ANIM_CAT)
-        self.ph_smoke = fireball.SmokeParticleHandler(self)
         # skill tree
         self.skhandler = SKILL_TREE.get_registry(self)
     
@@ -257,16 +251,15 @@ class Mage(physics.Entity):
         self.add_component(self.c_statehandler)
 
     def update(self):
-        self.player_dis = singleton.PLAYER.position - self.position
-        self.shandler.player_dis = self.player_dis.magnitude()
+        self.c_statehandler["player_dis"] = singleton.PLAYER.position - self.position
         self.aregist[self._current_anim].update()
         self.velocity = smath.v2lerp(self.velocity, (0,0), LC)
-
+        
         # set sprite flipping
         self.c_sprite.flip = self.velocity.x > 0
 
         # output
-        MOVEMENT_SIGNAL.emit(velocity=self.velocity)
+        MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity)
     
     def debug(self, surface):
         super().debug(surface)

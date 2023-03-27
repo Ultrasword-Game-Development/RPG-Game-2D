@@ -4,13 +4,12 @@ from pygame import math as pgmath, draw as pgdraw
 import soragl as SORA
 from soragl import animation, base_objects, physics, signal, smath
 
-# -------------------------------------------------- #
-
-animation.Category.load_and_parse_aseprite_animation_wrotations("assets/particles/fire.json", 8)
-
+from scripts.attacks import attacks
+from scripts.game import skillhandler
 
 # -------------------------------------------------- #
 # smoke particle handler
+SPH_HANDLER_TYPE = 'SPH_DEFAULT_NAME'
 SPH_DEFAULT_FIRE_MAX_DISTANCE = 150
 SPH_SMOKE_MOVE_SPEED = 10
 SPH_RADIUS = 1
@@ -50,25 +49,22 @@ def sph_update(particle, surface):
                     particle[SPH_RADIUS])
 
 # register
-particle.ParticleHandler.register_handler("fire", sph_create, sph_update)
+physics.ParticleHandler.register_particle_type(SPH_HANDLER_TYPE, sph_create, sph_update)
 
 
 # -------------------------------------------------- #
 # skills
 
+# skill data
+FB_SKILL_NAME = "Fireball"
+FB_CASTING_TIME = 2
+FB_COOLDOWN_TIME = 3
+FB_MANA_COST = 25
+
 class FireBallSkill(skillhandler.Skill):
-    # -------------------------------------------------- #
-    # skill data
-    SKILL_NAME = "Fireball"
-    CASTING_TIME = 2
-    COOLDOWN_TIME = 3
-    MANA_COST = 25
-
-    # -------------------------------------------------- #
-
     def __init__(self):
-        super().__init__(FireBallSkill.SKILL_NAME, FireBallSkill.CASTING_TIME, FireBallSkill.COOLDOWN_TIME,
-                         FireBallSkill.MANA_COST)
+        super().__init__(FB_SKILL_NAME, FB_CASTING_TIME, FB_COOLDOWN_TIME,
+                        FB_MANA_COST)
 
     def activate(self, *args):
         return Fire(args[0], args[1])
@@ -78,81 +74,38 @@ class FireBallSkill(skillhandler.Skill):
 # fire class
 
 # animation
-ANIM_CAT = "assets/particles/fire.json"
-IDLE_ANIM = "fire"
+F_ANIM_CAT = "assets/particles/fire.json"
+F_IDLE_ANIM = "fire"
+F_FIREBALL_ORIENTATION_COUNT = 8
+F_ANGLE_RANGE = (0, 360, 360//F_FIREBALL_ORIENTATION_COUNT)
 
-animation.Category.load_category(ANIM_CAT)
-
+animation.Category.load_category(F_ANIM_CAT)
+F_ANIM_CACHE = animation.RotatedSequence(animation.Category.get_category_framedata(F_ANIM_CAT)[F_IDLE_ANIM], angle_range=F_ANGLE_RANGE)
 
 # statistics
-MS = 25
-LC = 0.3
+F_MS = 25
+F_LC = 0.3
+F_MAX_DISTANCE = 150
 
-MAX_DISTANCE = 150
-
-FIREBALL_ORIENTATION_COUNT = 8
-
-# ----------------------- #
-# buffered objects
-ANGLE_CACHE = []
-
-
-class Fire(Attack):
-    # -------------------------------------------------- #
-    
-
-    # -------------------------------------------------- #
-
-    def __init__(self, r_ent: entityext.GameEntity, phandler=None):
-        super().__init__(r_ent.position.x, r_ent.position.y,
-                         Fire.ANIM_CATEGORY.get_animation(Fire.IDLE_ANIM).get_registry(),
-                         generate_attack_data(atk=5, pen=2), r_ent)
-        self.name = Fire.TYPE
-        self.sprite = self.aregist.get_frame()
-        self.hitbox = self.aregist.get_hitbox()
-        # particle handler for smoke + embers
-        if phandler:
-            self.phandler = phandler
-        else:
-            self.phandler = SmokeParticleHandler(self)
-        # state handler for (creation + destruction + idle)
-        # self.shandler = FireStateHandler(self)
-        self.distance_travelled = 0
+class Fire(attacks.Attack):
+    def __init__(self, sender: "Entity"):
+        super().__init__(sender.position.xy, F_ANIM_CACHE.get_registry(), sender=sender)
+        # private
+        self._distance_travelled = 0
+        self._phandler = physics.ParticleHandler(handler_type=SPH_HANDLER_TYPE)
+        self._phandler.position = self.position
 
     def on_ready(self):
-        pass
+        super().on_ready()
 
     def update(self):
-        # standard stuff
-        self.aregist.update()
-        self.sprite = self.aregist.get_frame()
-        self.hitbox = self.aregist.get_hitbox()
-        self.calculate_rel_hitbox()
-        self.aregist.angle = self.motion.angle_to(EGLOB.DOWN)
-        self.aregist.update_angle()
+        super().update()
+        self.aregist.angle = self.motion.angle_to(physics.World2D.UP)
 
-        self.phandler.update()
-
-        # movement
-        self.position += self.motion
-        self.move_to_position()
         # kill check
-        self.distance_travelled += self.motion.magnitude()
-        if self.distance_travelled > Fire.MAX_DISTANCE and self.sender:
-            self.sender.remove_active_attack(self)
+        self.distance_travelled += self.velocity.magnitude()
+        if self.distance_travelled > Fire.MAX_DISTANCE:
             self.kill()
-
-    def render(self, surface):
-        surface.blit(self.sprite, self.get_glob_pos())
-        # entity.render_entity_hitbox(self, surface)
-        # pygame.draw.rect(surface, (255,0,0), self.get_glob_cpos())
-
-    def create_particle(self, pid):
-        return [pid, self.rel_hitbox.centerx, self.rel_hitbox.centery, 1, SmokeParticleHandler.FIRE_PARTICLE_LIFE,
-                maths.normalized_random() * SmokeParticleHandler.SMOKE_MOVE_SPEED,
-                maths.normalized_random() * SmokeParticleHandler.SMOKE_MOVE_SPEED]
-
 
 # ------------- setup ----------- #
 skillhandler.SkillHandler.add_skill(FireBallSkill())
-entity.EntityTypes.register_entity_type(Fire.TYPE, Fire)

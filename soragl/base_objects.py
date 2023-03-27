@@ -245,7 +245,7 @@ class Area2DAspect(scene.Aspect):
     def on_add(self):
         """On add"""
         # grab aspect
-        self.a_collision2D = self._world.get_aspect(
+        self.a_collision2D = self._world.get_aspects(
             Collision2DAspect, Collision2DRendererAspectDebug
         )
         if not self.a_collision2D:

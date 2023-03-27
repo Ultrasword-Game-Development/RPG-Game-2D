@@ -88,7 +88,7 @@ class SignalRegister:
         """Call all receiver functions"""
         for rec in self.receivers:
             self.receivers[rec].call(args)
-    
+
     def __repr__(self):
         """Represent the signal as a string"""
         return f"signal: {self.name} | id: {self.id}"

@@ -126,34 +126,6 @@ class SequenceRegistry:
         return self.fdata.frame
 
 # ------------------------------ #
-# rotated-sequences
-
-class RotatedSequence(Sequence):
-    @classmethod
-    def generate_angles(cls, start: int, end: int, skip: int):
-        """Generate angles"""
-        return list(range(start, end, skip))
-    # ------------------------------ #
-    def __init__(self, frames: list, metadata: dict, time_range: tuple (0, 360, 30)):
-        super().__init__([], metadata)
-        self.angles = angles
-        # time range
-        self.time_range = time_range
-        # rotate frames - angles
-        for i, a in enumerate(range(self.time_range[0], self.time_range[1], self.time_range[2])):
-            r_frame = pgtrans.rotate(frames[i].frame, a)
-            r_data = FrameData(r_frame, frames[i].duration, frames[i].order)
-            self.sprite_sheet.frames.append(r_data)
-        # duration
-        self.duration = sum([f.duration for f in frames])
-    
-    def get_frame(self, index: int, angle:float=0):
-        """Get a frame at a specified index and angle"""
-        # prob fix this 1:15am code
-        offset = round(smath.__clamp__(angle, 0, 360) / self.time_range[2]) % self.time_range[1] + self.time_range[0]
-        return super().get_frame(index * len(self.angles) + offset)
-
-# ------------------------------ #
 # sequence
 
 class Sequence:
@@ -192,6 +164,17 @@ class Sequence:
 # animation categories
 
 class Category:
+    """
+    Categories store data on:
+    - framedata; dict of sequences
+    - meta; dict of metadata
+
+    framedata:
+    - key: name of sequence
+    - value: a Sequence object (contains all the frames)
+        - to use --> get a registry object from the sequence
+    """
+
     SEQUENCES = {}
 
     @classmethod
@@ -260,4 +243,70 @@ class Category:
         return {
             k: v.get_registry() for k, v in cls.get_category_framedata(filename).items()
         }
+
+# -------------------------------------------------- #
+# extensions
+
+# ------------------------------ #
+# rotated-sequences
+
+class RotatedRegistry(SequenceRegistry):
+    def __init__(self, parent, angle):
+        super().__init__(parent)
+        self.angle = angle
+
+    def update(self):
+        self.timer.update()
+        if self.timer.loopcount:
+            self.f += 1
+            self.f %= len(self.parent)
+            self.fdata = self.parent.get_frame_data(self.f, self.angle)
+            self.timer.reset_timer(self.fdata.duration)
+
+    def get_frame(self):
+        """Get the current animation frame"""
+        return self.fdata.frame
+
+class RotatedSequence(Sequence):
+    @classmethod
+    def generate_angles(cls, start: int, end: int, skip: int):
+        """Generate angles"""
+        return list(range(start, end, skip))
+    # ------------------------------ #
+    def __init__(self, sequence: "Sequence", angle_range: tuple = (0, 360, 30)):
+        super().__init__([], sequence._metadata)
+        # angle range
+        self.angle_range = angle_range
+        # rotate frames - angles
+        frames = sequence.sprite_sheet.frames
+        for i in range(len(frames)):
+            for a in range(self.angle_range[0], self.angle_range[1], self.angle_range[2]):
+                r_frame = pgtrans.rotate(frames[i].frame, a)
+                r_data = FrameData(r_frame, frames[i].duration, frames[i].order)
+                self.sprite_sheet.frames.append(r_data)
+        # duration
+        self.duration = sequence.duration
+        self._size = len(sequence)
+    
+    # ------------------------------ #
+    def get_frame_data(self, index, angle: float=0):
+        """Get a frame at a specified index and angle"""
+        # prob fix this 1:15am code
+        offset = round(smath.__clamp__(angle, 0, 360) / self.time_range[2]) % self.time_range[1] + self.time_range[0]
+        return super().get_frame_data(index * len(self.angles) + offset)
+
+    def get_frame(self, index: int, angle:float=0):
+        """Get a frame at a specified index and angle"""
+        # prob fix this 1:15am code
+        offset = round(smath.__clamp__(angle, 0, 360) / self.time_range[2]) % self.time_range[1] + self.time_range[0]
+        return super().get_frame(index * len(self.angles) + offset)
+
+    def get_registry(self, angle: float=0):
+        """Get a sequence registry"""
+        return RotatedRegistry(self, angle)
+
+    # ------------------------------ #
+    def __len__(self):
+        """Get the number of frames in the sequence"""
+        return self._size
 

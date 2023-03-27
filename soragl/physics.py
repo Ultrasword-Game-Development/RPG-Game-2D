@@ -264,25 +264,61 @@ class ParticleHandler(Entity):
         self._data = {
             "interval": 0.1
         }
+        self.args = args
         self._timer = 0
         self._remove = []
 
         # public
         self._function_data = [create_func, update_func, create_timer_func]
-        self.create_timer_func = ParticleHandler.get_create_timer_funcion(name=create_timer_func)
-        self.create_func = ParticleHandler.get_create_function(name=create_func)
-        self.update_func = ParticleHandler.get_update_function(name=update_func)
+        self._create_timer_func = ParticleHandler.get_create_timer_funcion(name=create_timer_func)
+        self._create_func = ParticleHandler.get_create_function(name=create_func)
+        self._update_func = ParticleHandler.get_update_function(name=update_func)
     
     def get_new_particle_id(self):
         """Get a new particle id"""
         self._particle_count += 1
         return self._particle_count
 
+    # ------------------------------ #
     @property
     def data(self):
         """Get the data for the particle handler"""
         return self._data
 
+    @property
+    def create_func(self):
+        """Get the create function"""
+        return self._create_func
+    
+    @create_func.setter
+    def create_func(self, value):
+        """Set the create function"""
+        self._function_data[0] = value
+        self._create_func = ParticleHandler.get_create_function(name=value)
+    
+    @property
+    def update_func(self):
+        """Get the update function"""
+        return self._update_func
+    
+    @update_func.setter
+    def update_func(self, value):
+        """Set the update function"""
+        self._function_data[1] = value
+        self._update_func = ParticleHandler.get_update_function(name=value)
+
+    @property
+    def create_timer_func(self):
+        """Get the timer function"""
+        return self._create_timer_func
+
+    @create_timer_func.setter
+    def create_timer_func(self, value):
+        """Set the timer function"""
+        self._function_data[2] = value
+        self._create_timer_func = ParticleHandler.get_create_timer_funcion(name=value)
+
+    # ------------------------------ #
     def __getitem__(self, name):
         """Get a piece of data"""
         return self._data[name]
@@ -295,12 +331,13 @@ class ParticleHandler(Entity):
         """Remove a particle"""
         self._remove.append(particle[-1])
 
+    # ------------------------------ #
     def update(self):
         """Update the Particle Handler"""
         # print(self._function_data)
-        self.create_timer_func(self, **self.args)
+        self._create_timer_func(self, **self.args)
         for particle in self._particles.values():
-            self.update_func(self, particle)
+            self._update_func(self, particle)
         # remove timer
         for i in self._remove:
             del self._particles[i]
@@ -336,7 +373,7 @@ def _default_update(parent, particle):
     pgdraw.circle(SORA.FRAMEBUFFER, particle[3], particle[0], particle[2]) #, 1)
 
 # timer function
-def _default_timer(parent):
+def _default_timer(parent, **kwargs):
     """Default timer function for particles"""
     parent._timer += SORA.DELTA
     if parent._timer >= parent._data["interval"]:
