@@ -37,8 +37,9 @@ class Attack(physics.Entity):
     
     def on_ready(self):
         """Called when the attack is ready to be used"""
-        # components
+        # components)
         self.add_component(base_objects.AnimatedSprite(0, 0, self.aregist))
+        self.add_component(base_objects.SpriteRenderer())
         self.add_component(base_objects.Area2D(self.area[0], self.area[1]))
 
     def update(self):

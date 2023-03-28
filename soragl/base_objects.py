@@ -222,6 +222,8 @@ class Area2D(scene.Component):
         self.enter_signal_register = signal.SignalRegister("Area2D-enter")
         self.overlap_signal_register = signal.SignalRegister("Area2D-overlap")
         self.exit_signal_register = signal.SignalRegister("Area2D-exit")
+        # conditional for (if already has Collision2DComponent)
+        self._collision2D = False
 
     def on_add(self):
         """On add"""
@@ -256,6 +258,10 @@ class Area2DAspect(scene.Aspect):
     def handle(self):
         """Handle area2Ds"""
         for entity in self.iterate_entities():
+            if not entity.get_component(Area2D)._collision2D:
+                # move entity around
+                entity.position += entity.velocity
+                entity.rect.center = entity.position
             # check for collision with each of the active collision2D components
             for other in self.a_collision2D.iterate_entities():
                 # rect collision between entities

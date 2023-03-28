@@ -82,7 +82,7 @@ animation.Category.load_category(F_ANIM_CAT)
 F_ANIM_CACHE = animation.RotatedSequence(animation.Category.get_category_framedata(F_ANIM_CAT)[F_IDLE_ANIM], angle_range=F_ANGLE_RANGE)
 
 # statistics
-F_MS = 25
+F_MS = 100
 F_LC = 0.3
 F_MAX_DISTANCE = 150
 
@@ -94,13 +94,16 @@ class Fire(attacks.Attack):
         self._phandler = physics.ParticleHandler(handler_type=SPH_HANDLER_TYPE)
         self._phandler.position = self.position
 
+        print(self.aregist)
+
     def on_ready(self):
         super().on_ready()
 
     def update(self):
         super().update()
         self._phandler.position = self.position
-        self.aregist.angle = self.velocity.angle_to(physics.World2D.UP)
+        self.aregist.angle = self.velocity.angle_to(physics.World2D.DOWN)
+        print(self.aregist.angle)
 
         # kill check
         self._distance_travelled += self.velocity.magnitude()

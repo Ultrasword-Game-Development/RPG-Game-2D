@@ -36,9 +36,9 @@ SORA.create_context()
 
 from scripts import singleton
 
-from scripts.entities import player, mage
+from scripts.entities import player, mage, particle_scripts
 # from scripts.entities import player, mage, peasant, test
-from scripts.entities import particle_scripts
+from scripts.attacks import fireball, attacks
 
 # from scripts.environment import grass, ambient, wind
 
@@ -94,6 +94,10 @@ while SORA.RUNNING:
     for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):
         for x, frame in enumerate(anim.parent.sprite_sheet.frames):
             SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
+
+    # render out frames from fireball.F_ANIM_CACHE
+    for i, frame in enumerate(fireball.F_ANIM_CACHE.sprite_sheet.frames):
+        SORA.FRAMEBUFFER.blit(frame.get_frame(), (i * 16, 16 * 4))
 
     # update signals
     signal.handle_signals()

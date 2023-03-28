@@ -140,7 +140,6 @@ class CastingState(statesystem.State):
 
     def update(self):
         print(self.name, self.casting_cdr)
-        self.handler[PARENT].ph_magic.update()
         # case 1: finish casting
         self.casting_cdr -= SORA.DELTA
         if self.casting_cdr < 0:
@@ -161,7 +160,6 @@ class PostcastState(statesystem.State):
 
     def update(self):
         # case 1: finish postcast -- until no more particles
-        self.handler[PARENT].ph_magic.update()
         print(self.name, len(self.handler[PARENT].ph_magic))
         if not len(self.handler[PARENT].ph_magic) and self.handler[PARENT].aregist[POSTCAST_ANIM].finished_loops() > 0:
             self.shoot_fireball()
@@ -170,6 +168,7 @@ class PostcastState(statesystem.State):
     
     # ---------------------------- #
     def shoot_fireball(self):
+        # print("added fireball")
         skill = self.handler[PARENT].skhandler.get_skill(fireball.FB_SKILL_NAME)
         fire = skill.activate(self.handler[PARENT])
         fire.position = self.handler[PARENT].position
@@ -221,6 +220,7 @@ class Mage(physics.Entity):
         
         # particle handler
         self.ph_magic = physics.ParticleHandler(handler_type=MG_PARTICLE_FUNC)
+        self.ph_magic.disable_particles()
         self.ph_smoke = physics.ParticleHandler(handler_type=fireball.SPH_HANDLER_TYPE)
         # skill tree
         self.skhandler = SKILL_TREE.get_registry(self)
@@ -253,7 +253,7 @@ class Mage(physics.Entity):
 
     def update(self):
         # testing
-        self.ph_magic.enable_particles()
+        # self.ph_magic.enable_particles()
         # print(self.ph_magic.position)
 
         # print(self.c_statehandler.current, self._current_anim)
@@ -271,9 +271,10 @@ class Mage(physics.Entity):
     def script(self):
         self.ph_magic.position = self.position
         self.ph_smoke.position = self.position
-        pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position, DETECT_RADIUS, width=1)
-        pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position, PREF_DIS, width=1)
-        pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position, DEF_DISTANCE, width=1)
+        if SORA.DEBUG:
+            pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position, DETECT_RADIUS, width=1)
+            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position, PREF_DIS, width=1)
+            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position, DEF_DISTANCE, width=1)
 
 # -------------------------------------------------- #
 # particle handler
