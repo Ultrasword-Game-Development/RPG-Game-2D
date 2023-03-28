@@ -94,8 +94,6 @@ class Fire(attacks.Attack):
         self._phandler = physics.ParticleHandler(handler_type=SPH_HANDLER_TYPE)
         self._phandler.position = self.position
 
-        print(self.aregist)
-
     def on_ready(self):
         super().on_ready()
 
