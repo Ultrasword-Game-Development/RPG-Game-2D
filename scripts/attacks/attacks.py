@@ -27,7 +27,7 @@ def generate_attack_data(
 HIT_SIGNAL = "-hit"
 
 class Attack(physics.Entity):
-    def __init__(self, position: tuple, aregist: "Animation Register", data: dict, sender=None):
+    def __init__(self, position: tuple, aregist: "Animation Register", data: dict={}, sender=None):
         super().__init__()
         self.data = data
         self.sender = sender

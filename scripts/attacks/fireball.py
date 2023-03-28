@@ -67,7 +67,7 @@ class FireBallSkill(skillhandler.Skill):
                         FB_MANA_COST)
 
     def activate(self, *args):
-        return Fire(args[0], args[1])
+        return Fire(args[0])
 
 
 # -------------------------------------------------- #
@@ -100,11 +100,12 @@ class Fire(attacks.Attack):
 
     def update(self):
         super().update()
-        self.aregist.angle = self.motion.angle_to(physics.World2D.UP)
+        self._phandler.position = self.position
+        self.aregist.angle = self.velocity.angle_to(physics.World2D.UP)
 
         # kill check
-        self.distance_travelled += self.velocity.magnitude()
-        if self.distance_travelled > Fire.MAX_DISTANCE:
+        self._distance_travelled += self.velocity.magnitude()
+        if self._distance_travelled > F_MAX_DISTANCE:
             self.kill()
 
 # ------------- setup ----------- #

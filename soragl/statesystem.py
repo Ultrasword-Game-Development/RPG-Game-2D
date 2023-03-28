@@ -18,10 +18,10 @@ class State:
         self.name = name
         self.handler = None
     
-    def on_ready(self):
+    def start(self):
         """Start function"""
         pass
-    
+
     def update(self):
         """Update function"""
         pass
@@ -59,7 +59,7 @@ class StateHandler(scene.Component, misc.Dictionary):
     def current(self, new):
         """Update the current state"""
         self._current = new
-        self.states[self._current].on_ready()
+        self.states[self._current].start()
 
 
 # -------------------------------------------------- #
@@ -78,14 +78,4 @@ class StateHandlerAspect(scene.Aspect):
             if not c_shandler._current:
                 continue
             c_shandler.states[c_shandler._current].update()
-
-
-# -------------------------------------------------- #
-# entity state
-class EntityState(State):
-    def __init__(self, name, entity):
-        super().__init__(name)
-        self.entity = entity
-
-
 

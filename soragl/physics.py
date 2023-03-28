@@ -249,17 +249,24 @@ class ParticleHandler(Entity):
         """Register a particle type"""
         cls.register_create_function(name, create_func)
         cls.register_update_function(name, update_func)
+        if not timer_func:
+            timer_func = _default_timer
         cls.register_timer_function(name, timer_func)
 
     # ------------------------------ #
+    # class
 
     def __init__(self, args: dict = {}, max_particles: int = 100, create_func: str = None, update_func: str = None, create_timer_func: str = None, handler_type: str = None):
         super().__init__()
         if handler_type:
-            create_func = update_func = create_timer_func = handler_type
+            create_func = handler_type if handler_type in self.CREATE else self.DEFAULT_CREATE
+            update_func = handler_type if handler_type in self.UPDATE else self.DEFAULT_UPDATE
+            create_timer_func = handler_type if handler_type in self.TIMER_FUNC else self.DEFAULT_TIMER
         # private
+        self._create = True
         self._particles = {}
         self._particle_count = 0
+        self._total_particles = 0
         self._max_particles = max_particles
         self._data = {
             "interval": 0.1
@@ -277,6 +284,7 @@ class ParticleHandler(Entity):
     def get_new_particle_id(self):
         """Get a new particle id"""
         self._particle_count += 1
+        self._total_particles += 1
         return self._particle_count
 
     # ------------------------------ #
@@ -327,15 +335,28 @@ class ParticleHandler(Entity):
         """Set a piece of data"""
         self._data[name] = value
     
+    def __len__(self):
+        """Get the number of particles"""
+        return self._total_particles
+
     def remove_particle(self, particle):
         """Remove a particle"""
+        self._total_particles -= 1
         self._remove.append(particle[-1])
+
+    def disable_particles(self):
+        """Disable particles"""
+        self._create = False
+    
+    def enable_particles(self):
+        """Enable particles"""
+        self._create = True
 
     # ------------------------------ #
     def update(self):
         """Update the Particle Handler"""
         # print(self._function_data)
-        self._create_timer_func(self, **self.args)
+        if self._create: self._create_timer_func(self, **self.args)
         for particle in self._particles.values():
             self._update_func(self, particle)
         # remove timer

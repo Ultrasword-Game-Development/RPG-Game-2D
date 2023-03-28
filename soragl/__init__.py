@@ -239,7 +239,7 @@ def update_mouse_pos(event):
 
 def update_mouse_press(event):
     """Update mouse button press."""
-    if event.button - 1 > 3:
+    if 3 < event.button > 1:
         return
     MOUSE_BUTTONS[event.button - 1] = True
     MOUSE_PRESSED.add(event.button - 1)
@@ -247,13 +247,17 @@ def update_mouse_press(event):
 
 def update_mouse_release(event):
     """Update mouse button release."""
+    # in case of scrolling
+    if 3 < event.button > 1:
+        return
     MOUSE_BUTTONS[event.button - 1] = False
 
 
 def update_mouse_scroll(event):
     """Update mouse scroll."""
-    MOUSE_SCROLL[0], MOUSE_SCROLL[1] = event.rel
-    MOUSE_SCROLL_POS[0], MOUSE_SCROLL_POS[1] = event.pos
+    MOUSE_SCROLL_POS[0] += event.precise_x
+    MOUSE_SCROLL_POS[1] += event.precise_y
+    MOUSE_SCROLL[0], MOUSE_SCROLL[1] = event.precise_x, event.precise_y
 
 
 # ------------------------------------------------ #

@@ -35,6 +35,20 @@ def normalized_random():
     """Return a random number between -1 and 1"""
     return np.random.random() * 2 - 1
 
+def rotate_point_about(point: "(x,y)", center: "(x,y)", angle: float) -> "(x,y)":
+    """Rotate a point about another point"""
+    s, c = math.sin(angle), math.cos(angle)
+    x, y = point[0] - center[0], point[1] - center[1]
+    return [point[0] + x * c - y * s, center[1] + x * s + y * c]
+
+def map_arr_to_iarr(arr: list):
+    """Convert an array to integer array"""
+    return list(map(int, arr))
+
+def hex_to_tuple(hex: str) -> list:
+    """Convert hex to tuple (rgb)"""
+    return [int(hex[i * 2:i * 2 + 2], base=16) for i in range(3)]
+
 
 # ------------------------------------------------------------ #
 # curve functions

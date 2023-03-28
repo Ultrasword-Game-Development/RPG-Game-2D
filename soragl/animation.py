@@ -110,6 +110,7 @@ class SequenceRegistry:
         self.parent = parent
         self.findex = 0
         self.f = 0
+        self.fini = 0
         self.fdata = parent.get_frame_data(self.f)
         self.timer = SORA.get_timer(limit=self.fdata.duration, loop=True)
 
@@ -117,13 +118,25 @@ class SequenceRegistry:
         self.timer.update()
         if self.timer.loopcount:
             self.f += 1
-            self.f %= len(self.parent)
+            if self.f >= len(self.parent):
+                self.f = 0
+                self.fini += 1
             self.fdata = self.parent.get_frame_data(self.f)
             self.timer.reset_timer(self.fdata.duration)
 
     def get_frame(self):
         """Get the current animation frame"""
         return self.fdata.frame
+
+    def finished_loops(self) -> int:
+        """Get the # of finished animatino cycles"""
+        return self.fini
+
+    def reset(self):
+        """Reset the registry frames"""
+        self.f = 0
+        self.fini = 0
+
 
 # ------------------------------ #
 # sequence
@@ -292,14 +305,14 @@ class RotatedSequence(Sequence):
     def get_frame_data(self, index, angle: float=0):
         """Get a frame at a specified index and angle"""
         # prob fix this 1:15am code
-        offset = round(smath.__clamp__(angle, 0, 360) / self.time_range[2]) % self.time_range[1] + self.time_range[0]
-        return super().get_frame_data(index * len(self.angles) + offset)
+        offset = round(smath.__clamp__(angle, 0, 360) / self.angle_range[2]) % self.angle_range[1] + self.angle_range[0]
+        return super().get_frame_data(index * self._size + offset)
 
     def get_frame(self, index: int, angle:float=0):
         """Get a frame at a specified index and angle"""
         # prob fix this 1:15am code
-        offset = round(smath.__clamp__(angle, 0, 360) / self.time_range[2]) % self.time_range[1] + self.time_range[0]
-        return super().get_frame(index * len(self.angles) + offset)
+        offset = round(smath.__clamp__(angle, 0, 360) / self.angle_range[2]) % self.angle_range[1] + self.angle_range[0]
+        return super().get_frame(index * self._size + offset)
 
     def get_registry(self, angle: float=0):
         """Get a sequence registry"""
