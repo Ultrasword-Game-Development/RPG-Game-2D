@@ -427,30 +427,29 @@ class Collision2DRendererAspectDebug(Collision2DAspect):
 # ------------------------------ #
 # renderable
 
-class Renderable(scene.Component):
+class Script(scene.Component):
     def __init__(self):
         super().__init__()
 
     def on_add(self):
-        if not "renderable" in dir(self._entity):
+        if not "script" in dir(self._entity):
             raise NotImplementedError(
-                self._entity, "doesn't have `renderable` function"
+                self._entity, "doesn't have `script` function"
             )
 
 
-class RenderableAspect(scene.Aspect):
+class ScriptAspect(scene.Aspect):
     def __init__(self):
-        super().__init__(Renderable)
+        super().__init__(Script)
         self.priority = 2
 
     def handle(self):
         for e in self.iterate_entities():
-            e.renderable()
+            e.script()
 
 
 # ------------------------------ #
 # 
-
 
 # ------------------------------------------------------------ #
 # world component aspects

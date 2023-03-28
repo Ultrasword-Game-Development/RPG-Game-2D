@@ -210,9 +210,12 @@ class ParticleHandler(Entity):
     UPDATE = {}
     TIMER_FUNC = {}
 
-    DEFAULT_CREATE = "default_create"
-    DEFAULT_UPDATE = "default_update"
-    DEFAULT_TIMER = "default_timer"
+    SETTINGS = {}
+
+    DEFAULT_SETTING = "default"
+    DEFAULT_CREATE = "default"
+    DEFAULT_UPDATE = "default"
+    DEFAULT_TIMER = "default"
 
     @classmethod
     def register_create_function(cls, name, func):
@@ -245,13 +248,27 @@ class ParticleHandler(Entity):
         return cls.TIMER_FUNC[name] if name in cls.TIMER_FUNC else cls.TIMER_FUNC[cls.DEFAULT_TIMER]
     
     @classmethod
-    def register_particle_type(cls, name, create_func, update_func, timer_func=None):
+    def register_particle_setting(cls, name, create_func, update_func, timer_func=None, data:dict={}):
         """Register a particle type"""
         cls.register_create_function(name, create_func)
         cls.register_update_function(name, update_func)
         if not timer_func:
             timer_func = _default_timer
         cls.register_timer_function(name, timer_func)
+        # register the setting
+        cls.SETTINGS[name] = {
+            "create_func": create_func,
+            "update_func": update_func,
+            "timer_func": timer_func,
+            "data": data
+        }
+    
+    @classmethod
+    def instance_particle_setting(cls, name):
+        """Instance a particle setting"""
+        if name in cls.SETTINGS:
+            return cls.SETTINGS[name]
+        return cls.instance_particle_setting(cls.DEFAULT_SETTING)
 
     # ------------------------------ #
     # class
@@ -405,8 +422,5 @@ def _default_timer(parent, **kwargs):
         parent._particles[particle[-1]] = particle
         # print(parent._particle_count)
 
-# update function
-ParticleHandler.register_create_function(ParticleHandler.DEFAULT_CREATE, _default_create)
-ParticleHandler.register_update_function(ParticleHandler.DEFAULT_UPDATE, _default_update)
-ParticleHandler.register_timer_function(ParticleHandler.DEFAULT_TIMER, _default_timer)
-
+# REGISTER default function
+ParticleHandler.register_particle_setting(ParticleHandler.DEFAULT_SETTING, _default_create, _default_update, _default_timer)

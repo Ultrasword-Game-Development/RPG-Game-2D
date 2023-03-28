@@ -134,10 +134,9 @@ class CastingState(statesystem.State):
 
     def start(self):
         self.casting_cdr = DEFAULT_CAST_CD
+        self.handler[PARENT].ph_magic.enable_particles()
         self.handler[PARENT]._current_anim = CASTING_ANIM
         self.handler[PARENT].aregist[CASTING_ANIM].reset()
-        # move particle handler to position of mage
-        self.handler[PARENT].ph_magic.position = self.handler[PARENT].position.xy
 
     def update(self):
         print(self.name, self.casting_cdr)
@@ -176,7 +175,6 @@ class PostcastState(statesystem.State):
         fire.position = self.handler[PARENT].position
         fire.velocity = self.handler[PLAYER_DISTANCE_NVEC] * 2
         self.handler[PARENT].world.add_entity(fire)
-
 
 class FlightState(statesystem.State):
     def __init__(self):
@@ -220,8 +218,6 @@ class Mage(physics.Entity):
         self.c_sprite = base_objects.AnimatedSprite(0, 0, self.aregist[self._current_anim])
         self.c_collision = base_objects.Collision2DComponent()
         self.c_statehandler = statesystem.StateHandler()
-        self.c_statehandler[PLAYER_DISTANCE_NVEC] = pgmath.Vector2()
-        self.c_statehandler[PLAYER_DISTANCE] = 0
         
         # particle handler
         self.ph_magic = physics.ParticleHandler(handler_type=MG_PARTICLE_FUNC)
@@ -232,6 +228,10 @@ class Mage(physics.Entity):
     def on_ready(self):
         self.area = (8, 8)
         self.c_statehandler[PARENT] = self
+        self.c_statehandler[PLAYER_DISTANCE_NVEC] = pgmath.Vector2()
+        self.c_statehandler[PLAYER_DISTANCE] = 0
+        
+        # add states
         self.c_statehandler.add_state(IdleState())
         self.c_statehandler.add_state(AlertState())
         self.c_statehandler.add_state(PrecastState())
@@ -239,15 +239,23 @@ class Mage(physics.Entity):
         self.c_statehandler.add_state(FlightState())
         self.c_statehandler.add_state(PostcastState())
         self.c_statehandler.current = IDLE_STATE
+        
+        # particle handler
+        self.world.add_entity(self.ph_magic)
+        self.world.add_entity(self.ph_smoke)
 
         # add components
         self.add_component(self.c_sprite)
         self.add_component(base_objects.SpriteRenderer())
         self.add_component(self.c_collision)
         self.add_component(self.c_statehandler)
-        self.add_component(base_objects.Renderable())
+        self.add_component(base_objects.Script())
 
     def update(self):
+        # testing
+        self.ph_magic.enable_particles()
+        # print(self.ph_magic.position)
+
         # print(self.c_statehandler.current, self._current_anim)
         self.c_statehandler[PLAYER_DISTANCE_NVEC] = (singleton.PLAYER.position - self.position)
         self.c_statehandler[PLAYER_DISTANCE] = self.c_statehandler[PLAYER_DISTANCE_NVEC].magnitude()
@@ -260,7 +268,9 @@ class Mage(physics.Entity):
         # output
         # MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, player_distance=self.c_statehandler[PLAYER_DISTANCE])
     
-    def renderable(self):
+    def script(self):
+        self.ph_magic.position = self.position
+        self.ph_smoke.position = self.position
         pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position, DETECT_RADIUS, width=1)
         pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position, PREF_DIS, width=1)
         pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position, DEF_DISTANCE, width=1)
@@ -272,15 +282,16 @@ MG_PARTICLE_FUNC = "mage_particles"
 
 MG_SPAWN_RADIUS = DEF_DISTANCE
 MG_LIFE = 2.0
-MG_FREQ = 30
+MG_FREQ = 1/30
 MG_COLOR = (255, 0, 100)
 MG_LERP = 0.05
+MG_SPEED = 50
 
-MG_POSITION = 0
-MG_VELOCITY = 1
-MG_LIFE = 2
-MG_COLOR = 3
-MG_ID = 4
+MG_iPOSITION = 0
+MG_iVELOCITY = 1
+MG_iLIFE = 2
+MG_iCOLOR = 3
+MG_iID = 4
 
 def mage_particle_create(parent, **kwargs):
     """
@@ -297,28 +308,28 @@ def mage_particle_create(parent, **kwargs):
     x = smath.math.sin(theta) * MG_SPAWN_RADIUS + smath.normalized_random() * 10 + parent.position.x
     y = smath.math.cos(theta) * MG_SPAWN_RADIUS + smath.normalized_random() * 10 + parent.position.y
     # create particle
-    mx = smath.math.sin(theta + 3.14/2)
-    my = smath.math.cos(theta + 3.14/2)
+    mx = smath.math.sin(theta + 3.14/2) * MG_SPEED
+    my = smath.math.cos(theta + 3.14/2) * MG_SPEED
     return [pgmath.Vector2(x, y), pgmath.Vector2(mx, my), MG_LIFE, MG_COLOR, parent.get_new_particle_id()]
 
 def mage_particle_update(parent, particle):
     """
     update a magic particle
     """
-    particle[MG_LIFE] -= SORA.DELTA
-    if particle[MG_LIFE] < 0:
+    particle[MG_iLIFE] -= SORA.DELTA
+    if particle[MG_iLIFE] < 0:
         parent.remove_particle(particle)
         return
     # update position
-    particle[MG_VELOCITY] = smath.v2lerp(particle[MG_VELOCITY], (0, 0), MG_LERP)
-    particle[MG_POSITION] += particle[MG_VELOCITY] * SORA.DELTA
+    particle[MG_iVELOCITY] = smath.v2lerp(particle[MG_iVELOCITY], (0, 0), MG_LERP)
+    particle[MG_iPOSITION] += particle[MG_iVELOCITY] * SORA.DELTA
     # find offset
-    offset = parent.position - particle[MG_POSITION]
-    offset.normalize_ip()
+    offset = parent.position - particle[MG_iPOSITION]
     # move particle towards center
-    particle[MG_VELOCITY] += offset * SORA.DELTA
-    # render the particle
-    pgdraw.circle(SORA.FRAMEBUFFER, particle[MG_COLOR], particle[MG_POSITION], 1)
+    particle[MG_iVELOCITY] += offset * SORA.DELTA
+    # render the particles
+    pgdraw.circle(SORA.FRAMEBUFFER, particle[MG_iCOLOR], particle[MG_iPOSITION], 1)
 
 # register particle handler
-physics.ParticleHandler.register_particle_type(MG_PARTICLE_FUNC, mage_particle_create, mage_particle_update)
+physics.ParticleHandler.register_particle_setting(MG_PARTICLE_FUNC, mage_particle_create, 
+                mage_particle_update, data={"interval": MG_FREQ})

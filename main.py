@@ -70,7 +70,7 @@ scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
 scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
 scw.add_aspect(base_objects.Area2DAspect())
-scw.add_aspect(base_objects.RenderableAspect())
+scw.add_aspect(base_objects.ScriptAspect())
 scw.add_aspect(statesystem.StateHandlerAspect())
 
 # push scene

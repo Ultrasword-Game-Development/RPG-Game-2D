@@ -12,17 +12,17 @@ from scripts.game import skillhandler
 SPH_HANDLER_TYPE = 'SPH_DEFAULT_NAME'
 SPH_DEFAULT_FIRE_MAX_DISTANCE = 150
 SPH_SMOKE_MOVE_SPEED = 10
-SPH_RADIUS = 1
+SPH_SMOKE_RADIUS = 1
 
 SPH_FIRE_PARTICLE_COLOR = (80, 10, 0)
 SPH_FIRE_PARTICLE_FREQ = 1 / 20
 SPH_FIRE_PARTICLE_LIFE = 3
 
-SPH_POSITION = 0
-SPH_VELOCITY = 1
-SPH_LIFE = 2
-SPH_RADIUS = 3
-SPH_ID = 4
+SPH_iPOSITION = 0
+SPH_iVELOCITY = 1
+SPH_iLIFE = 2
+SPH_iRADIUS = 3
+SPH_iID = 4
 
 def sph_create(parent, **kwargs):
     """Create a new particle."""
@@ -30,26 +30,25 @@ def sph_create(parent, **kwargs):
         pgmath.Vector2(parent.position.xy),
         pgmath.Vector2(smath.normalized_random(),smath.normalized_random()).normalize() * SPH_SMOKE_MOVE_SPEED * smath.normalized_random(),
         SPH_FIRE_PARTICLE_LIFE,
-        SPH_RADIUS,
+        SPH_SMOKE_RADIUS,
         parent.get_new_particle_id()
     ]
 
-def sph_update(particle, surface):
+def sph_update(handler, particle):
     """Update a particle."""
-    particle[SPH_LIFE] -= clock.delta_time
-    if particle[SPH_LIFE] < 0:
-        particle[SPH_ID] = None
+    particle[SPH_iLIFE] -= SORA.DELTA
+    if particle[SPH_iLIFE] < 0:
+        particle[SPH_iID] = None
         return
     # update position
-    particle[SPH_POSITION] += particle[SPH_VELOCITY] * clock.delta_time
+    particle[SPH_iPOSITION] += particle[SPH_iVELOCITY] * SORA.DELTA
     # render
-    pgdraw.circle(surface, SPH_FIRE_PARTICLE_COLOR,
-                    (particle[SPH_POSITION].x + SORA.OFFSET[0],
-                    particle[SPH_POSITION].y + SORA.OFFSET[1]), 
-                    particle[SPH_RADIUS])
+    pgdraw.circle(SORA.FRAMEBUFFER, SPH_FIRE_PARTICLE_COLOR,
+                    particle[SPH_iPOSITION] + SORA.OFFSET,
+                    particle[SPH_iRADIUS])
 
 # register
-physics.ParticleHandler.register_particle_type(SPH_HANDLER_TYPE, sph_create, sph_update)
+physics.ParticleHandler.register_particle_setting(SPH_HANDLER_TYPE, sph_create, sph_update, data={"interval": SPH_FIRE_PARTICLE_FREQ})
 
 
 # -------------------------------------------------- #

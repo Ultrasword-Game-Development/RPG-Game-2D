@@ -83,12 +83,11 @@ def GRAVITY_PARTICLE_UPDATE(parent, particle):
         particle[1].x *= 0.3
 
     # render
-    pgdraw.circle(SORA.FRAMEBUFFER, particle[5], particle[0], particle[2])
+    pgdraw.circle(SORA.FRAMEBUFFER, particle[5], particle[0] + SORA.OFFSET, particle[2])
 
 
 # register functions
-physics.ParticleHandler.register_create_function("gravity", GRAVITY_PARTICLE_CREATE)
-physics.ParticleHandler.register_update_function("gravity", GRAVITY_PARTICLE_UPDATE)
+physics.ParticleHandler.register_particle_setting("gravity", GRAVITY_PARTICLE_CREATE, GRAVITY_PARTICLE_UPDATE)
 
 
 # gravity particle handler
