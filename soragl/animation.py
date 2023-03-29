@@ -306,8 +306,8 @@ class RotatedSequence(Sequence):
         """Get a frame at a specified index and angle"""
         # prob fix this 1:15am code
         offset = round(smath.__clamp__(angle, 0, 360) / self.angle_range[2])
-        return super().get_frame_data(index * len(self) + offset)
-        # return super().get_frame_data(index + offset * len(self))
+        # return super().get_frame_data(index * len(self) + offset)
+        return super().get_frame_data(index + offset * len(self))
 
     def get_frame(self, index: int, angle:float=0):
         """Get a frame at a specified index and angle"""

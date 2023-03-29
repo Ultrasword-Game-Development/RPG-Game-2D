@@ -49,10 +49,10 @@ PREF_DIS = 70
 DEF_DISTANCE = 30
 
 # cdt
-# ALERT_PRECAST_CD = 1.0
-ALERT_PRECAST_CD = 0.1
-# DEFAULT_CAST_CD = 2.3
-DEFAULT_CAST_CD = 0.1
+ALERT_PRECAST_CD = 1.0
+# ALERT_PRECAST_CD = 0.1
+DEFAULT_CAST_CD = 2.3
+# DEFAULT_CAST_CD = 0.1
 
 # -------------------------------------------------- #
 # signals
@@ -137,8 +137,8 @@ class CastingState(statesystem.State):
     def start(self):
         self.casting_cdr = DEFAULT_CAST_CD
         self.handler[PARENT].ph_magic.enable_particles()
-        self.handler[PARENT]._current_anim = CASTING_ANIM
         self.handler[PARENT].aregist[CASTING_ANIM].reset()
+        self.handler[PARENT]._current_anim = CASTING_ANIM
 
     def update(self):
         print(self.name, self.casting_cdr)
@@ -223,7 +223,6 @@ class Mage(physics.Entity):
         # particle handler
         self.ph_magic = physics.ParticleHandler(handler_type=MG_PARTICLE_FUNC)
         self.ph_magic.disable_particles()
-        self.ph_smoke = physics.ParticleHandler(handler_type=fireball.SPH_HANDLER_TYPE)
         # skill tree
         self.skhandler = SKILL_TREE.get_registry(self)
     
@@ -244,7 +243,6 @@ class Mage(physics.Entity):
         
         # particle handler
         self.world.add_entity(self.ph_magic)
-        self.world.add_entity(self.ph_smoke)
 
         # add components
         self.add_component(self.c_sprite)
@@ -263,6 +261,7 @@ class Mage(physics.Entity):
         self.c_statehandler[PLAYER_DISTANCE] = self.c_statehandler[PLAYER_DISTANCE_NVEC].magnitude()
         self.c_statehandler[PLAYER_DISTANCE_NVEC].normalize_ip()
         self.aregist[self._current_anim].update()
+        self.c_sprite.registry = self.aregist[self._current_anim]
         self.velocity = smath.v2lerp(self.velocity, (0,0), LC)
         
         # set sprite flipping
@@ -272,7 +271,6 @@ class Mage(physics.Entity):
     
     def script(self):
         self.ph_magic.position = self.position
-        self.ph_smoke.position = self.position
         if SORA.DEBUG:
             pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position, DETECT_RADIUS, width=1)
             pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position, PREF_DIS, width=1)

@@ -96,6 +96,7 @@ class Fire(attacks.Attack):
 
     def on_ready(self):
         super().on_ready()
+        self.world.add_entity(self._phandler)
 
     def update(self):
         super().update()
@@ -103,7 +104,7 @@ class Fire(attacks.Attack):
         self.aregist.angle = self.velocity.angle_to(physics.World2D.DOWN)
         # kill check
         self._distance_travelled += self.velocity.magnitude()
-        if self._distance_travelled > F_MAX_DISTANCE:
+        if self._distance_travelled > F_MAX_DISTANCE or not self.world.is_entity_active(self):
             self.kill()
 
 # ------------- setup ----------- #

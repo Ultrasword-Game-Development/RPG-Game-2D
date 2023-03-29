@@ -30,8 +30,6 @@ class World3D:
     GRAVITY = Y_AXIS * -9.8 * 10
     UP = Y_AXIS
 
-
-
 # ------------------------------------------------------------ #
 # create a base entity class using the entity system
 # ------------------------------------------------------------ #
@@ -48,6 +46,7 @@ class Entity:
 
         # private
         self._components = {}
+        self._links = [] # links for linked entities
         self._alive = True
         Entity.ENTITY_COUNT += 1
         self._entity_id = Entity.ENTITY_COUNT
@@ -106,8 +105,8 @@ class Entity:
         pass
 
     def kill(self):
-        """Kill the entity"""
-        self._alive = False
+        """Kill the entity == world removes all linked entities"""
+        self.world.remove_entity(self)
 
     #=== values / setters / getters
     @property
@@ -143,6 +142,21 @@ class Entity:
         """Set the velocity for the entity"""
         self._velocity.x = new_velocity[0]
         self._velocity.y = new_velocity[1]
+
+    #=== links -- between entiites
+    @property
+    def links(self) -> list:
+        """Links property"""
+        return self._links
+    
+    def add_link(self, entity):
+        """Add a link to the entity"""
+        self._links.append(entity)
+    
+    def remove_link(self, entity):
+        """Remove a link from the entity"""
+        if entity in self._links:
+            self._links.remove(entity)
 
     #=== standard overloads
     def __eq__(self, o):

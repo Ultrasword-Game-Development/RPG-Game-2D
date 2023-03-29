@@ -41,56 +41,6 @@ class SceneHandler:
         cls._STACK[-1].update()
 
 # ------------------------------ #
-# scene -- handlers
-
-class EntityHandler:
-    """
-    entity handlers:
-    - only store entities + entity types
-    - used to compare entity types + entities if required!
-    """
-
-    ENTITY_TYPES = {}
-
-    @classmethod
-    def register_type(cls, ename, etype):
-        """Register the entity type"""
-        cls.ENTITY_TYPES[ename] = etype
-
-    # ------------------------------ #
-
-    def __init__(self, scene):
-        self._entities = {}
-        self._scene = scene
-        self._new_entities = set()
-
-    def initialize_entities_at_end_of_update(self):
-        """Initialize the entities at the end of the update"""
-        for e in self._new_entities:
-            self._entities[e].on_ready()
-        self._new_entities.clear()
-
-    def register_entity(self, entity):
-        """Register the entity"""
-        entity.handler = self
-        entity.world = self._world
-        # store entity in ehandler
-        self._entities[hash(entity)] = entity
-        self._new_entities.add(hash(entity))
-
-    def get_entity(self, entity):
-        """Get the entity"""
-        return self._entities[hash(entity)]
-
-    def remove_entity(self, entity):
-        """Remove the entity"""
-        del self._entities[hash(entity)]
-
-    def clear(self):
-        """Clear the entity handler"""
-        self._entities.clear()
-
-# ------------------------------ #
 # scene - chunks
 
 class Chunk:
@@ -105,6 +55,14 @@ class Chunk:
         cpw, cph = options["chunkpixw"], options["chunkpixh"]
         self.rect = pygame.Rect(x * cpw, y * cph, (x + 1) * cpw, (y + 1) * cph)
 
+    def add_entity(self, entity: "Entity"):
+        """Add an entity to the chunk"""
+        self._intrinstic_entities.add(entity)
+    
+    def remove_entity(self, entity: "Entity"):
+        """Remove an entity from the chunk"""
+        self._intrinstic_entities.remove(entity)
+
     def __hash__(self):
         """Hash the chunk"""
         return hash(self._hash)
@@ -114,7 +72,7 @@ class Chunk:
         # update all intrinstic entities
         for entity in self._intrinstic_entities:
             self._world._scene._global_entities[entity].update()
-        # # debug update
+        # debug update
         if SORA.DEBUG:
             pygame.draw.rect(SORA.FRAMEBUFFER, (255, 0, 0), self.rect, 1)
 
@@ -231,8 +189,12 @@ class World:
 
     # == entitiy
     def get_entity(self, entity):
-        """Get the entity"""
-        return self._ehandler.get_entity(entity)
+        """Get the entity -- from the GLOBAL entity handler"""
+        return self.scene.get_entity(hash(entity))
+    
+    def remove_entity(self, entity):
+        """Remove an entity from the world"""
+        self._scene.remove_entity(entity)
 
     def add_entity(self, entity):
         """Add an entity to the world"""
@@ -246,22 +208,29 @@ class World:
             entity.rect.centerx // self._options["chunkpixw"],
             entity.rect.centery // self._options["chunkpixh"],
         )
-        c._intrinstic_entities.add(hash(entity))
+        c.add_entity(entity)
         return entity
 
     def update_entity_chunk(self, entity, old, new):
         """Update the chunk intrinsic properties for entities"""
         ochunk = self.get_chunk(old[0], old[1])
         nchunk = self.get_chunk(new[0], new[1])
-        ochunk._intrinstic_entities.remove(hash(entity))
-        nchunk._intrinstic_entities.add(hash(entity))
+        ochunk.remove_entity(entity)
+        nchunk.add_entity(entity)
         entity.c_chunk[0], entity.c_chunk[1] = new
+
+    def is_entity_active(self, entity):
+        """Check if the entity is active"""
+        for chunk in self._active_chunks:
+            if entity in self._chunks[chunk]._intrinstic_entities:
+                return True
+        return False
 
     def iter_active_entities(self):
         """Iterate through the active entities"""
         for chunk in self._active_chunks:
             for entity in self._chunks[chunk]._intrinstic_entities:
-                yield self._scene._global_entities[entity]
+                yield self._scene.get_entity(entity)
 
     # == comps
     def add_component(self, entity, component):
@@ -278,7 +247,7 @@ class World:
         component._entity = entity
         component.on_add()
 
-    def remove_component(self, entity, comp_class):
+    def remove_component(self, entity: "Entity", comp_class):
         """Remove a component from an entity"""
         if comp_class.get_hash() in self._components:
             self._components[comp_class.get_hash()].remove(hash(entity))
@@ -411,6 +380,7 @@ class Scene:
         # adding entities
         self._global_entities = {}
         self._new_entities = set()
+        self._remove_entities = set()
 
     def make_layer(self, config: dict, priority: int = 0, **kwargs):
         """Add a layer to the scene"""
@@ -428,8 +398,9 @@ class Scene:
 
     def remove_entity(self, entity):
         """Remove an entity from the scene"""
+        # remove from global entities
         if hash(entity) in self._global_entities:
-            del self._global_entities[hash(entity)]
+            self._remove_entities.add(hash(entity))
 
     def get_entity(self, entity_hash: int):
         """Get an entity from the scene"""
@@ -450,12 +421,27 @@ class Scene:
         # update layers
         for layer in self._layers:
             layer.update()
+        # remove entities
+        for entity in self._remove_entities:
+            e = self.get_entity(entity)
+            self._remove_entity(e)
+        self._remove_entities.clear()
         # add new entities
         buf = tuple(self._new_entities)
         # print(buf) if buf else None
         self._new_entities.clear()
         for pack in buf:
             pack.on_ready()
+    
+    def _remove_entity(self, entity: "Entity"):
+        """Remove an entity from the scene"""
+        entity.world.get_chunk(entity.c_chunk[0], entity.c_chunk[1])._intrinstic_entities.remove(entity)
+        # remove entity + components from handlers
+        for comp in entity._components:
+            entity.world.remove_component(entity, comp.__class__)
+        # remove linked entities
+        for link in entity._linked_entities:
+            self._remove_entity(link)
 
 
 # ------------------------------ #
