@@ -49,8 +49,10 @@ PREF_DIS = 70
 DEF_DISTANCE = 30
 
 # cdt
-ALERT_PRECAST_CD = 1.0
-DEFAULT_CAST_CD = 2.3
+# ALERT_PRECAST_CD = 1.0
+ALERT_PRECAST_CD = 0.1
+# DEFAULT_CAST_CD = 2.3
+DEFAULT_CAST_CD = 0.1
 
 # -------------------------------------------------- #
 # signals

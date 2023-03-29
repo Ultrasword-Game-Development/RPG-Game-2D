@@ -101,8 +101,6 @@ class Fire(attacks.Attack):
         super().update()
         self._phandler.position = self.position
         self.aregist.angle = self.velocity.angle_to(physics.World2D.DOWN)
-        print(self.aregist.angle)
-
         # kill check
         self._distance_travelled += self.velocity.magnitude()
         if self._distance_travelled > F_MAX_DISTANCE:
