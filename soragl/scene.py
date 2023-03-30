@@ -108,7 +108,7 @@ class Aspect:
         # print(self._world._components[self._target])
         for t in self._targets:
             for entity in self._world._components[t]:
-                yield self._world._scene.get_entity(hash(entity))
+                yield entity
 
 # ------------------------------ #
 # components
@@ -150,7 +150,6 @@ class Component:
 # ------------------------------ #
 # world class
 
-
 class World:
     """
     Acts as layers within a scene
@@ -170,6 +169,7 @@ class World:
         self._aspects = []
         self._components = {}  # comp_hash: {entities} (set)
         self._options = options
+        self._remove_c_ = []
         # rendering
         self._center_chunk = [0, 0]
         self._dev = {}
@@ -190,7 +190,7 @@ class World:
     # == entitiy
     def get_entity(self, entity):
         """Get the entity -- from the GLOBAL entity handler"""
-        return self.scene.get_entity(hash(entity))
+        return self.scene.get_entity(entity)
     
     def remove_entity(self, entity):
         """Remove an entity from the world"""
@@ -200,15 +200,6 @@ class World:
         """Add an entity to the world"""
         entity.world = self
         self._scene.add_entity(entity)
-        # register components in world
-        for comp in entity.components:
-            self.add_component(entity, comp)
-        # add to chunk
-        c = self.get_chunk(
-            entity.rect.centerx // self._options["chunkpixw"],
-            entity.rect.centery // self._options["chunkpixh"],
-        )
-        c.add_entity(entity)
         return entity
 
     def update_entity_chunk(self, entity, old, new):
@@ -236,22 +227,24 @@ class World:
     def add_component(self, entity, component):
         """Add a component to an entity in the world"""
         comp_hash = hash(component)
+        comp_id = id(component)
         # print(component.__class__.__name__, comp_hash)
         if comp_hash not in self._components:
             self._components[comp_hash] = set()
         # find parent classes
-        self._components[comp_hash].add(hash(entity))
-        # add to entity
+        self._components[comp_hash].add(entity)
+        # add to entity -- using unique id
         entity._components[comp_hash] = component
         # component parent = entity
         component._entity = entity
         component.on_add()
 
-    def remove_component(self, entity: "Entity", comp_class):
+    def remove_component(self, entity: "Entity", comp: "Component"):
         """Remove a component from an entity"""
-        if comp_class.get_hash() in self._components:
-            self._components[comp_class.get_hash()].remove(hash(entity))
-            entity.components.remove(comp_class.get_hash())
+        comp_hash = hash(comp)
+        comp_id = id(comp)
+        if comp_hash in self._components:
+            self._remove_c_.append((entity, comp))
 
     # == chunks
     def add_chunk(self, chunk):
@@ -347,6 +340,12 @@ class World:
         # == update chunks
         for chunk in self._active_chunks:
             self._chunks[chunk].update()
+        # == update components
+        for i in self._remove_c_:
+            print(i)
+            i[0].world._components[hash(i[1])].remove(i[0])
+            del i[0]._components[hash(i[1])]
+        self._remove_c_.clear()
         # == update aspects
         self.handle_aspects()
 
@@ -393,14 +392,19 @@ class Scene:
     def add_entity(self, entity):
         """Add an entity to the scene"""
         entity.scene = self
-        self._global_entities[hash(entity)] = entity
+        # IMPORTANT: added but should not be updatable!!
+        self._global_entities[entity] = entity
         self._new_entities.add(entity)
 
     def remove_entity(self, entity):
         """Remove an entity from the scene"""
         # remove from global entities
-        if hash(entity) in self._global_entities:
-            self._remove_entities.add(hash(entity))
+        if entity in self._global_entities:
+            # remove entity + components from handlers
+            for comp in entity._components.values():
+                entity.world.remove_component(entity, comp.__class__)
+            # add to remove queue
+            self._remove_entities.add(entity)
 
     def get_entity(self, entity_hash: int):
         """Get an entity from the scene"""
@@ -418,27 +422,35 @@ class Scene:
 
     def update(self):
         """Update a scene"""
-        # update layers
-        for layer in self._layers:
-            layer.update()
-        # remove entities
-        for entity in self._remove_entities:
-            e = self.get_entity(entity)
-            self._remove_entity(e)
-        self._remove_entities.clear()
         # add new entities
         buf = tuple(self._new_entities)
         # print(buf) if buf else None
         self._new_entities.clear()
         for pack in buf:
+            # add components + etc
+            # register components in world
+            w = pack.world
+            for comp in pack.components:
+                w.add_component(entity, comp)
+            # add to chunk
+            c = w.get_chunk(
+                pack.position.x // w._options["chunkpixw"],
+                pack.position.y // w._options["chunkpixh"],
+            ).add_entity(pack)
+            # on ready function call
             pack.on_ready()
+        # remove entities
+        for entity in self._remove_entities:
+            e = self.get_entity(entity)
+            self._remove_entity(e)
+        self._remove_entities.clear()
+        # update layers
+        for layer in self._layers:
+            layer.update()
     
     def _remove_entity(self, entity: "Entity"):
         """Remove an entity from the scene"""
-        entity.world.get_chunk(entity.c_chunk[0], entity.c_chunk[1])._intrinstic_entities.remove(entity)
-        # remove entity + components from handlers
-        for comp in entity._components:
-            entity.world.remove_component(entity, comp.__class__)
+        entity.world.get_chunk(entity.c_chunk[0], entity.c_chunk[1]).remove_entity(entity)
         # remove linked entities
         for link in entity._linked_entities:
             self._remove_entity(link)

@@ -46,7 +46,7 @@ class Entity:
 
         # private
         self._components = {}
-        self._links = [] # links for linked entities
+        self._linked_entities = [] # links for linked entities
         self._alive = True
         Entity.ENTITY_COUNT += 1
         self._entity_id = Entity.ENTITY_COUNT
@@ -151,12 +151,12 @@ class Entity:
     
     def add_link(self, entity):
         """Add a link to the entity"""
-        self._links.append(entity)
+        self._linked_entities.append(entity)
     
     def remove_link(self, entity):
         """Remove a link from the entity"""
-        if entity in self._links:
-            self._links.remove(entity)
+        if entity in self._linked_entities:
+            self._linked_entities.remove(entity)
 
     #=== standard overloads
     def __eq__(self, o):

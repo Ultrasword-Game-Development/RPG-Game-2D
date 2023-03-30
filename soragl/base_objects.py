@@ -163,6 +163,7 @@ class SpriteRendererAspect(scene.Aspect):
         """Render the sprites"""
         for e in self.iterate_entities():
             # get the sprite
+            # print(e._components)
             c_sprite = e.get_component(SpriteRenderer)._sprite
             if not c_sprite.sprite:
                 continue

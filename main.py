@@ -76,7 +76,6 @@ scw.add_aspect(statesystem.StateHandlerAspect())
 # push scene
 scene.SceneHandler.push_scene(sc)
 
-
 # -------------------------------------------------------------- #
 # game loop
 SORA.start_engine_time()
