@@ -152,6 +152,7 @@ class Entity:
     def add_link(self, entity):
         """Add a link to the entity"""
         self._linked_entities.append(entity)
+        self.world.add_entity(entity)
     
     def remove_link(self, entity):
         """Remove a link from the entity"""

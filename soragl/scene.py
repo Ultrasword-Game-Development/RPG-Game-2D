@@ -440,7 +440,7 @@ class Scene:
             # on ready function call
             pack.on_ready()
         # remove entities
-        for entity in self._remove_entities:
+        for entity in tuple(self._remove_entities):
             e = self.get_entity(entity)
             self._remove_entity(e)
         self._remove_entities.clear()
@@ -453,7 +453,7 @@ class Scene:
         entity.world.get_chunk(entity.c_chunk[0], entity.c_chunk[1]).remove_entity(entity)
         # remove linked entities
         for link in entity._linked_entities:
-            self._remove_entity(link)
+            link.kill()
 
 
 # ------------------------------ #

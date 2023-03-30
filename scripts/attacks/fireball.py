@@ -96,7 +96,7 @@ class Fire(attacks.Attack):
 
     def on_ready(self):
         super().on_ready()
-        self.world.add_entity(self._phandler)
+        self.add_link(self._phandler)
 
     def update(self):
         super().update()
