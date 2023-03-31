@@ -306,6 +306,7 @@ class ParticleHandler(Entity):
         self.args = args
         self._timer = 0
         self._remove = []
+        self._instant_death = False
 
         # public
         self._function_data = [create_func, update_func, create_timer_func]
@@ -358,6 +359,16 @@ class ParticleHandler(Entity):
         self._function_data[2] = value
         self._create_timer_func = ParticleHandler.get_create_timer_funcion(name=value)
 
+    @property
+    def instant_death(self):
+        """Get the instant death state"""
+        return self._instant_death
+    
+    @instant_death.setter
+    def instant_death(self, value):
+        """Set the instant death state"""
+        self._instant_death = value
+
     # ------------------------------ #
     def __getitem__(self, name):
         """Get a piece of data"""
@@ -396,6 +407,15 @@ class ParticleHandler(Entity):
             del self._particles[i]
         # self._particle_count -= len(self._remove) # when removing particles bad things happen
         self._remove.clear()
+
+    def kill(self):
+        """Kill the particle handler"""
+        if self._instant_death: 
+            return super().kill()
+        # kill all particles
+        self.disable_particles()
+        if not len(self):
+            return super().kill()
 
 
 # ------------------------------ #
