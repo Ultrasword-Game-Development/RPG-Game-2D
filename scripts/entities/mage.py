@@ -272,9 +272,9 @@ class Mage(physics.Entity):
     def script(self):
         self.ph_magic.position = self.position
         if SORA.DEBUG:
-            pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position, DETECT_RADIUS, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position, PREF_DIS, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position, DEF_DISTANCE, width=1)
+            pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
+            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position - SORA.OFFSET, PREF_DIS, width=1)
+            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position - SORA.OFFSET, DEF_DISTANCE, width=1)
 
 # -------------------------------------------------- #
 # particle handler
@@ -329,7 +329,7 @@ def mage_particle_update(parent, particle):
     # move particle towards center
     particle[MG_iVELOCITY] += offset * SORA.DELTA
     # render the particles
-    pgdraw.circle(SORA.FRAMEBUFFER, particle[MG_iCOLOR], particle[MG_iPOSITION], 1)
+    pgdraw.circle(SORA.FRAMEBUFFER, particle[MG_iCOLOR], particle[MG_iPOSITION] - SORA.OFFSET, 1)
 
 # register particle handler
 physics.ParticleHandler.register_particle_setting(MG_PARTICLE_FUNC, mage_particle_create, 

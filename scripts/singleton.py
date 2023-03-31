@@ -2,5 +2,6 @@
 # singletons
 
 PLAYER = None
+CAMERA = None
 
 # -------------------------------------------------- #

@@ -44,7 +44,7 @@ def sph_update(handler, particle):
     particle[SPH_iPOSITION] += particle[SPH_iVELOCITY] * SORA.DELTA
     # render
     pgdraw.circle(SORA.FRAMEBUFFER, SPH_FIRE_PARTICLE_COLOR,
-                    particle[SPH_iPOSITION] + SORA.OFFSET,
+                    particle[SPH_iPOSITION] - SORA.OFFSET,
                     particle[SPH_iRADIUS])
 
 # register

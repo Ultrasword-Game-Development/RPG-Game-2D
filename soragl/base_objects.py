@@ -167,8 +167,6 @@ class SpriteRendererAspect(scene.Aspect):
             c_sprite = e.get_component(SpriteRenderer)._sprite
             if not c_sprite.sprite:
                 continue
-            # get the position
-            pos = e.position.xy
             # get sprite
             _sprite = c_sprite.sprite if not c_sprite.flip else pgtrans.flip(
                 c_sprite.sprite, True, False
@@ -177,12 +175,13 @@ class SpriteRendererAspect(scene.Aspect):
             if c_sprite.scale_size:
                 SORA.FRAMEBUFFER.blit(
                     pgtrans.scale(_sprite, c_sprite.scale_size),
-                    pos - (c_sprite.hwidth, c_sprite.hheight),
+                    e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET,
                 )
                 continue
             SORA.FRAMEBUFFER.blit(
-                _sprite, pos - (c_sprite.hwidth, c_sprite.hheight)
+                _sprite, e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET
             )
+            # print(pos - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET)
 
 
 class SpriteRendererAspectDebug(scene.Aspect):
@@ -201,13 +200,13 @@ class SpriteRendererAspectDebug(scene.Aspect):
             # print(c_sprite)
             # render the sprite
             SORA.FRAMEBUFFER.blit(
-                c_sprite.sprite, e.position - (c_sprite.hwidth, c_sprite.hheight)
+                c_sprite.sprite, e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET
             )
             pgdraw.rect(
                 SORA.DEBUGBUFFER,
                 (0, 0, 255),
                 pgRect(
-                    e.position - (c_sprite.hwidth, c_sprite.hheight),
+                    e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET,
                     c_sprite.sprite.get_size(),
                 ),
                 1,
@@ -428,7 +427,9 @@ class Collision2DRendererAspectDebug(Collision2DAspect):
             self.handle_movement(entity)
             # render debug rect etc
             # print(entity.rect)
-            pgdraw.rect(SORA.DEBUGBUFFER, (255, 0, 0), entity.rect, 1)
+            pgdraw.rect(SORA.DEBUGBUFFER, (255, 0, 0), 
+                    pgRect(entity.rect.x - SORA.OFFSET[0], entity.rect.y - SORA.OFFSET[1], entity.rect.w, entity.rect.h),
+                    1)
 
 
 # ------------------------------ #
@@ -584,7 +585,7 @@ class TileMap(scene.Aspect):
     def handle(self):
         """Handle the rendering of the tilemap"""
         for item in self.iterate_active_tiles():
-            SORA.FRAMEBUFFER.blit(self._resized_sprites[item.sprite_path][0], item.rect)
+            SORA.FRAMEBUFFER.blit(self._resized_sprites[item.sprite_path][0], (item.rect.x - SORA.OFFSET[0], item.rect.y - SORA.OFFSET[1]))
 
 
 class TileMapDebug(TileMap):
@@ -594,7 +595,7 @@ class TileMapDebug(TileMap):
     def handle(self):
         """Handle the rendering of the tilemap"""
         for item in self.iterate_active_tiles():
-            SORA.FRAMEBUFFER.blit(self._resized_sprites[item.sprite_path][0], item.rect)
+            SORA.FRAMEBUFFER.blit(self._resized_sprites[item.sprite_path][0], (item.rect.x - SORA.OFFSET[0], item.rect.y - SORA.OFFSET[1]))
             # debug render rect
             r = self._resized_sprites[item.sprite_path]
             # if r.w == 0 or r.h == 0: continue
@@ -790,49 +791,44 @@ For use in opengl based applications / games! -- not pygame 2D
 
 
 # 2D camera
-class Camera2D:
+class Camera2D(physics.Entity):
     def __init__(self):
         """
         Camera Constructor:
         contains:
         - position
         """
-        self.campos = pygame.math.Vector2(0, 0)
-        self.position = pygame.math.Vector2(0, 0)
-        self.chunkpos = [0, 0]
-        self.screenchunkpos = [0, 0]
+        super().__init__()
+        self.campos = pgmath.Vector2(0, 0)
         # ----------------------------------- #
         # viewport size
-        self.viewport = pygame.rect.Rect(0, 0, SORA.FSIZE[0], SORA.FSIZE[1])
+        self.viewport = pgRect(0, 0, SORA.FSIZE[0], SORA.FSIZE[1])
 
         # target info + cache
         self.target = None
 
-    def track_target(self):
+    def update(self):
         """Track an entity target and center them"""
         if not self.target:
             return
         # get world position
-        wpos = self.target.position
-        # set position
-        self.position.x = self.campos.x - SORA.FHSIZE[0]
-        self.position.y = self.campos.y - SORA.FHSIZE[1]
-        # chunk pos
-        self.screenchunkpos[0] = (
-            int(self.campos.x) // self.target._world.config["chunkpixw"]
+        self.position = self.target.position.xy
+        # get chunk pos
+        self.c_chunk[0] = (
+            int(self.position.x) // self.target.world._options["chunkpixw"]
         )
-        self.screenchunkpos[1] = (
-            int(self.campos.y) // self.target._world.config["chunkpixh"]
+        self.c_chunk[1] = (
+            int(self.position.y) // self.target.world._options["chunkpixh"]
         )
-        self.chunkpos[0] = -self.screenchunkpos[0]
-        self.chunkpos[1] = -self.screenchunkpos[1]
         # viewport position
-        self.viewport.topleft = -self.position.xy
-
+        self.viewport.center = self.position.xy
         # update eglob offset
-        SORA.OFFSET[0] = self.position.x
-        SORA.OFFSET[1] = self.position.y
-
+        SORA.OFFSET[0] = self.viewport.x
+        SORA.OFFSET[1] = self.viewport.y
+        # update world center chunk
+        self.world.set_center_chunk(self.c_chunk[0], self.c_chunk[1])
+        # print(self.position, self.target.position, self.viewport.center)
+    
     def set_target(self, target):
         """Set a target"""
         self.target = target

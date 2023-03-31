@@ -37,7 +37,7 @@ SORA.create_context()
 from scripts import singleton
 
 from scripts.entities import player, mage, particle_scripts
-# from scripts.entities import player, mage, peasant, test
+# from scripts.entities import peasant, test
 from scripts.attacks import fireball, attacks
 
 # from scripts.environment import grass, ambient, wind
@@ -55,10 +55,13 @@ ph = scw.add_entity(particle_scripts.GravityParticleHandler(color=(255, 0, 0), l
 ph.position += (100, 100)
 ph["interval"] = 1 / 15
 
+#=== singletons
+singleton.CAMERA = scw.add_entity(base_objects.Camera2D())
 # player
 singleton.PLAYER = scw.add_entity(player.Player())
 singleton.PLAYER.position += (100, 100)
 ph.add_collider(singleton.PLAYER.rect)
+singleton.CAMERA.set_target(singleton.PLAYER)
 
 # mage
 _mage = scw.add_entity(mage.Mage())
@@ -90,14 +93,14 @@ while SORA.RUNNING:
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
     
-    # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
-    for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):
-        for x, frame in enumerate(anim.parent.sprite_sheet.frames):
-            SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
+    # # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
+    # for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):
+    #     for x, frame in enumerate(anim.parent.sprite_sheet.frames):
+    #         SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
 
-    # render out frames from fireball.F_ANIM_CACHE
-    for i, frame in enumerate(fireball.F_ANIM_CACHE.sprite_sheet.frames):
-        SORA.FRAMEBUFFER.blit(frame.get_frame(), (i * 16, 16 * 4))
+    # # render out frames from fireball.F_ANIM_CACHE
+    # for i, frame in enumerate(fireball.F_ANIM_CACHE.sprite_sheet.frames):
+    #     SORA.FRAMEBUFFER.blit(frame.get_frame(), (i * 16, 16 * 4))
 
     # update signals
     signal.handle_signals()

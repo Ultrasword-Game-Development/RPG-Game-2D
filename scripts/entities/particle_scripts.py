@@ -83,7 +83,7 @@ def GRAVITY_PARTICLE_UPDATE(parent, particle):
         particle[1].x *= 0.3
 
     # render
-    pgdraw.circle(SORA.FRAMEBUFFER, particle[5], particle[0] + SORA.OFFSET, particle[2])
+    pgdraw.circle(SORA.FRAMEBUFFER, particle[5], particle[0] - SORA.OFFSET, particle[2])
 
 
 # register functions
