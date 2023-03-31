@@ -52,16 +52,26 @@ class Chunk:
         self._dev = {}
 
         # public
+        self.aq = []
+        self.rq = []
         cpw, cph = options["chunkpixw"], options["chunkpixh"]
         self.rect = pygame.Rect(x * cpw, y * cph, (x + 1) * cpw, (y + 1) * cph)
 
-    def add_entity(self, entity: "Entity"):
+    def _add_entity(self, entity: "Entity"):
         """Add an entity to the chunk"""
         self._intrinstic_entities.add(entity)
     
-    def remove_entity(self, entity: "Entity"):
+    def _remove_entity(self, entity: "Entity"):
         """Remove an entity from the chunk"""
         self._intrinstic_entities.remove(entity)
+
+    def add_entity(self, entity: "Entity"):
+        """Add an entity to the chunk"""
+        self.aq.append(entity)
+    
+    def remove_entity(self, entity: "Entity"):
+        """Remove an entity from the chunk"""
+        self.rq.append(entity)
 
     def __hash__(self):
         """Hash the chunk"""
@@ -69,12 +79,19 @@ class Chunk:
 
     def update(self):
         """Update the chunk"""
+        # add + remove entiites
+        for entity in self.aq:
+            self._add_entity(entity)
+        for entity in self.rq:
+            self._remove_entity(entity)
+        self.aq.clear()
+        self.rq.clear()
         # update all intrinstic entities
         for entity in self._intrinstic_entities:
             self._world._scene._global_entities[entity].update()
         # debug update
         if SORA.DEBUG:
-            pygame.draw.rect(SORA.FRAMEBUFFER, (255, 0, 0), self.rect, 1)
+            pygame.draw.rect(SORA.FRAMEBUFFER, (255, 0, 0), (self.rect.x - SORA.OFFSET[0], self.rect.y - SORA.OFFSET[1], self.rect.w, self.rect.h), 1)
 
 # ------------------------------ #
 # scene - aspects
@@ -206,8 +223,11 @@ class World:
         """Update the chunk intrinsic properties for entities"""
         ochunk = self.get_chunk(old[0], old[1])
         nchunk = self.get_chunk(new[0], new[1])
+        # ochunk
+        print('moved', entity, 'from', old, 'to', new)
         ochunk.remove_entity(entity)
         nchunk.add_entity(entity)
+        # update entity
         entity.c_chunk[0], entity.c_chunk[1] = new
 
     def is_entity_active(self, entity):
@@ -338,6 +358,7 @@ class World:
     def update(self):
         """Update the world"""
         # == update chunks
+        # print(self._active_chunks)
         for chunk in self._active_chunks:
             self._chunks[chunk].update()
         # == update components

@@ -1,6 +1,7 @@
 # -------------------------------------------------- #
 # imports
 import pygame
+from pygame import math as pgmath
 
 import soragl as SORA
 from soragl import animation, base_objects, physics, signal, smath
@@ -81,9 +82,7 @@ class Player(physics.Entity):
             self.kill()
 
         # TODO - update camera
-        # self.camera.campos -= self.motion
-        # self.camera.track_target()
-        # self.camera.update()
+        MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, position=self.position)
 
         # set sprite flipping
         self.c_sprite.flip = self.velocity.x > 0

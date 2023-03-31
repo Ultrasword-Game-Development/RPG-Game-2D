@@ -4,6 +4,7 @@ from soragl import scene, physics, mgl, animation, smath, signal
 import random
 import math
 import glm
+import numpy as np
 
 from pygame import Rect as pgRect
 from pygame import math as pgmath
@@ -360,38 +361,37 @@ class Collision2DAspect(scene.Aspect):
         update chunk pos
         """
         # x movement
-        entity.position.x += entity.velocity.x * SORA.DELTA
-        entity.rect.center = entity.position.xy
+        entity._position.x += entity.velocity.x * SORA.DELTA
+        entity.rect.center = entity._position.xy
         # check for x collisions
         for col in self.iterate_collisions(entity.rect):
             # print(col.rect)
             if entity.velocity.x > 0:
-                entity.position.x -= entity.rect.right - col.rect.left
+                entity._position.x -= entity.rect.right - col.rect.left
             elif entity.velocity.x < 0:
-                entity.position.x += col.rect.right - entity.rect.left
+                entity._position.x += col.rect.right - entity.rect.left
             # update rect
-            entity.rect.center = entity.position.xy
+            entity.rect.center = entity._position.xy
         # y movement
-        entity.position.y += entity.velocity.y * SORA.DELTA
-        entity.rect.center = entity.position.xy
+        entity._position.y += entity.velocity.y * SORA.DELTA
+        entity.rect.center = entity._position.xy
         # check for y collisoins
         for col in self.iterate_collisions(entity.rect):
             if entity.velocity.y > 0:
-                entity.position.y -= entity.rect.bottom - col.rect.top
+                entity._position.y -= entity.rect.bottom - col.rect.top
             elif entity.velocity.y < 0:
-                entity.position.y += col.rect.bottom - entity.rect.top
+                entity._position.y += col.rect.bottom - entity.rect.top
             # update rect
-            entity.rect.center = entity.position.xy
+            entity.rect.center = entity._position.xy
         # update rect once more
-        entity.rect.center = entity.position.xy
+        entity.rect.center = entity._position.xy
 
         # update chunk position -- if moved to new chunk
         nchunk = [
-            int(entity.position.x) // self._world._options["chunkpixw"],
-            int(entity.position.y) // self._world._options["chunkpixh"],
+            int(entity._position.x) // self._world._options["chunkpixw"],
+            int(entity._position.y) // self._world._options["chunkpixh"],
         ]
         if nchunk != entity.c_chunk:
-            # print("new chunK!!!", nchunk, entity.c_chunk)
             self._world.update_entity_chunk(entity, entity.c_chunk, nchunk)
 
     def iterate_collisions(self, rect):
@@ -600,7 +600,7 @@ class TileMapDebug(TileMap):
             r = self._resized_sprites[item.sprite_path]
             # if r.w == 0 or r.h == 0: continue
             # print((r.x + item[0], r.y + item[0], r.w, r.h))
-            pgdraw.rect(SORA.DEBUGBUFFER, (0, 0, 255), item.rect, 1)
+            pgdraw.rect(SORA.DEBUGBUFFER, (0, 0, 255), pgRect(item.rect.x - SORA.OFFSET[0], item.rect.y - SORA.OFFSET[1], item.rect.w, item.rect.h), 1)
 
 
 # ------------------------------------------------------------ #
@@ -806,28 +806,33 @@ class Camera2D(physics.Entity):
 
         # target info + cache
         self.target = None
+    
+    def on_ready(self):
+        """Called when the camera is ready"""
+        pass
 
     def update(self):
         """Track an entity target and center them"""
         if not self.target:
             return
         # get world position
-        self.position = self.target.position.xy
-        # get chunk pos
-        self.c_chunk[0] = (
-            int(self.position.x) // self.target.world._options["chunkpixw"]
-        )
-        self.c_chunk[1] = (
-            int(self.position.y) // self.target.world._options["chunkpixh"]
-        )
+        self.position = self.target._position.xy
+        self.target._position.xy = tuple(map(lambda x: math.floor(abs(x))*np.sign(x), self.position))
         # viewport position
         self.viewport.center = self.position.xy
         # update eglob offset
         SORA.OFFSET[0] = self.viewport.x
         SORA.OFFSET[1] = self.viewport.y
-        # update world center chunk
-        self.world.set_center_chunk(self.c_chunk[0], self.c_chunk[1])
-        # print(self.position, self.target.position, self.viewport.center)
+        # update chunk position -- if moved to new chunk
+        nchunk = [
+            int(self._position.x) // self.world._options["chunkpixw"],
+            int(self._position.y) // self.world._options["chunkpixh"],
+        ]
+        # update world center
+        if nchunk != self.c_chunk:
+            self.world.update_entity_chunk(self, self.c_chunk, nchunk)
+            self.c_chunk[0:2] = nchunk
+            self.world.set_center_chunk(self.c_chunk[0], self.c_chunk[1])
     
     def set_target(self, target):
         """Set a target"""
