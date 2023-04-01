@@ -62,8 +62,9 @@ class Entity:
     # whenever components are added -- the world must be queried --> so that cache can be updated
     def on_ready(self):
         """When Entity is ready -- called at end of every update loop by world -- if new entity"""
-        # print(self)
-        pass
+        # add to required chunk
+        self.c_chunk[0] = self.position.x // self.world._options['chunkpixw']
+        self.c_chunk[1] = self.position.y // self.world._options['chunkpixh']
 
     #=== components
     @property

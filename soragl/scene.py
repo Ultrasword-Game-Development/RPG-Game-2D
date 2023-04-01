@@ -2,7 +2,6 @@
 import json
 import pygame
 
-# ------------------------------------------------------------ #
 import soragl as SORA
 
 if SORA.DEBUG:
@@ -55,8 +54,8 @@ class Chunk:
         self.aq = []
         self.rq = []
         cpw, cph = options["chunkpixw"], options["chunkpixh"]
-        self.rect = pygame.Rect(x * cpw, y * cph, (x + 1) * cpw, (y + 1) * cph)
-
+        self.rect = pygame.Rect(x * cpw, y * cph, cpw, cph)
+    
     def _add_entity(self, entity: "Entity"):
         """Add an entity to the chunk"""
         self._intrinstic_entities.add(entity)
@@ -64,7 +63,7 @@ class Chunk:
     def _remove_entity(self, entity: "Entity"):
         """Remove an entity from the chunk"""
         self._intrinstic_entities.remove(entity)
-
+    
     def add_entity(self, entity: "Entity"):
         """Add an entity to the chunk"""
         self.aq.append(entity)
@@ -82,16 +81,16 @@ class Chunk:
         # add + remove entiites
         for entity in self.aq:
             self._add_entity(entity)
+        # print(self._hash, self.rq, self._intrinstic_entities)
         for entity in self.rq:
+            if entity not in self._intrinstic_entities:
+                print(entity.c_chunk, self._hash)
             self._remove_entity(entity)
         self.aq.clear()
         self.rq.clear()
         # update all intrinstic entities
         for entity in self._intrinstic_entities:
             self._world._scene._global_entities[entity].update()
-        # debug update
-        if SORA.DEBUG:
-            pygame.draw.rect(SORA.FRAMEBUFFER, (255, 0, 0), (self.rect.x - SORA.OFFSET[0], self.rect.y - SORA.OFFSET[1], self.rect.w, self.rect.h), 1)
 
 # ------------------------------ #
 # scene - aspects
@@ -223,8 +222,9 @@ class World:
         """Update the chunk intrinsic properties for entities"""
         ochunk = self.get_chunk(old[0], old[1])
         nchunk = self.get_chunk(new[0], new[1])
+        print(entity, old, new)
         # ochunk
-        print('moved', entity, 'from', old, 'to', new)
+        # print('moved', entity, 'from', old, 'to', new)
         ochunk.remove_entity(entity)
         nchunk.add_entity(entity)
         # update entity
@@ -361,9 +361,23 @@ class World:
         # print(self._active_chunks)
         for chunk in self._active_chunks:
             self._chunks[chunk].update()
+        # debug render if required
+        if SORA.DEBUG:
+            # for all x in range screen viewport
+            cc = self.get_chunk(self._center_chunk[0], self._center_chunk[1])
+            cr = cc.rect
+            # propagate outwards in all 4 directions -- if width of 3 chunks > width of framebuffer
+            lx = [cr.left, cr.right] + [ix for ix in range(3, SORA.FSIZE[0] // self._options['chunkpixw'])]
+            ly = [cr.top, cr.bottom]
+
+            for x in lx:
+                pygame.draw.line(SORA.DEBUGBUFFER, (255, 0, 0), (x - SORA.iOFFSET[0], 0), (x - SORA.iOFFSET[0], SORA.FSIZE[1]), 1)
+            for y in ly:
+                pygame.draw.line(SORA.DEBUGBUFFER, (255, 0, 0), (0, y - SORA.iOFFSET[1]), (SORA.FSIZE[0], y - SORA.iOFFSET[1]), 1)
+            # pygame.draw.rect(SORA.DEBUGBUFFER, (255, 0, 0), (cr.x - SORA.iOFFSET[0], cr.y - SORA.iOFFSET[1], cr.w, cr.h), 1)
         # == update components
         for i in self._remove_c_:
-            print(i)
+            # print(i)
             i[0].world._components[hash(i[1])].remove(i[0])
             del i[0]._components[hash(i[1])]
         self._remove_c_.clear()

@@ -227,6 +227,7 @@ class Mage(physics.Entity):
         self.skhandler = SKILL_TREE.get_registry(self)
     
     def on_ready(self):
+        super().on_ready()
         self.area = (8, 8)
         self.c_statehandler[PARENT] = self
         self.c_statehandler[PLAYER_DISTANCE_NVEC] = pgmath.Vector2()

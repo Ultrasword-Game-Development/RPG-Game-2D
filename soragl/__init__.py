@@ -134,11 +134,9 @@ FBITS = 32
 MODERNGL = False
 
 # setup engine
-
-
 def initialize(options: dict = {}) -> None:
-    """Initialize Sora Engine with options."""
-    global FPS, WSIZE, WFLAGS, WBITS, FFLAGS, FSIZE, FBITS, MODERNGL, DEBUG
+    """Initialize Sora Engine with options"""
+    global FPS, WSIZE, WFLAGS, WBITS, FFLAGS, FSIZE, FHSIZE, FBITS, MODERNGL, DEBUG
     FPS = options["fps"] if "fps" in options else 60
     WSIZE = options["window_size"] if "window_size" in options else [1280, 720]
     WFLAGS = (
@@ -153,6 +151,7 @@ def initialize(options: dict = {}) -> None:
         else pygame.SRCALPHA
     )
     FSIZE = options["framebuffer_size"] if "framebuffer_size" in options else WSIZE
+    FHSIZE = [FSIZE[0]//2, FSIZE[1]//2]
     FBITS = options["framebuffer_bits"] if "framebuffer_bits" in options else 32
     DEBUG = options["debug"] if "debug" in options else False
     # add options as required!
@@ -177,6 +176,15 @@ CLOCK = None
 RUNNING = False
 
 OFFSET = [0, 0]
+iOFFSET = [0, 0]
+
+def set_offset(x: float, y: float):
+    """Set the engine offset"""
+    global OFFSET, iOFFSET
+    OFFSET[0] = x
+    OFFSET[1] = y
+    iOFFSET[0] = round(x)
+    iOFFSET[1] = round(y)
 
 
 def create_context():

@@ -45,6 +45,8 @@ from scripts.attacks import fireball, attacks
 # -------------------------------------------------------------- #
 
 sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
+sc._config['chunkpixw'] = 100
+sc.render_distance = 5
 scw = sc.make_layer(sc.get_config(), 1)
 # scw.get_chunk(0, 0)
 BG_COL = (153, 220, 80)

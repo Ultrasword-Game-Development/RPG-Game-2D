@@ -207,7 +207,7 @@ class SpriteRendererAspectDebug(scene.Aspect):
                 SORA.DEBUGBUFFER,
                 (0, 0, 255),
                 pgRect(
-                    e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET,
+                    e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.iOFFSET,
                     c_sprite.sprite.get_size(),
                 ),
                 1,
@@ -428,7 +428,7 @@ class Collision2DRendererAspectDebug(Collision2DAspect):
             # render debug rect etc
             # print(entity.rect)
             pgdraw.rect(SORA.DEBUGBUFFER, (255, 0, 0), 
-                    pgRect(entity.rect.x - SORA.OFFSET[0], entity.rect.y - SORA.OFFSET[1], entity.rect.w, entity.rect.h),
+                    pgRect(entity.rect.x - SORA.iOFFSET[0], entity.rect.y - SORA.iOFFSET[1], entity.rect.w, entity.rect.h),
                     1)
 
 
@@ -600,7 +600,7 @@ class TileMapDebug(TileMap):
             r = self._resized_sprites[item.sprite_path]
             # if r.w == 0 or r.h == 0: continue
             # print((r.x + item[0], r.y + item[0], r.w, r.h))
-            pgdraw.rect(SORA.DEBUGBUFFER, (0, 0, 255), pgRect(item.rect.x - SORA.OFFSET[0], item.rect.y - SORA.OFFSET[1], item.rect.w, item.rect.h), 1)
+            pgdraw.rect(SORA.DEBUGBUFFER, (0, 0, 255), pgRect(item.rect.x - SORA.iOFFSET[0], item.rect.y - SORA.iOFFSET[1], item.rect.w, item.rect.h), 1)
 
 
 # ------------------------------------------------------------ #
@@ -813,16 +813,12 @@ class Camera2D(physics.Entity):
 
     def update(self):
         """Track an entity target and center them"""
-        if not self.target:
-            return
+        if not self.target: return
         # get world position
         self.position = self.target._position.xy
-        self.target._position.xy = tuple(map(lambda x: math.floor(abs(x))*np.sign(x), self.position))
-        # viewport position
-        self.viewport.center = self.position.xy
+        self.viewport.center = tuple(map(int, self.position.xy))
         # update eglob offset
-        SORA.OFFSET[0] = self.viewport.x
-        SORA.OFFSET[1] = self.viewport.y
+        SORA.set_offset(self.position.x - SORA.FHSIZE[0], self.position.y - SORA.FHSIZE[1])
         # update chunk position -- if moved to new chunk
         nchunk = [
             int(self._position.x) // self.world._options["chunkpixw"],

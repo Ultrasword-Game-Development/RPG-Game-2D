@@ -53,6 +53,7 @@ class Player(physics.Entity):
         self.priority = True
 
     def on_ready(self):
+        super().on_ready()
         self.area = AREA
         self.add_component(self.c_sprite)
         self.add_component(base_objects.SpriteRenderer())
@@ -82,7 +83,7 @@ class Player(physics.Entity):
             self.kill()
 
         # TODO - update camera
-        MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, position=self.position)
+        # MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, position=self.position)
 
         # set sprite flipping
         self.c_sprite.flip = self.velocity.x > 0
