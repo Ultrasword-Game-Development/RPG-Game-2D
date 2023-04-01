@@ -5,7 +5,16 @@ import struct
 from pygame import draw as pgdraw
 from pygame import math as pgmath
 
-from soragl import animation, scene, physics, base_objects, mgl, smath, signal, statesystem
+from soragl import (
+    animation,
+    scene,
+    physics,
+    base_objects,
+    mgl,
+    smath,
+    signal,
+    statesystem,
+)
 
 # -------------------------------------------------------------- #
 # setup
@@ -16,20 +25,39 @@ WW = 1280 // 3
 FB_SIZE = [WW, int(WW / 16 * 9)]
 
 # mac version -- since no opengl
+# ------------------------------ #
+# setup
 SORA.initialize(
     {
         "fps": 30,
-        "window_size": WINDOW_SIZE,
-        "window_flags": pygame.RESIZABLE | pygame.DOUBLEBUF,
+        "window_size": [1280, 720],
+        "window_flags": pygame.RESIZABLE
+        | pygame.OPENGL
+        | pygame.DOUBLEBUF
+        | pygame.HWSURFACE
+        | pygame.OPENGL
+        if SORA.get_os() == SORA.OS_WINDOWS
+        else 0,
         "window_bits": 32,
         "framebuffer_flags": pygame.SRCALPHA,
-        "framebuffer_size": FB_SIZE,
+        "framebuffer_size": [1280 // 3, 720 // 3],
         "framebuffer_bits": 32,
         "debug": True,
     }
 )
 
+
 SORA.create_context()
+
+# if moderngl stuff setup
+if SORA.is_flag_active(pygame.OPENGL):
+    mgl.ModernGL.create_context(
+        options={
+            "standalone": False,
+            "gc_mode": "context_gc",
+            "clear_color": [0.0, 0.0, 0.0, 1.0],
+        }
+    )
 
 # -------------------------------------------------------------- #
 # imports
@@ -37,6 +65,7 @@ SORA.create_context()
 from scripts import singleton
 
 from scripts.entities import player, mage, particle_scripts
+
 # from scripts.entities import peasant, test
 from scripts.attacks import fireball, attacks
 
@@ -45,8 +74,9 @@ from scripts.attacks import fireball, attacks
 # -------------------------------------------------------------- #
 
 sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
-sc._config['chunkpixw'] = 100
-sc.render_distance = 5
+sc._config["chunkpixw"] = 100
+sc._config["chunkpixh"] = 100
+sc._config["render_distance"] = 5
 scw = sc.make_layer(sc.get_config(), 1)
 # scw.get_chunk(0, 0)
 BG_COL = (153, 220, 80)
@@ -57,7 +87,7 @@ ph = scw.add_entity(particle_scripts.GravityParticleHandler(color=(255, 0, 0), l
 ph.position += (100, 100)
 ph["interval"] = 1 / 15
 
-#=== singletons
+# === singletons
 singleton.CAMERA = scw.add_entity(base_objects.Camera2D())
 singleton.PLAYER = singleton.CAMERA.add_link(player.Player())
 # player
@@ -73,7 +103,8 @@ ph.add_collider(_mage.rect)
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
-scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
+scw.add_aspect(base_objects.Collision2DAspect())
+# scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
 scw.add_aspect(base_objects.Area2DAspect())
 scw.add_aspect(base_objects.ScriptAspect())
 scw.add_aspect(statesystem.StateHandlerAspect())
@@ -94,7 +125,7 @@ while SORA.RUNNING:
 
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
-    
+
     # # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
     # for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):
     #     for x, frame in enumerate(anim.parent.sprite_sheet.frames):

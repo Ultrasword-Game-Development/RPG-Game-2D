@@ -2,6 +2,7 @@
 # imports
 import pygame
 from pygame import math as pgmath, draw as pgdraw
+
 import soragl as SORA
 from soragl import physics, base_objects, animation, smath, misc
 from soragl import signal, statesystem
@@ -99,7 +100,7 @@ class AlertState(statesystem.State):
         self.countdown = ALERT_PRECAST_CD
 
     def update(self):
-        print('alert', self.countdown)
+        # print('alert', self.countdown)
         # case 1: timer counts to 0 == then we go attack
         self.countdown -= SORA.DELTA
         if self.countdown <= 0:
@@ -123,7 +124,7 @@ class PrecastState(statesystem.State):
 
     def update(self):
         # case 1: finish precast
-        print(self.handler[PARENT].aregist[PRECAST_ANIM].finished_loops())
+        # print(self.handler[PARENT].aregist[PRECAST_ANIM].finished_loops())
         if self.handler[PARENT].aregist[PRECAST_ANIM].finished_loops() > 0:
             self.handler.current = CASTING_STATE
         # case 2: what if casting fails? what if player interrupts?
@@ -141,7 +142,7 @@ class CastingState(statesystem.State):
         self.handler[PARENT]._current_anim = CASTING_ANIM
 
     def update(self):
-        print(self.name, self.casting_cdr)
+        # print(self.name, self.casting_cdr)
         # case 1: finish casting
         self.casting_cdr -= SORA.DELTA
         if self.casting_cdr < 0:
@@ -162,7 +163,7 @@ class PostcastState(statesystem.State):
 
     def update(self):
         # case 1: finish postcast -- until no more particles
-        print(self.name, len(self.handler[PARENT].ph_magic))
+        # print(self.name, len(self.handler[PARENT].ph_magic))
         if not len(self.handler[PARENT].ph_magic) and self.handler[PARENT].aregist[POSTCAST_ANIM].finished_loops() > 0:
             self.shoot_fireball()
             self.handler.current = ALERT_STATE

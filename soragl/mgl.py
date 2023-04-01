@@ -29,7 +29,9 @@ class ModernGL:
 
     # ------------------------------ #
     # static
-    FB_BUFFER = None
+    FB_iBUFFER = None
+    FB_vBUFFER = None
+    FB_VAO = None
 
     # ------------------------------ #
     @classmethod
@@ -42,59 +44,77 @@ class ModernGL:
         )
         # create the quad buffer for FB
         print("quad buffer needs to be replaced with custom vao object")
-        cls.FB_BUFFER = cls.CTX.buffer(
-            data=array(
-                "f",
-                [
-                    -1.0,
-                    -1.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                    -1.0,
-                    1.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    -1.0,
-                    1.0,
-                    0.0,
-                    1.0,
-                ],
-            )
+        cls.FB_VAO = VAO()
+        cls.FB_vBUFFER = Buffer(
+            "20f",
+            [
+                -1.0,
+                -1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                -1.0,
+                0.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                0.0,
+                1.0,
+                0.0,
+                -1.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+            ],
         )
+        cls.FB_iBUFFER = Buffer("6i", [0, 1, 2, 3, 0, 2])
+        # attributes
+        cls.FB_VAO.add_attribute("3f", "vvert")
+        cls.FB_VAO.add_attribute("2f", "vuv")
+        cls.FB_VAO.create_structure(cls.FB_vBUFFER, cls.FB_iBUFFER)
         # stuff
         if "depth_test" in options and options["depth_test"]:
             cls.CTX.enable(moderngl.DEPTH_TEST)
 
     @classmethod
+    def set_clear_color(cls, color):
+        """Sets the clear color."""
+        cls.CLEARCOLOR = color
+
+    # === actual rendering code
+
+    @classmethod
     def update_context(cls):
         """Updates moderngl context."""
-
         # garbage collection
         cls.CTX.gc()
 
     @classmethod
-    def render(cls, texture):
-        """Renders the framebuffer to the window."""
-        # render frame buffer texture to window!
-        cls.CTX.screen.use()
+    def pre_render(cls):
+        """Pre-rendering stuff."""
+        cls.update_context()
+        # clear the screen
+        cls.CTX.clear(*cls.CLEARCOLOR)
+        # enable blending
         cls.CTX.enable(moderngl.BLEND)
-        cls.CTX.clear(
-            ModernGL.CLEARCOLOR[0],
-            ModernGL.CLEARCOLOR[1],
-            ModernGL.CLEARCOLOR[2],
-            ModernGL.CLEARCOLOR[3],
-        )
-
-        cls.CTX.disable(moderngl.BLEND)
+        # update some uniforms
 
     @classmethod
-    def set_clear_color(cls, color):
-        """Sets the clear color."""
-        cls.CLEARCOLOR = color
+    def render_frame(cls):
+        """Renders the everything (framebuffer + debugbuffer) to the window."""
+        # upload frames to shader
+        cls.FB_VAO.change_uniform_scalar(
+            "framebuffer", Texture.pg2gltex(SORA.FRAMEBUFFER, "fb")
+        )
+        cls.FB_VAO.change_uniform_scalar(
+            "debugbuffer", Texture.pg2gltex(SORA.DEBUGBUFFER, "db")
+        )
+        # render the quad
+        cls.FB_VAO.render()
+        # disable blending
 
 
 # ------------------------------ #
@@ -111,7 +131,7 @@ class Texture:
     @classmethod
     def load_texture(cls, path):
         """Loads a moderngl texture from a file."""
-        surf = soragl.SoraContext.load_image(path)
+        surf = SORA.load_image(path)
         return cls.pg2gltex(surf, path)
 
     @classmethod
@@ -257,7 +277,7 @@ class ShaderProgram:
             # check if texture type
             try:
                 # print(uniforms[uni], type(uniforms[uni]))
-                if type(uniforms[uni][0]) == moderngl.texture.Texture:
+                if type(uniforms[uni][0]) == moderngl.Texture:
                     uniforms[uni][0].use(location=tcount)
                     shader.program[uni].value = tcount
                     tcount += 1
@@ -272,7 +292,7 @@ class ShaderProgram:
                     f"Error occured when uploading uniform: `{uni}` | of value: {uniforms[uni]}"
                 )
                 print(e)
-                soragl.SoraContext.pause_time(0.4)
+                SORA.pause_time(0.4)
 
     # ------------------------------ #
     # loading shaders

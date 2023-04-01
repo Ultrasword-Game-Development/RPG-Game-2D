@@ -3,6 +3,7 @@ import json
 import pygame
 
 import soragl as SORA
+from soragl import smath
 
 if SORA.DEBUG:
     print("Activating scene.py")
@@ -84,7 +85,8 @@ class Chunk:
         # print(self._hash, self.rq, self._intrinstic_entities)
         for entity in self.rq:
             if entity not in self._intrinstic_entities:
-                print(entity.c_chunk, self._hash)
+                # print(entity.c_chunk, self._hash)
+                continue
             self._remove_entity(entity)
         self.aq.clear()
         self.rq.clear()
@@ -191,7 +193,7 @@ class World:
         self._dev = {}
 
         # variables
-        self.render_distance = render_distance
+        self.render_distance = options["render_distance"]
         self.aspect_times = {}
 
         # add data to buffer
@@ -222,7 +224,7 @@ class World:
         """Update the chunk intrinsic properties for entities"""
         ochunk = self.get_chunk(old[0], old[1])
         nchunk = self.get_chunk(new[0], new[1])
-        print(entity, old, new)
+        # print(entity, old, new)
         # ochunk
         # print('moved', entity, 'from', old, 'to', new)
         ochunk.remove_entity(entity)
@@ -367,9 +369,8 @@ class World:
             cc = self.get_chunk(self._center_chunk[0], self._center_chunk[1])
             cr = cc.rect
             # propagate outwards in all 4 directions -- if width of 3 chunks > width of framebuffer
-            lx = [cr.left, cr.right] + [ix for ix in range(3, SORA.FSIZE[0] // self._options['chunkpixw'])]
-            ly = [cr.top, cr.bottom]
-
+            lx = [ix for ix in range(cc.rect.w * -self.render_distance + cc.rect.left, cc.rect.w * self.render_distance + cc.rect.right, cc.rect.w)]
+            ly = [iy for iy in range(cc.rect.h * -self.render_distance + cc.rect.top, cc.rect.h * self.render_distance + cc.rect.bottom, cc.rect.h)]
             for x in lx:
                 pygame.draw.line(SORA.DEBUGBUFFER, (255, 0, 0), (x - SORA.iOFFSET[0], 0), (x - SORA.iOFFSET[0], SORA.FSIZE[1]), 1)
             for y in ly:
@@ -501,6 +502,7 @@ DEFAULT_CONFIG = {
     "chunktileh": 16,
     "tilepixw": 16,
     "tilepixh": 16,
+    "render_distance": 2
 }
 
 

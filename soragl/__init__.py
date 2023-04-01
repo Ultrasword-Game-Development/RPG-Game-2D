@@ -2,9 +2,31 @@ print("Thanks for using Sora Engine! v0.1")
 
 import pygame
 import time
+import sys
 
 
 DEBUG = True
+
+# ------------------------------------------------ #
+# system / environment data
+# ------------------------------------------------ #
+
+OS_WINDOWS = "win"
+OS_MACOS = "darwin"
+OS_LINUX = "linux"
+
+
+def get_os():
+    """Checks the operating system."""
+    if sys.platform.startswith(OS_WINDOWS):
+        return OS_WINDOWS
+    elif sys.platform.startswith(OS_MACOS):
+        return OS_MACOS
+    elif sys.platform.startswith(OS_LINUX):
+        return OS_LINUX
+    else:
+        return "unknown"
+
 
 # ------------------------------------------------ #
 # time + time + time
@@ -128,10 +150,11 @@ WBITS = 32
 FFLAGS = pygame.SRCALPHA
 FPREVSIZE = [1280, 720]
 FSIZE = [1280, 720]
-FHSIZE = [FSIZE[0]//2, FSIZE[1]//2]
+FHSIZE = [FSIZE[0] // 2, FSIZE[1] // 2]
 FBITS = 32
 
 MODERNGL = False
+
 
 # setup engine
 def initialize(options: dict = {}) -> None:
@@ -151,7 +174,7 @@ def initialize(options: dict = {}) -> None:
         else pygame.SRCALPHA
     )
     FSIZE = options["framebuffer_size"] if "framebuffer_size" in options else WSIZE
-    FHSIZE = [FSIZE[0]//2, FSIZE[1]//2]
+    FHSIZE = [FSIZE[0] // 2, FSIZE[1] // 2]
     FBITS = options["framebuffer_bits"] if "framebuffer_bits" in options else 32
     DEBUG = options["debug"] if "debug" in options else False
     # add options as required!
@@ -178,6 +201,7 @@ RUNNING = False
 OFFSET = [0, 0]
 iOFFSET = [0, 0]
 
+
 def set_offset(x: float, y: float):
     """Set the engine offset"""
     global OFFSET, iOFFSET
@@ -201,9 +225,8 @@ def push_framebuffer():
     """Pushes framebuffer to window."""
     if MODERNGL:
         # push frame buffer to moderngl window context
-        mgl.ModernGL.render(mgl.Texture.pg2gltex(FRAMEBUFFER, "fb"))
-        if DEBUG:
-            mgl.ModernGL.render(mgl.Texture.pg2gltex(DEBUGBUFFER, "debug"))
+        mgl.ModernGL.pre_render()
+        mgl.ModernGL.render_frame()
         pygame.display.flip()
     else:
         # render frame buffer texture to window!
