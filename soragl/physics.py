@@ -18,10 +18,14 @@ class World2D:
     LEFT = pgmath.Vector2(-1, 0)
     UP = pgmath.Vector2(0, -1)
     DOWN = pgmath.Vector2(0, 1)
+    TOPRIGHT = RIGHT.rotate(45)
+    TOPLEFT = RIGHT.rotate(135)
+    BOTLEFT = RIGHT.rotate(225)
+    BOTRIGHT = RIGHT.rotate(315)
     X_AXIS = RIGHT
     Y_AXIS = UP
-
     GRAVITY = DOWN * 9.8 * 10
+
 class World3D:
     X_AXIS = pgmath.Vector3(1, 0, 0)
     Y_AXIS = pgmath.Vector3(0, 1, 0)

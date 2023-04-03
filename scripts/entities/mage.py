@@ -188,7 +188,7 @@ class FlightState(statesystem.State):
 
     def update(self):
         # player is already known to be nearby
-        self.handler[PARENT].velocity -= self.handler[PLAYER_DISTANCE_NVEC] * SORA.DELTA * self.distance_desire_coef( self.handler[PLAYER_DISTANCE])
+        self.handler[PARENT].velocity -= self.handler[PLAYER_DISTANCE_NVEC] * SORA.DELTA * self.distance_desire_coef(self.handler[PLAYER_DISTANCE]) * MS
         
         if self.handler[PLAYER_DISTANCE] > PREF_DIS:
             self.handler.current = ALERT_STATE
@@ -203,7 +203,6 @@ class FlightState(statesystem.State):
 
     def distance_desire_coef(self, dis: float) -> float:
         return 1 / (.05 * dis + 4 / 5)
-
 
 # -------------------------------------------------- #
 # mage
@@ -257,15 +256,12 @@ class Mage(physics.Entity):
         # testing
         # self.ph_magic.enable_particles()
         # print(self.ph_magic.position)
-
-        # print(self.c_statehandler.current, self._current_anim)
         self.c_statehandler[PLAYER_DISTANCE_NVEC] = (singleton.PLAYER.position - self.position)
         self.c_statehandler[PLAYER_DISTANCE] = self.c_statehandler[PLAYER_DISTANCE_NVEC].magnitude()
         self.c_statehandler[PLAYER_DISTANCE_NVEC].normalize_ip()
         self.aregist[self._current_anim].update()
         self.c_sprite.registry = self.aregist[self._current_anim]
         self.velocity = smath.v2lerp(self.velocity, (0,0), LC)
-        
         # set sprite flipping
         self.c_sprite.flip = self.velocity.x > 0
         # output

@@ -42,15 +42,10 @@ class Player(physics.Entity):
 
         # private
         self._current_anim = RUN_ANIM
-
         # objects
         self.aregist = animation.Category.get_registries_for_all(ANIM_CAT)
-
         self.c_sprite = base_objects.AnimatedSprite(0, 0, self.aregist[self._current_anim])
         self.c_collision = base_objects.Collision2DComponent()
-        # camera and events
-        self.camera = None
-        self.priority = True
 
     def on_ready(self):
         super().on_ready()
@@ -58,18 +53,10 @@ class Player(physics.Entity):
         self.add_component(self.c_sprite)
         self.add_component(base_objects.SpriteRenderer())
         self.add_component(self.c_collision)
-        return
-        # TODO - grab camera from layer
-        self.camera = self.layer.camera
-        self.camera.set_target(self)
-        # tell camera to calculate motion
-        self.camera.track_target()
 
     def update(self):
-        # TODO -- consider removing
         self.aregist[self._current_anim].update()
         self.velocity = smath.v2lerp(self.velocity, (0, 0), LC)
-
         # movement
         if SORA.is_key_pressed(pygame.K_d):
             self.velocity.x += MS * SORA.DELTA
@@ -81,9 +68,7 @@ class Player(physics.Entity):
             self.velocity.y += MS * SORA.DELTA
         if SORA.is_key_pressed(pygame.K_k):
             self.kill()
-
         # TODO - update camera
         # MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, position=self.position)
-
         # set sprite flipping
         self.c_sprite.flip = self.velocity.x > 0

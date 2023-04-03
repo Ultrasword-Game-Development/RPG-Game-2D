@@ -137,7 +137,6 @@ class SequenceRegistry:
         self.f = 0
         self.fini = 0
 
-
 # ------------------------------ #
 # sequence
 
@@ -202,6 +201,16 @@ class Category:
         cls.SEQUENCES[filename] = {"meta": meta, "framedata": sequences}
 
     @classmethod
+    def load_from_directory(cls, folder: str):
+        """
+        Load animation from directory of images
+        - directory should contain images of same name + numbered for sorting
+        """
+        files = os.listdir(folder)
+        
+
+
+    @classmethod
     def get_category_framedata(cls, filename: str):
         """Return the animation parsed framedata"""
         return cls.SEQUENCES[filename]["framedata"]
@@ -257,9 +266,9 @@ class Category:
             k: v.get_registry() for k, v in cls.get_category_framedata(filename).items()
         }
 
+
 # -------------------------------------------------- #
 # extensions
-
 # ------------------------------ #
 # rotated-sequences
 

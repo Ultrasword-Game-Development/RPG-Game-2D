@@ -25,6 +25,7 @@ WW = 1280 // 3
 FB_SIZE = [WW, int(WW / 16 * 9)]
 
 # mac version -- since no opengl
+
 # ------------------------------ #
 # setup
 SORA.initialize(
@@ -74,8 +75,8 @@ from scripts.attacks import fireball, attacks
 # -------------------------------------------------------------- #
 
 sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
-sc._config["chunkpixw"] = 100
-sc._config["chunkpixh"] = 100
+sc._config["chunkpixw"] = 300
+sc._config["chunkpixh"] = 300
 sc._config["render_distance"] = 5
 scw = sc.make_layer(sc.get_config(), 1)
 # scw.get_chunk(0, 0)

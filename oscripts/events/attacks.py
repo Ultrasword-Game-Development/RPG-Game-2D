@@ -10,10 +10,8 @@ from oscripts.entities.particle_scripts import AnimatedParticle
 def generate_attack_data(**kwargs):
     return kwargs
 
-
 def handle_hit(event):
     print("Handle Event:", event.data['a'].name, event.data['b'].name)
-
 
 # create attack event
 def create_attack_event(event):
@@ -27,12 +25,9 @@ class Attack(AnimatedParticle):
     # -------------------------------------------------- #
     # signals
     HIT_SIGNAL = "-hit"
-
     # wrappers
     HIT_WRAPPER = Eventhandler.register_to_signal(HIT_SIGNAL, handle_hit)
-
     # -------------------------------------------------- #
-
     def __init__(self, x, y, registry, data, sender=None):
         super().__init__(x, y, registry)
         self.data = data
@@ -51,16 +46,11 @@ class Attack(AnimatedParticle):
     def debug(self, surface):
         super().debug(surface)
 
-
 # -------------------------------------------------- #
-
-
 # melee attacks
 class MeleeStab(Attack):
-
     def __init__(self, x, y, registry, data, sender):
         super().__init__(x, y, registry, data, sender)
-
     def update(self):
         super().update()
         self.position += self.motion * clock.delta_time
@@ -69,20 +59,14 @@ class MeleeStab(Attack):
         self.motion *= 0.8
         # print(self.motion)
 
-
 class RangedAttack(Attack):
     def __init__(self, x, y, registry, data):
         super().__init__(x, y, registry, data)
-
     def update(self):
         super().update()
 
-
 # -------------------------------------------------- #
 # setup
-
 singleton.ATTACK_PARTICLE_CREATE = Eventhandler.register_to_signal(singleton.ATTACK_PARTICLE_CREATE_ID,
                                                                    create_attack_event)
-
-
 

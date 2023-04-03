@@ -15,8 +15,6 @@ from .mage import Mage
 # -------------------------------------------------- #
 animation.load_and_parse_aseprite_animation("assets/sprites/peasant.json")
 animation.load_and_parse_aseprite_animation("assets/sprites/particles/melee_swing.json")
-
-
 # -------------------------------------------------- #
 # states
 
