@@ -32,6 +32,7 @@ class Attack(physics.Entity):
         self.data = data
         self.sender = sender
         self._aregist = aregist
+        self.position = position
         # signal
         self._hit_signal = signal.SignalRegister(HIT_SIGNAL)
     

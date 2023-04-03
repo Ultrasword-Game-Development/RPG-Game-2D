@@ -18,7 +18,6 @@ IDLE_ANIM = "idle"
 RUN_ANIM = "run"
 
 animation.Category.load_category(ANIM_CAT)
-animation.Category.load_category(MELEE_ATTACK_CAT)
 
 # -------------------------------------------------- #
 # peasant states

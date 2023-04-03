@@ -28,7 +28,29 @@ class MeleeRangeSkill(skillhandler.Skill):
 # fire class
 
 # animation 
-M_ANIM_CAT_FOLDER = "assets/particles/stab"
+M_ANIM_CAT = "assets/particles/melee_attack.json"
+M_IDLE_ANIM = "seq"
+
+animation.Category.load_category(M_ANIM_CAT)
+M_ANIM_CACHE = animation.Category.get_category_framedata(M_ANIM_CAT)
+
+class MeleeRange(attacks.Attack):
+    def __init__(self, sender: "Entity"):
+        super().__init__(sender.position.xy, M_ANIM_CACHE[M_IDLE_ANIM].get_registry(), sender=sender)
+        # private
+        # self._phandler = physics.ParticleHandler()
+
+    def on_ready(self):
+        super().on_ready()
+        # self.add_link(self._phandler)
+
+    def update(self):
+        super().update()
+        # self._phandler.position = self.position
+        # kill check
+        if self.aregist.finished_loops():
+            self.kill()
+
 
 
 
