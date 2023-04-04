@@ -6,6 +6,8 @@ from pygame import math as pgmath
 import soragl as SORA
 from soragl import animation, base_objects, physics, signal, smath
 
+from scripts.attacks import short_melee
+
 # -------------------------------------------------- #
 # animations
 ANIM_CAT = "assets/sprites/player.json"
@@ -68,6 +70,8 @@ class Player(physics.Entity):
             self.velocity.y += MS * SORA.DELTA
         if SORA.is_key_pressed(pygame.K_k):
             self.kill()
+        if SORA.is_key_pressed(pygame.K_SPACE):
+            self.world.add_entity(short_melee.MeleeRange(self))
         # TODO - update camera
         # MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, position=self.position)
         # set sprite flipping

@@ -136,7 +136,7 @@ while SORA.RUNNING:
     # # render out frames from fireball.F_ANIM_CACHE
     # for i, frame in enumerate(fireball.F_ANIM_CACHE.sprite_sheet.frames):
     #     SORA.FRAMEBUFFER.blit(frame.get_frame(), (i * 16, 16 * 4))
-    scw.add_entity(short_melee.MeleeRange(singleton.PLAYER))
+    # scw.add_entity(short_melee.MeleeRange(singleton.PLAYER))
 
     # # render out frames from animation.Category.get_registries_for_all(short_melee.M_ANIM_CAT)
     # for y, anim in enumerate(animation.Category.get_registries_for_all(short_melee.M_ANIM_CAT).values()):

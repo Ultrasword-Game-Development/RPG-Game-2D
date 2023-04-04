@@ -7,7 +7,7 @@ import soragl as SORA
 from soragl import physics, base_objects, animation, smath, misc
 from soragl import signal, statesystem
 
-from scripts.attacks import fireball
+from scripts.attacks import short_melee
 from scripts.game import skillhandler
 from scripts import singleton, skillext
 
@@ -61,6 +61,12 @@ IDLE_MOVE_MAGE_WEIGHT = 0.6
 
 # -------------------------------------------------- #
 # signals
+
+SKILL_TREE = skillhandler.SkillTree(skillext.SkillTreeLoader("assets/skilltree/peasant.json"))
+
+SKILLS = skillhandler.SkillHandler()
+SKILLS.add_skill(short_melee.MeleeRangeSkill())
+
 MOVEMENT_SIGNAL = signal.register_signal(signal.SignalRegister("peasant-move"))
 # receiver
 MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
@@ -82,11 +88,8 @@ class IdleState(statesystem.State):
         self.handler[PARENT].aregist[IDLE_ANIM].reset()
 
     def update(self):
-        # check for player distance etc
-        # print(self.handler[PLAYER_DISTANCE])
-        if self.handler[PLAYER_DISTANCE] < DETECT_RADIUS:
-            self.handler.current = ALERT_STATE
-        # also calculate for idle movement
+        # case 1: player enters detect range
+        pass
 
 class AlertState(statesystem.State):
     def __init__(self):
@@ -204,9 +207,9 @@ class FlightState(statesystem.State):
         return 1 / (.05 * dis + 4 / 5)
 
 # -------------------------------------------------- #
-# mage
+# peasant
 
-class Mage(physics.Entity):
+class Peasant(physics.Entity):
     def __init__(self):
         super().__init__()
         # private
@@ -219,9 +222,6 @@ class Mage(physics.Entity):
         self.c_collision = base_objects.Collision2DComponent()
         self.c_statehandler = statesystem.StateHandler()
         
-        # particle handler
-        self.ph_magic = physics.ParticleHandler(handler_type=MG_PARTICLE_FUNC)
-        self.ph_magic.disable_particles()
         # skill tree
         self.skhandler = SKILL_TREE.get_registry(self)
     
@@ -240,9 +240,6 @@ class Mage(physics.Entity):
         self.c_statehandler.add_state(FlightState())
         self.c_statehandler.add_state(PostcastState())
         self.c_statehandler.current = IDLE_STATE
-        
-        # particle handler
-        self.world.add_entity(self.ph_magic)
 
         # add components
         self.add_component(self.c_sprite)
@@ -267,11 +264,10 @@ class Mage(physics.Entity):
         # MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, player_distance=self.c_statehandler[PLAYER_DISTANCE])
     
     def script(self):
-        self.ph_magic.position = self.position
-        if SORA.DEBUG:
-            pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position - SORA.OFFSET, PREF_DIS, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position - SORA.OFFSET, DEF_DISTANCE, width=1)
+        # if SORA.DEBUG:
+            # pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
+            # pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position - SORA.OFFSET, PREF_DIS, width=1)
+            # pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position - SORA.OFFSET, DEF_DISTANCE, width=1)
 
 # -------------------------------------------------- #
 # particle handler
