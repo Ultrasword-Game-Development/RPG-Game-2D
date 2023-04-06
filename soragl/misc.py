@@ -7,7 +7,7 @@ Misc functions:
 import pygame
 
 import soragl as SORA
-from soragl import scene
+from soragl import scene, signal
 
 # ------------------------------------------------------------ #
 # misc functions!
@@ -103,3 +103,73 @@ class MouseLocking(scene.Aspect):
             self.delta = [0, 0]
 
 
+
+# timer class
+class Timer:
+    def __init__(self, limit: float, loop: bool=False):
+        self.hash = hash(self)
+        self.initial = SORA.get_current_time()
+        self.passed = 0
+        self.loopcount = 0
+        self.limit = limit
+        self.loop = loop
+        self._active = False
+        # signal
+        self._signal_register = signal.SignalRegister('timer-finish')
+        # register timer
+        SORA.ALL_CLOCKS[self.hash] = self
+
+    def update(self):
+        """Updates the clock - throws a signal when finished"""
+        self.passed += SORA.DELTA
+        # to implement sending signals -- when completed!
+        # print(self.passed)
+        if self.passed > self.limit:
+            # -- emit a signal
+            self._signal_register.emit_signal()
+            self.passed = 0
+            self.loopcount += 1
+            if not self.loop:
+                SORA.deactivate_timer(self)
+
+    def reset_timer(self, time: float = 0):
+        """Reset the timer"""
+        self.initial = SORA.get_current_time()
+        self.passed = 0
+        self.loopcount = 0
+
+    def start(self):
+        """Start the timer"""
+        self._active = True
+        SORA.activate_timer(self)
+    
+    def stop(self):
+        """Stop the timer"""
+        self._active = False
+        SORA.deactivate_timer(self)
+
+    #=== properties
+    @property
+    def finished_loops(self):
+        """Returns the number of loops completed"""
+        return self.loopcount
+    
+    @property
+    def time_passed(self):
+        """Returns the time passed"""
+        return self.passed
+    
+    @property
+    def time_left(self):
+        """Returns the time left"""
+        return self.limit - self.passed
+
+    @property
+    def active(self):
+        """Is the timer active?"""
+        return self._active
+
+    #=== signals
+    def on_finish(self, func):
+        """Register a function to be called when the timer finishes"""
+        return self._signal_register.add_receiver(func)

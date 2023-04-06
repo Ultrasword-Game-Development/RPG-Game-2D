@@ -36,19 +36,28 @@ RUN_STATE = "run"
 PLAYER_DISTANCE_NVEC = "player_dis_normvec"
 PLAYER_DISTANCE = "player_dis"
 PARENT = "parent"
+MAGE_HOST = "mage_host"
 
 # -------------------------------------------------- #
 # statistics
 MS = 150
 LC = 0.3
 
-DETECT_RADIUS = 80
-ATTACK_RANGE = 30
+DETECT_RADIUS = 40
+ATTACK_RANGE = 25
 MELEE_ATTACK_RANGE = 25
 MAGE_HOVER_DIS = 120
 
+PEASANT_AVOID_DIS = 35
+PEASANT_AVOID_COEF = 0.3
+
+TARGET_DISTANCE_ERROR_COEF = 0.1
+TARGET_DISTANCE_ERROR = 15
+
+IDLE_MOVE_MAGE_WEIGHT = 0.6
+
 # cdt
-ENVIRO_CHECK_TIMER = 2.5
+ENVIRO_CHECK_TIMER = 5
 ALERT_DECISION_PAUSE = 0.5
 IDLE_MOVE_PAUSE = 3.0
 
@@ -57,7 +66,6 @@ IDLE_MOVE_WAIT = 1.0
 ORBIT_ATTACK_WAIT = 1.5
 RUN_TIME_PERIOD = 1.5
 
-IDLE_MOVE_MAGE_WEIGHT = 0.6
 
 # -------------------------------------------------- #
 # signals
@@ -74,137 +82,178 @@ MOVEMENT_RECEIVER = MOVEMENT_SIGNAL.add_receiver(
 )
 
 # -------------------------------------------------- #
-# buffered objects
-
-# -------------------------------------------------- #
 # mage state handler
 
 class IdleState(statesystem.State):
     def __init__(self):
         super().__init__(IDLE_STATE)
+        self._idle_timer = misc.Timer(IDLE_MOVE_PAUSE)
+        self._idle_receiver = self._idle_timer.on_finish(signal.Receiver(self.on_timer_finish))
 
     def start(self):
         self.handler[PARENT]._current_anim = IDLE_ANIM
         self.handler[PARENT].aregist[IDLE_ANIM].reset()
+        self._idle_timer.reset_timer()
+        self._idle_timer.start()
 
     def update(self):
         # case 1: player enters detect range
-        pass
-
-class AlertState(statesystem.State):
-    def __init__(self):
-        super().__init__(ALERT_STATE)
-        self.countdown = ALERT_PRECAST_CD
-
-    def start(self):
-        # print("alert")
-        self.handler[PARENT]._current_anim = IDLE_ANIM
-        self.countdown = ALERT_PRECAST_CD
-
-    def update(self):
-        # print('alert', self.countdown)
-        # case 1: timer counts to 0 == then we go attack
-        self.countdown -= SORA.DELTA
-        if self.countdown <= 0:
-            self.handler.current = PRECAST_STATE
-        # case 2: player comes too close -- then run away
-        if self.handler[PLAYER_DISTANCE] < PREF_DIS:
-            self.handler.current = FLIGHT_STATE
-        # case 3: player goes out of range
-        elif self.handler[PLAYER_DISTANCE] > DETECT_RADIUS:
-            self.handler.current = IDLE_STATE
-
-class PrecastState(statesystem.State):
-    def __init__(self):
-        super().__init__(PRECAST_STATE)
-
-    def start(self):
-        self.handler[PARENT].aregist[PRECAST_ANIM].reset()
-        self.handler[PARENT]._current_anim = PRECAST_ANIM
-        # enable particles
-        self.handler[PARENT].ph_magic.enable_particles()
-
-    def update(self):
-        # case 1: finish precast
-        # print(self.handler[PARENT].aregist[PRECAST_ANIM].finished_loops())
-        if self.handler[PARENT].aregist[PRECAST_ANIM].finished_loops() > 0:
-            self.handler.current = CASTING_STATE
-        # case 2: what if casting fails? what if player interrupts?
-        # TODO - code
-
-class CastingState(statesystem.State):
-    def __init__(self):
-        super().__init__(CASTING_STATE)
-        self.casting_cdr = DEFAULT_CAST_CD
-
-    def start(self):
-        self.casting_cdr = DEFAULT_CAST_CD
-        self.handler[PARENT].ph_magic.enable_particles()
-        self.handler[PARENT].aregist[CASTING_ANIM].reset()
-        self.handler[PARENT]._current_anim = CASTING_ANIM
-
-    def update(self):
-        # print(self.name, self.casting_cdr)
-        # case 1: finish casting
-        self.casting_cdr -= SORA.DELTA
-        if self.casting_cdr < 0:
-            self.handler.current = POSTCAST_STATE
-
-class PostcastState(statesystem.State):
-    def __init__(self):
-        super().__init__(POSTCAST_STATE)
-        self.cani = POSTCAST_ANIM
-
-    def start(self):
-        self.cani = POSTCAST_ANIM
-        # set animation
-        self.handler[PARENT]._current_anim = POSTCAST_ANIM
-        self.handler[PARENT].aregist[POSTCAST_ANIM].reset()
-        # disable particles
-        self.handler[PARENT].ph_magic.disable_particles()
-
-    def update(self):
-        # case 1: finish postcast -- until no more particles
-        # print(self.name, len(self.handler[PARENT].ph_magic))
-        if not len(self.handler[PARENT].ph_magic) and self.handler[PARENT].aregist[POSTCAST_ANIM].finished_loops() > 0:
-            self.shoot_fireball()
+        if self.handler[PLAYER_DISTANCE] < DETECT_RADIUS:
             self.handler.current = ALERT_STATE
-        # case 2: interrupted -> backlash
-    
-    # ---------------------------- #
-    def shoot_fireball(self):
-        # print("added fireball")
-        skill = self.handler[PARENT].skhandler.get_skill(fireball.FB_SKILL_NAME)
-        fire = skill.activate(self.handler[PARENT])
-        fire.position = self.handler[PARENT].position
-        fire.velocity = self.handler[PLAYER_DISTANCE_NVEC] * 2
-        self.handler[PARENT].world.add_entity(fire)
+        
+    def end(self):
+        self._idle_timer.stop()
+        
+    def on_timer_finish(self, data: dict):
+        """Called when the timer finishes"""
+        self.handler.current = IDLE_MOVE_STATE
 
-class FlightState(statesystem.State):
+
+class IdleMoveState(statesystem.State):
     def __init__(self):
-        super().__init__(FLIGHT_STATE)
+        super().__init__(IDLE_MOVE_STATE)
+        self._move_timer = misc.Timer(IDLE_MOVE_PERIOD)
+        self._wait_timer = misc.Timer(IDLE_MOVE_WAIT)
+        self._move_receiver = self._move_timer.on_finish(signal.Receiver(self.on_move_finish))
+        self._wait_receiver = self._wait_timer.on_finish(signal.Receiver(self.on_wait_finish))
 
     def start(self):
         self.handler[PARENT]._current_anim = RUN_ANIM
         self.handler[PARENT].aregist[RUN_ANIM].reset()
+        self._move_timer.reset_timer()
+        self._wait_timer.reset_timer()
+        self._wait_timer.start()
+    
+    def update(self):
+        # case 1: player is in range
+        if self.handler[PLAYER_DISTANCE] < DETECT_RADIUS:
+            self.handler.current = ALERT_STATE
+        
+        print(self._wait_timer.finished_loops)
+        if self._wait_timer.finished_loops:
+            # calculate movement vector -- idle motion
+            self.handler[PARENT].velocity += smath.normalized_random_vec2() * MS * SORA.DELTA
+
+    
+    def end(self):
+        self._move_timer.stop()
+
+    def on_move_finish(self, data: dict):
+        """Called when the move timer finishes"""
+        # case 2: movement finishes
+        self.handler.current = IDLE_STATE
+
+    def on_wait_finish(self, data: dict):
+        """Called when the wait timer finishes"""
+        # case 3: wait finishes
+        self._wait_timer.stop()
+        self._move_timer.start()
+
+class ApproachState(statesystem.State):
+    def __init__(self):
+        super().__init__(APPROACH_STATE)
+
+    def start(self):
+        self.handler[PARENT]._current_anim = RUN_ANIM
+        self.handler[PARENT].aregist[RUN_ANIM].reset()
+    
+    def update(self):
+        # move towards player
+        self.handler[PARENT].velocity += self.handler[PLAYER_DISTANCE_NVEC] * MS * SORA.DELTA
+        # case 1: player leaves range
+        if self.handler[PLAYER_DISTANCE] > DETECT_RADIUS:
+            self.handler.current = IDLE_STATE
+        # case 2: player is in attack range
+        elif self.handler[PLAYER_DISTANCE] < ATTACK_RANGE:
+            self.handler.current = ATTACK_STATE
+        # case 3: peasant leaves the mage radius
+        elif self.handler[PARENT].c_collision.get_distance(self.handler[PARENT].c_statehandler[PARENT].c_collision) > MAGE_HOVER_DIS:
+            self.handler.current = ORBIT_STATE
+
+
+class OrbitState(statesystem.State):
+    def __init__(self):
+        super().__init__(ORBIT_STATE)
+        self._attack_timer = misc.Timer(ORBIT_ATTACK_WAIT)
+        self._attack_receiver = self._attack_timer.on_finish(signal.Receiver(self.on_attack_finish))
+    
+    def start(self):
+        self.handler[PARENT]._current_anim = RUN_ANIM
+        self.handler[PARENT].aregist[RUN_ANIM].reset()
+        self._attack_timer.reset_timer()
+        self._attack_timer.start()
+    
+    def update(self):
+        # case 1: player leaves range
+        if self.handler[PLAYER_DISTANCE] > DETECT_RADIUS:
+            self._attack_timer.stop()
+            # do a bit of randomized checking
+            if smath.normalized_random() < TARGET_DISTANCE_ERROR_COEF:
+                self.handler.current = IDLE_STATE
+        # case 2: player is in attack range -- attack timer
+        if not self._attack_timer.active:
+            self._attack_timer.start()
+        # calculate movement -- including avoiding other peasants
+        self.handle_movement()
+
+    def end(self):
+        self._attack_timer.stop()
+    
+    def on_attack_finish(self, data: dict):
+        """Called when the attack timer finishes"""
+        # case 3: attack timer finishes
+        self.handler.current = RUN_STATE
+        # add an attack particle to the world
+        self.handler[PARENT].velocity *= 0
+        skill = SKILL_TREE.get_skill(short_melee.MR_SKILL_NAME)
+        attack = skill.activate(self.handler[PARENT])
+        attack.position = self.handler[PARENT].position
+        attack.velocity = self.handler[PLAYER_DISTANCE_NVEC] * 3
+        self.handler[PARENT].world.add_entity(attack)
+
+    def handle_movement(self):
+        """Handles movement for the peasant"""
+        # calculate original movement vector from entity to player
+        move_vec = self.handler[PLAYER_DISTANCE_NVEC] * MS
+        # calculate avoidance vector
+        avoidance_vec = smath.vec2(0, 0)
+        for entity in self.handler[PARENT].world.iter_active_entities_filter_entity_exclude_self(self.handler[PARENT], self):
+            # check if within detection range otherwise waste of computational power
+            dis = (entity.position - self.handler[PARENT].position).magnitude()
+            if dis > PEASANT_AVOID_DIS:
+                continue
+            # calculate avoidance vector
+            avoidance_vec += (self.handler[PARENT].position - entity.position) * (PEASANT_AVOID_DIS - dis)
+        avoidance_vec.normalize_ip()
+        # calculate final movement vector
+        self.handler[PARENT].velocity += (move_vec + avoidance_vec * PEASANT_AVOID_COEF) * SORA.DELTA
+
+
+class RunState(statesystem.State):
+    def __init__(self):
+        super().__init__(RUN_STATE)
+        self._run_timer = misc.Timer(RUN_TIME_PERIOD)
+        self._run_timer_receiver = self._run_timer.on_finish(signal.Receiver(self.on_finish_running))
+
+    def start(self):
+        self.handler[PARENT]._current_anim = RUN_ANIM
+        self.handler[PARENT].aregist[RUN_ANIm].reset()
+        self._run_timer.reset_timer()
+        self._run_timer.start()
 
     def update(self):
-        # player is already known to be nearby
-        self.handler[PARENT].velocity -= self.handler[PLAYER_DISTANCE_NVEC] * SORA.DELTA * self.distance_desire_coef(self.handler[PLAYER_DISTANCE]) * MS
-        
-        if self.handler[PLAYER_DISTANCE] > PREF_DIS:
-            self.handler.current = ALERT_STATE
-        # case 1: player is too close --> go to melee def/atk mode
-        if self.handler[PLAYER_DISTANCE] < DEF_DISTANCE:
-            # case 1 fulfilled, begin precast
-            self.handler.current = PRECAST_STATE
-        # case 2: player leaves zone
-        elif self.handler[PLAYER_DISTANCE] > PREF_DIS:
-            # case 2 fulfilled, begin alert state
-            self.handler.current = ALERT_STATE
+        # case 1: has a nearby mage character
+        if self.handler[MAGE_HOST]:
+            direction = (self.handler[MAGE_HOST].position - self.handler[PARENT].position).normalize()
+            self.handler[PARENT].velocity -= direction * MS * SORA.DELTA
 
-    def distance_desire_coef(self, dis: float) -> float:
-        return 1 / (.05 * dis + 4 / 5)
+    def end(self):
+        self._run_timer.stop()
+
+    def on_finish_running(self, data: dict):
+        """When the timer finishes"""
+        self.handler.current = IDLE_STATE
+
 
 # -------------------------------------------------- #
 # peasant
@@ -217,10 +266,12 @@ class Peasant(physics.Entity):
 
         # objects
         self.aregist = animation.Category.get_registries_for_all(ANIM_CAT)
-        
         self.c_sprite = base_objects.AnimatedSprite(0, 0, self.aregist[self._current_anim])
         self.c_collision = base_objects.Collision2DComponent()
         self.c_statehandler = statesystem.StateHandler()
+        # timer object for mage detection
+        self._mage_detection_timer = misc.Timer(ENVIRO_CHECK_TIMER)
+        self._mage_detection_receiver = self._mage_detection_timer.on_finish(signal.Receiver(self.on_mage_detection_timer_finish))
         
         # skill tree
         self.skhandler = SKILL_TREE.get_registry(self)
@@ -234,12 +285,14 @@ class Peasant(physics.Entity):
         
         # add states
         self.c_statehandler.add_state(IdleState())
-        self.c_statehandler.add_state(AlertState())
-        self.c_statehandler.add_state(PrecastState())
-        self.c_statehandler.add_state(CastingState())
-        self.c_statehandler.add_state(FlightState())
-        self.c_statehandler.add_state(PostcastState())
+        self.c_statehandler.add_state(IdleMoveState())
+        self.c_statehandler.add_state(ApproachState())
+        self.c_statehandler.add_state(OrbitState())
+        self.c_statehandler.add_state(RunState())
         self.c_statehandler.current = IDLE_STATE
+
+        # state timers
+        self._mage_detection_timer.start()
 
         # add components
         self.add_component(self.c_sprite)
@@ -264,66 +317,23 @@ class Peasant(physics.Entity):
         # MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, player_distance=self.c_statehandler[PLAYER_DISTANCE])
     
     def script(self):
-        # if SORA.DEBUG:
-            # pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
-            # pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position - SORA.OFFSET, PREF_DIS, width=1)
-            # pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position - SORA.OFFSET, DEF_DISTANCE, width=1)
+        print(self.velocity)
+        if SORA.DEBUG:
+            pygame.draw.circle(SORA.DEBUGBUFFER, (100, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
+            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 100), self.position - SORA.OFFSET, ATTACK_RANGE, width=1)
+            pygame.draw.circle(SORA.DEBUGBUFFER, (255, 255, 0), self.position - SORA.OFFSET, MAGE_HOVER_DIS, width=1)
+
+    def on_mage_detection_timer_finish(self, data: dict):
+        self.c_statehandler[MAGE_HOST] = None
+        # check if there are mages in range
+        for entity in self.world.iter_active_entities():
+            if hash(entity) == singleton.T_MAGE:
+                if entity.c_collision.get_distance(self.c_collision) < MAGE_HOVER_DIS:
+                    # select entity as nearby_mage
+                    self.c_statehandler[MAGE_HOST] = entity
+                    break
+
 
 # -------------------------------------------------- #
 # particle handler
 
-MG_PARTICLE_FUNC = "mage_particles"
-
-MG_SPAWN_RADIUS = DEF_DISTANCE
-MG_LIFE = 2.0
-MG_FREQ = 1/30
-MG_COLOR = (255, 0, 100)
-MG_LERP = 0.05
-MG_SPEED = 50
-
-MG_iPOSITION = 0
-MG_iVELOCITY = 1
-MG_iLIFE = 2
-MG_iCOLOR = 3
-MG_iID = 4
-
-def mage_particle_create(parent, **kwargs):
-    """
-    create a magic particle
-    - position
-    - velocity
-    - life
-    - color
-    - id
-    """
-    # calcualte x and y
-    theta = smath.normalized_random() * 3.14
-    # angle rotation + random offset
-    x = smath.math.sin(theta) * MG_SPAWN_RADIUS + smath.normalized_random() * 10 + parent.position.x
-    y = smath.math.cos(theta) * MG_SPAWN_RADIUS + smath.normalized_random() * 10 + parent.position.y
-    # create particle
-    mx = smath.math.sin(theta + 3.14/2) * MG_SPEED
-    my = smath.math.cos(theta + 3.14/2) * MG_SPEED
-    return [pgmath.Vector2(x, y), pgmath.Vector2(mx, my), MG_LIFE, MG_COLOR, parent.get_new_particle_id()]
-
-def mage_particle_update(parent, particle):
-    """
-    update a magic particle
-    """
-    particle[MG_iLIFE] -= SORA.DELTA
-    if particle[MG_iLIFE] < 0:
-        parent.remove_particle(particle)
-        return
-    # update position
-    particle[MG_iVELOCITY] = smath.v2lerp(particle[MG_iVELOCITY], (0, 0), MG_LERP)
-    particle[MG_iPOSITION] += particle[MG_iVELOCITY] * SORA.DELTA
-    # find offset
-    offset = parent.position - particle[MG_iPOSITION]
-    # move particle towards center
-    particle[MG_iVELOCITY] += offset * SORA.DELTA
-    # render the particles
-    pgdraw.circle(SORA.FRAMEBUFFER, particle[MG_iCOLOR], particle[MG_iPOSITION] - SORA.OFFSET, 1)
-
-# register particle handler
-physics.ParticleHandler.register_particle_setting(MG_PARTICLE_FUNC, mage_particle_create, 
-                mage_particle_update, data={"interval": MG_FREQ})

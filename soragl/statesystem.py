@@ -26,6 +26,10 @@ class State:
         """Update function"""
         pass
 
+    def end(self):
+        """End function"""
+        pass
+
 
 # -------------------------------------------------- #
 # state handler
@@ -58,6 +62,8 @@ class StateHandler(scene.Component, misc.Dictionary):
     @current.setter
     def current(self, new):
         """Update the current state"""
+        if self._current:
+            self.states[self._current].end()
         self._current = new
         self.states[self._current].start()
 

@@ -245,6 +245,29 @@ class World:
             for entity in self._chunks[chunk]._intrinstic_entities:
                 yield self._scene.get_entity(entity)
 
+    def iter_active_entities_filter_type(self, entity_type: "Type"):
+        """Iterate through the active entities"""
+        for chunk in self._active_chunks:
+            for entity in self._chunks[chunk]._intrinstic_entities:
+                if entity.type == entity_type:
+                    yield self._scene.get_entity(entity)
+
+    def iter_active_entities_filter_type_and_component(
+        self, entity_type: "Type", component: "Component"
+    ):
+        """Iterate through the active entities"""
+        for chunk in self._active_chunks:
+            for entity in self._chunks[chunk]._intrinstic_entities:
+                if entity.type == entity_type and component in entity._components:
+                    yield self._scene.get_entity(entity)
+
+    def iter_active_entities_filter_entity_exclude_self(self, entity_type: "Type", entity: "Entity"):
+        """Iterate through the active entities"""
+        for chunk in self._active_chunks:
+            for e in self._chunks[chunk]._intrinstic_entities:
+                if e.type == entity_type and e != entity:
+                    yield self._scene.get_entity(e)
+
     # == comps
     def add_component(self, entity, component):
         """Add a component to an entity in the world"""

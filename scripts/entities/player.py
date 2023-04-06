@@ -6,6 +6,7 @@ from pygame import math as pgmath
 import soragl as SORA
 from soragl import animation, base_objects, physics, signal, smath
 
+from scripts import singleton
 from scripts.attacks import short_melee
 
 # -------------------------------------------------- #

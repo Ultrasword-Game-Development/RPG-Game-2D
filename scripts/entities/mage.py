@@ -173,10 +173,10 @@ class PostcastState(statesystem.State):
     def shoot_fireball(self):
         # print("added fireball")
         skill = self.handler[PARENT].skhandler.get_skill(fireball.FB_SKILL_NAME)
-        fire = skill.activate(self.handler[PARENT])
-        fire.position = self.handler[PARENT].position
-        fire.velocity = self.handler[PLAYER_DISTANCE_NVEC] * 2
-        self.handler[PARENT].world.add_entity(fire)
+        attack = skill.activate(self.handler[PARENT])
+        attack.position = self.handler[PARENT].position
+        attack.velocity = self.handler[PLAYER_DISTANCE_NVEC] * 2
+        self.handler[PARENT].world.add_entity(attack)
 
 class FlightState(statesystem.State):
     def __init__(self):
@@ -273,6 +273,7 @@ class Mage(physics.Entity):
             pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
             pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position - SORA.OFFSET, PREF_DIS, width=1)
             pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position - SORA.OFFSET, DEF_DISTANCE, width=1)
+
 
 # -------------------------------------------------- #
 # particle handler

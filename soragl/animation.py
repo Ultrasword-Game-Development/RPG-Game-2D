@@ -112,7 +112,7 @@ class SequenceRegistry:
         self.f = 0
         self.fini = 0
         self.fdata = parent.get_frame_data(self.f)
-        self.timer = SORA.get_timer(limit=self.fdata.duration, loop=True)
+        self.timer = misc.Timer(limit=self.fdata.duration, loop=True)
 
     def update(self):
         self.timer.update()

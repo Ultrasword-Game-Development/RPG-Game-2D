@@ -51,7 +51,7 @@ class MeleeRange(attacks.Attack):
         if self.aregist.finished_loops():
             self.kill()
 
-
-
+# ------------- setup ----------- #
+skillhandler.SkillHandler.add_skill(MeleeRangeSkill())
 
 

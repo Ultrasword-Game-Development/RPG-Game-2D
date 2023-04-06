@@ -71,73 +71,36 @@ def get_current_time():
     return START_TIME
 
 
-# ------------------------------------------------ #
+# --------------------------------- #
 # global clock queue
-# ------------------------------------------------ #
+# --------------------------------- #
 
 ALL_CLOCKS = {}
 ACTIVE_CLOCKS = set()
-REMOVE_ARR = set()
+ADD_ARR, REMOVE_ARR = [], [] 
 
 
 def deactivate_timer(timer):
     """Deactivate a timer"""
-    REMOVE_ARR.add(timer.hash)
+    if timer.hash in ACTIVE_CLOCKS:
+        REMOVE_ARR.append(timer.hash)
 
 
 def activate_timer(timer):
     """Activate a timer"""
-    ACTIVE_CLOCKS.add(timer.hash)
-
-
-def get_timer(limit: float = 0, loop: bool = False):
-    """Get a timer object"""
-    c = Timer(limit, loop)
-    ALL_CLOCKS[c.hash] = c
-    activate_timer(c)
-    return c
+    ADD_ARR.append(timer.hash)
 
 
 def update_global_clocks():
     """Update all active clocks"""
+    for a in ADD_ARR:
+        ACTIVE_CLOCKS.add(a)
     for c in ACTIVE_CLOCKS:
         ALL_CLOCKS[c].update()
-    for c in REMOVE_ARR:
-        ACTIVE_CLOCKS.remove(c)
+    for b in REMOVE_ARR:
+        ACTIVE_CLOCKS.remove(b)
+    ADD_ARR.clear()
     REMOVE_ARR.clear()
-
-
-# ------------------------------------------------ #
-# timer class
-# ------------------------------------------------ #
-
-
-class Timer:
-    def __init__(self, limit: float, loop: bool):
-        self.hash = hash(self)
-        self.initial = get_current_time()
-        self.passed = 0
-        self.loopcount = 0
-        self.limit = limit
-        self.loop = loop
-
-    def update(self):
-        """Updates the clock - throws a signal when finished"""
-        self.passed += DELTA
-        # to implement sending signals -- when completed!
-        # print(self.passed)
-        if self.passed > self.limit:
-            # -- emit a signal
-            self.passed = 0
-            self.loopcount += 1
-            if not self.loop:
-                deactivate_timer(self)
-
-    def reset_timer(self, time: float = 0):
-        """Reset the timer"""
-        self.initial = get_current_time()
-        self.passed = 0
-        self.loopcount = 0
 
 
 # ------------------------------------------------ #

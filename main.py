@@ -66,7 +66,7 @@ if SORA.is_flag_active(pygame.OPENGL):
 from scripts import singleton
 
 from scripts.entities import player, mage, particle_scripts
-# from scripts.entities import peasant
+from scripts.entities import peasant
 
 # from scripts.entities import peasant, test
 from scripts.attacks import fireball, attacks, short_melee
@@ -101,6 +101,11 @@ singleton.CAMERA.set_target(singleton.PLAYER)
 _mage = scw.add_entity(mage.Mage())
 _mage.position += (200, 200)
 ph.add_collider(_mage.rect)
+
+# peasant
+_peasant = scw.add_entity(peasant.Peasant())
+_peasant.position += (200, 200)
+ph.add_collider(_peasant.rect)
 
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())
