@@ -22,7 +22,7 @@ class MeleeRangeSkill(skillhandler.Skill):
                         MR_MANA_COST)
 
     def activate(self, *args):
-        return Fire(args[0])
+        return MeleeRange(args[0])
 
 # -------------------------------------------------- #
 # fire class

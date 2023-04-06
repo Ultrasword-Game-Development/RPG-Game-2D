@@ -24,7 +24,6 @@ animation.Category.load_category(ANIM_CAT)
 
 IDLE_STATE = "idle"
 IDLE_MOVE_STATE = "idle-move"
-ALERT_STATE = "alert"
 APPROACH_STATE = "approach"
 ORBIT_STATE = "orbit"
 ATTACK_STATE = "attack"
@@ -40,7 +39,8 @@ MAGE_HOST = "mage_host"
 
 # -------------------------------------------------- #
 # statistics
-MS = 150
+MS = 250
+IDLE_MS = 150
 LC = 0.3
 
 DETECT_RADIUS = 40
@@ -61,7 +61,7 @@ ENVIRO_CHECK_TIMER = 5
 ALERT_DECISION_PAUSE = 0.5
 IDLE_MOVE_PAUSE = 3.0
 
-IDLE_MOVE_PERIOD = 1.4
+IDLE_MOVE_PERIOD = 4.0
 IDLE_MOVE_WAIT = 1.0
 ORBIT_ATTACK_WAIT = 1.5
 RUN_TIME_PERIOD = 1.5
@@ -99,7 +99,7 @@ class IdleState(statesystem.State):
     def update(self):
         # case 1: player enters detect range
         if self.handler[PLAYER_DISTANCE] < DETECT_RADIUS:
-            self.handler.current = ALERT_STATE
+            self.handler.current = APPROACH_STATE
         
     def end(self):
         self._idle_timer.stop()
@@ -116,6 +116,8 @@ class IdleMoveState(statesystem.State):
         self._wait_timer = misc.Timer(IDLE_MOVE_WAIT)
         self._move_receiver = self._move_timer.on_finish(signal.Receiver(self.on_move_finish))
         self._wait_receiver = self._wait_timer.on_finish(signal.Receiver(self.on_wait_finish))
+        # movement direction
+        self._direction = smath.normalized_random_vec2()
 
     def start(self):
         self.handler[PARENT]._current_anim = RUN_ANIM
@@ -127,13 +129,11 @@ class IdleMoveState(statesystem.State):
     def update(self):
         # case 1: player is in range
         if self.handler[PLAYER_DISTANCE] < DETECT_RADIUS:
-            self.handler.current = ALERT_STATE
-        
-        print(self._wait_timer.finished_loops)
-        if self._wait_timer.finished_loops:
+            self.handler.current = APPROACH_STATE
+        # print(self._wait_timer.finished_loops)
+        if self._move_timer.active:
             # calculate movement vector -- idle motion
-            self.handler[PARENT].velocity += smath.normalized_random_vec2() * MS * SORA.DELTA
-
+            self.handler[PARENT].velocity += self._direction * IDLE_MS * SORA.DELTA
     
     def end(self):
         self._move_timer.stop()
@@ -142,12 +142,14 @@ class IdleMoveState(statesystem.State):
         """Called when the move timer finishes"""
         # case 2: movement finishes
         self.handler.current = IDLE_STATE
+        self._direction = smath.normalized_random_vec2()
 
     def on_wait_finish(self, data: dict):
         """Called when the wait timer finishes"""
         # case 3: wait finishes
         self._wait_timer.stop()
         self._move_timer.start()
+
 
 class ApproachState(statesystem.State):
     def __init__(self):
@@ -163,12 +165,12 @@ class ApproachState(statesystem.State):
         # case 1: player leaves range
         if self.handler[PLAYER_DISTANCE] > DETECT_RADIUS:
             self.handler.current = IDLE_STATE
-        # case 2: player is in attack range
+        # case 2: player enters attack range
         elif self.handler[PLAYER_DISTANCE] < ATTACK_RANGE:
-            self.handler.current = ATTACK_STATE
-        # case 3: peasant leaves the mage radius
-        elif self.handler[PARENT].c_collision.get_distance(self.handler[PARENT].c_statehandler[PARENT].c_collision) > MAGE_HOVER_DIS:
             self.handler.current = ORBIT_STATE
+        # case 3: peasant leaves the mage radius
+        elif self.handler[MAGE_HOST] and (self.handler[MAGE_HOST].position - self.handler[PARENT].position).magnitude() > MAGE_HOVER_DIS:
+            self.handler.current = RUN_STATE
 
 
 class OrbitState(statesystem.State):
@@ -214,9 +216,9 @@ class OrbitState(statesystem.State):
     def handle_movement(self):
         """Handles movement for the peasant"""
         # calculate original movement vector from entity to player
-        move_vec = self.handler[PLAYER_DISTANCE_NVEC] * MS
+        move_vec = self.handler[PLAYER_DISTANCE_NVEC] * (self.handler[PLAYER_DISTANCE] - ATTACK_RANGE)
         # calculate avoidance vector
-        avoidance_vec = smath.vec2(0, 0)
+        avoidance_vec = pgmath.Vector2(0.0000001, 0)
         for entity in self.handler[PARENT].world.iter_active_entities_filter_entity_exclude_self(self.handler[PARENT], self):
             # check if within detection range otherwise waste of computational power
             dis = (entity.position - self.handler[PARENT].position).magnitude()
@@ -237,7 +239,7 @@ class RunState(statesystem.State):
 
     def start(self):
         self.handler[PARENT]._current_anim = RUN_ANIM
-        self.handler[PARENT].aregist[RUN_ANIm].reset()
+        self.handler[PARENT].aregist[RUN_ANIM].reset()
         self._run_timer.reset_timer()
         self._run_timer.start()
 
@@ -270,7 +272,7 @@ class Peasant(physics.Entity):
         self.c_collision = base_objects.Collision2DComponent()
         self.c_statehandler = statesystem.StateHandler()
         # timer object for mage detection
-        self._mage_detection_timer = misc.Timer(ENVIRO_CHECK_TIMER)
+        self._mage_detection_timer = misc.Timer(ENVIRO_CHECK_TIMER, True)
         self._mage_detection_receiver = self._mage_detection_timer.on_finish(signal.Receiver(self.on_mage_detection_timer_finish))
         
         # skill tree
@@ -293,6 +295,7 @@ class Peasant(physics.Entity):
 
         # state timers
         self._mage_detection_timer.start()
+        self.on_mage_detection_timer_finish(None)
 
         # add components
         self.add_component(self.c_sprite)
@@ -304,7 +307,7 @@ class Peasant(physics.Entity):
     def update(self):
         # testing
         # self.ph_magic.enable_particles()
-        # print(self.ph_magic.position)
+        print(self.c_statehandler.current)
         self.c_statehandler[PLAYER_DISTANCE_NVEC] = (singleton.PLAYER.position - self.position)
         self.c_statehandler[PLAYER_DISTANCE] = self.c_statehandler[PLAYER_DISTANCE_NVEC].magnitude()
         self.c_statehandler[PLAYER_DISTANCE_NVEC].normalize_ip()
@@ -317,7 +320,7 @@ class Peasant(physics.Entity):
         # MOVEMENT_SIGNAL.emit_signal(velocity=self.velocity, player_distance=self.c_statehandler[PLAYER_DISTANCE])
     
     def script(self):
-        print(self.velocity)
+        # print(self.velocity)
         if SORA.DEBUG:
             pygame.draw.circle(SORA.DEBUGBUFFER, (100, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
             pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 100), self.position - SORA.OFFSET, ATTACK_RANGE, width=1)

@@ -82,6 +82,7 @@ ADD_ARR, REMOVE_ARR = [], []
 
 def deactivate_timer(timer):
     """Deactivate a timer"""
+    print(timer)
     if timer.hash in ACTIVE_CLOCKS:
         REMOVE_ARR.append(timer.hash)
 

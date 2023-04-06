@@ -44,7 +44,7 @@ class ModernGL:
         )
         # create the quad buffer for FB
         print("quad buffer needs to be replaced with custom vao object")
-        cls.FB_VAO = VAO()
+        cls.FB_VAO = VAO(options.get("shader"))
         cls.FB_vBUFFER = Buffer(
             "20f",
             [

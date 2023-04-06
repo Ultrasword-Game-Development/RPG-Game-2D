@@ -249,7 +249,7 @@ class World:
         """Iterate through the active entities"""
         for chunk in self._active_chunks:
             for entity in self._chunks[chunk]._intrinstic_entities:
-                if entity.type == entity_type:
+                if type(e) == entity_type:
                     yield self._scene.get_entity(entity)
 
     def iter_active_entities_filter_type_and_component(
@@ -258,14 +258,14 @@ class World:
         """Iterate through the active entities"""
         for chunk in self._active_chunks:
             for entity in self._chunks[chunk]._intrinstic_entities:
-                if entity.type == entity_type and component in entity._components:
+                if type(e) == entity_type and component in entity._components:
                     yield self._scene.get_entity(entity)
 
     def iter_active_entities_filter_entity_exclude_self(self, entity_type: "Type", entity: "Entity"):
         """Iterate through the active entities"""
         for chunk in self._active_chunks:
             for e in self._chunks[chunk]._intrinstic_entities:
-                if e.type == entity_type and e != entity:
+                if type(e) == entity_type and e != entity:
                     yield self._scene.get_entity(e)
 
     # == comps

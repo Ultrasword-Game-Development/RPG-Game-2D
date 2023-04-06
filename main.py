@@ -148,7 +148,6 @@ while SORA.RUNNING:
     #     for x, frame in enumerate(anim.parent.sprite_sheet.frames):
     #         SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
 
-
     # update signals
     signal.handle_signals()
     # push frame
