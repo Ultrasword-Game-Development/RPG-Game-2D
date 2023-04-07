@@ -2,12 +2,12 @@
 #vertex
 #version 120
 
-in vec3 vvert;
-vec2 vuv;
-vec4 vcolor;
+attribute vec3 vvert;
+attribute vec2 vuv;
+attribute vec4 vcolor;
 
-vec2 fuv;
-vec4 fcolor;
+varying vec2 fuv;
+varying vec4 fcolor;
 
 void main() {
     gl_Position = vec4(vvert, 1.0);
@@ -19,8 +19,8 @@ void main() {
 #fragment
 #version 120
 
-vec2 fuv;
-vec4 fcolor;
+varying vec2 fuv;
+varying vec4 fcolor;
 
 vec4 fragColor;
 
@@ -28,7 +28,6 @@ uniform float utime;
 uniform sampler2D framebuffer, debugbuffer;
 
 vec4 frame, debug, tex;
-
 void main() {
     utime+0.01;
     frame = texture2D(framebuffer, fuv);
@@ -37,4 +36,6 @@ void main() {
     if (debug.a > 0.0)
         tex = debug;
     fragColor = tex;
+    // cringe
+    gl_FragColor = fragColor;
 }

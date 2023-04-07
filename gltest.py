@@ -45,7 +45,6 @@ SORA.initialize(
     }
 )
 
-
 SORA.create_context()
 
 # if moderngl stuff setup
@@ -55,9 +54,11 @@ if SORA.is_flag_active(pygame.OPENGL):
             "standalone": False,
             "gc_mode": "context_gc",
             "clear_color": [0.0, 0.0, 0.0, 1.0],
-            "shader": "assets/shaders/macdefault.glsl"
+            "shader": "assets/shaders/macdefault.glsl",
+            "backend":"egl"
         }
     )
+
 
 # -------------------------------------------------------------- #
 # imports

@@ -37,11 +37,12 @@ class ModernGL:
     @classmethod
     def create_context(cls, options: dict):
         """Creates moderngl context."""
-        cls.CTX = moderngl.create_context(options["standalone"])
+        cls.CTX = moderngl.create_context(options["standalone"], backend=options.get("backend"))
         cls.CTX.gc_mode = options["gc_mode"] if "gc_mode" in options else None
         cls.CLEARCOLOR = (
             options["clear_color"] if "clear_color" in options else ModernGL.CLEARCOLOR
         )
+
         # create the quad buffer for FB
         print("quad buffer needs to be replaced with custom vao object")
         cls.FB_VAO = VAO(options.get("shader"))
