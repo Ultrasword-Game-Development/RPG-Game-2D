@@ -270,9 +270,10 @@ class Mage(physics.Entity):
     def script(self):
         self.ph_magic.position = self.position
         if SORA.DEBUG:
-            pygame.draw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position - SORA.OFFSET, PREF_DIS, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position - SORA.OFFSET, DEF_DISTANCE, width=1)
+            pgdraw.circle(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
+            pgdraw.circle(SORA.DEBUGBUFFER, (0, 0, 255), self.position - SORA.OFFSET, PREF_DIS, width=1)
+            pgdraw.circle(SORA.DEBUGBUFFER, (0, 100, 100), self.position - SORA.OFFSET, DEF_DISTANCE, width=1)
+            pgdraw.line(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, self.position + (self.velocity.normalize() if self.velocity else pgmath.Vector2(0.001, 0)) * 10 - SORA.OFFSET, width=1)
 
 
 # -------------------------------------------------- #

@@ -54,6 +54,7 @@ PEASANT_AVOID_COEF = 0.3
 TARGET_DISTANCE_ERROR_COEF = 0.1
 TARGET_DISTANCE_ERROR = 15
 
+IDLE_MOVE_MAGE_ERROR = 0.4
 IDLE_MOVE_MAGE_WEIGHT = 0.6
 
 # cdt
@@ -142,7 +143,13 @@ class IdleMoveState(statesystem.State):
         """Called when the move timer finishes"""
         # case 2: movement finishes
         self.handler.current = IDLE_STATE
-        self._direction = smath.normalized_random_vec2()
+        if not self.handler[MAGE_HOST]:
+            self._direction = smath.normalized_random_vec2()
+        else:
+            self._direction = smath.weighted_random_vec2(IDLE_MOVE_MAGE_WEIGHT, 
+                        (self.handler[MAGE_HOST].position - self.position).normalize()
+                        , IDLE_MOVE_MAGE_ERROR)
+        # print(self._direction)
 
     def on_wait_finish(self, data: dict):
         """Called when the wait timer finishes"""
@@ -307,7 +314,7 @@ class Peasant(physics.Entity):
     def update(self):
         # testing
         # self.ph_magic.enable_particles()
-        print(self.c_statehandler.current)
+        # print(self.c_statehandler.current)
         self.c_statehandler[PLAYER_DISTANCE_NVEC] = (singleton.PLAYER.position - self.position)
         self.c_statehandler[PLAYER_DISTANCE] = self.c_statehandler[PLAYER_DISTANCE_NVEC].magnitude()
         self.c_statehandler[PLAYER_DISTANCE_NVEC].normalize_ip()
@@ -322,9 +329,10 @@ class Peasant(physics.Entity):
     def script(self):
         # print(self.velocity)
         if SORA.DEBUG:
-            pygame.draw.circle(SORA.DEBUGBUFFER, (100, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (0, 0, 100), self.position - SORA.OFFSET, ATTACK_RANGE, width=1)
-            pygame.draw.circle(SORA.DEBUGBUFFER, (255, 255, 0), self.position - SORA.OFFSET, MAGE_HOVER_DIS, width=1)
+            pgdraw.circle(SORA.DEBUGBUFFER, (100, 0, 0), self.position - SORA.OFFSET, DETECT_RADIUS, width=1)
+            pgdraw.circle(SORA.DEBUGBUFFER, (0, 0, 100), self.position - SORA.OFFSET, ATTACK_RANGE, width=1)
+            pgdraw.circle(SORA.DEBUGBUFFER, (255, 255, 0), self.position - SORA.OFFSET, MAGE_HOVER_DIS, width=1)
+            pgdraw.line(SORA.DEBUGBUFFER, (255, 0, 0), self.position - SORA.OFFSET, self.position - SORA.OFFSET + (self.velocity.normalize() if self.velocity else pgmath.Vector2(0.0001, 0)) * 5, width=1)
 
     def on_mage_detection_timer_finish(self, data: dict):
         self.c_statehandler[MAGE_HOST] = None

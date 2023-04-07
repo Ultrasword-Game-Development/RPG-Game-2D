@@ -41,6 +41,7 @@ class MeleeRange(attacks.Attack):
         # self._phandler = physics.ParticleHandler()
 
     def on_ready(self):
+        self.area = (4, 4)
         super().on_ready()
         # self.add_link(self._phandler)
 

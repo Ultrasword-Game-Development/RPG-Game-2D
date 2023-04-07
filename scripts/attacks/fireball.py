@@ -95,6 +95,7 @@ class Fire(attacks.Attack):
         self._phandler.position = self.position
 
     def on_ready(self):
+        self.area = (8, 8)
         super().on_ready()
         self.add_link(self._phandler)
 

@@ -400,14 +400,14 @@ class VAO:
     SCALAR = 0
     VECTOR = 1
 
-    def __init__(self, shader_path: str = ShaderProgram.DEFAULT):
+    def __init__(self, shader_path: str = None):
         """Creates an empty VAO"""
         self.attributes = []
         self.vbo = None
         self.ibo = None
         self.vao = None
-        self.uniforms = UniformHandler(shader_path)
-        self.shader = shader_path
+        self.shader = ShaderProgram.DEFAULT if not shader_path else shader_path
+        self.uniforms = UniformHandler(self.shader)
         self.initialized = False
 
     def add_attribute(self, parse: str, var_name: str):

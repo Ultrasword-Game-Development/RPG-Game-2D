@@ -41,6 +41,17 @@ def normalized_random_vec2():
     return Vector2(normalized_random(), normalized_random())
 
 
+def weighted_random(weight: float, desired: float, _error: float):
+    """Return a random number that is weighted towrads a certain value"""
+    return desired + (normalized_random() * _error * weight)
+
+
+def weighted_random_vec2(weight: float, desired: tuple, _error: float):
+    """Return a random vector that is weighted towrads a certain value"""
+    return Vector2(weighted_random(weight, desired[0], _error),
+                   weighted_random(weight, desired[1], _error))
+
+
 def rotate_point_about(point: "(x,y)", center: "(x,y)", angle: float) -> "(x,y)":
     """Rotate a point about another point"""
     s, c = math.sin(angle), math.cos(angle)

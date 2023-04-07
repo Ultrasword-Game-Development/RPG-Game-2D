@@ -235,7 +235,6 @@ class Area2D(scene.Component):
         """Detect collision with another shape"""
         pass
 
-
 class Area2DAspect(scene.Aspect):
     def __init__(self):
         super().__init__(Area2D)
@@ -256,33 +255,55 @@ class Area2DAspect(scene.Aspect):
                 "Please add the Collision2DAspect before the Area2DAspect"
             )
 
+    def handle_entity(self, entity):
+        """Handle entity"""
+        if not entity.get_component(Area2D)._collision2D:
+            # move entity around
+            entity.position += entity.velocity
+            entity.rect.center = entity.position
+        # check for collision with each of the active collision2D components
+        for other in self.a_collision2D.iterate_entities():
+            # rect collision between entities
+            if other.static:
+                continue
+            if other.rect.colliderect(entity.rect):
+                # raise a signal?
+                if id(other) in self.overlapped:
+                    entity.get_component(
+                        Area2D
+                    ).overlap_signal_register.emit_signal(overlap=other)
+                else:
+                    entity.get_component(Area2D).enter_signal_register.emit_signal(
+                        entered=other
+                    )
+                    self.overlapped.add(id(other))
+                # print(f"signal: {SORA.ENGINE_UPTIME:.2f}", entity)
+            elif id(other) in self.overlapped:
+                entity.get_component(Area2D).exit_signal_register.emit_signal(exit=other)
+                self.overlapped.remove(id(other))
+
     def handle(self):
         """Handle area2Ds"""
         for entity in self.iterate_entities():
-            if not entity.get_component(Area2D)._collision2D:
-                # move entity around
-                entity.position += entity.velocity
-                entity.rect.center = entity.position
-            # check for collision with each of the active collision2D components
-            for other in self.a_collision2D.iterate_entities():
-                # rect collision between entities
-                if other.static:
-                    continue
-                if other.rect.colliderect(entity.rect):
-                    # raise a signal?
-                    if id(other) in self.overlapped:
-                        entity.get_component(
-                            Area2D
-                        ).overlap_signal_register.emit_signal(other)
-                    else:
-                        entity.get_component(Area2D).enter_signal_register.emit_signal(
-                            other
-                        )
-                        self.overlapped.add(id(other))
-                    # print(f"signal: {SORA.ENGINE_UPTIME:.2f}", entity)
-                elif id(other) in self.overlapped:
-                    entity.get_component(Area2D).exit_signal_register.emit_signal(other)
-                    self.overlapped.remove(id(other))
+            self.handle_entity(entity)
+
+class Area2DRendererAspectDebug(Area2DAspect):
+    def __init__(self):
+        super().__init__()
+
+    def handle(self):
+        """Handle Area2Ds"""
+        for entity in self.iterate_entities():
+            self.handle_entity(entity)
+            # draw debug area for entity
+            rect = pgRect(0, 0, entity.rect.w, entity.rect.h)
+            rect.center = entity.position.xy - SORA.OFFSET
+            pgdraw.rect(
+                SORA.DEBUGBUFFER,
+                (255, 0, 0),
+                rect,
+                1,
+            )
 
 
 # TODO:

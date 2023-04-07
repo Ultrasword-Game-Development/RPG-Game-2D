@@ -47,7 +47,6 @@ SORA.initialize(
     }
 )
 
-
 SORA.create_context()
 
 # if moderngl stuff setup
@@ -104,17 +103,25 @@ ph.add_collider(_mage.rect)
 
 # peasant
 _peasant = scw.add_entity(peasant.Peasant())
-_peasant.position += (200, 200)
+_peasant.position += (150, 100)
 ph.add_collider(_peasant.rect)
 
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
-scw.add_aspect(base_objects.Collision2DAspect())
-# scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
-scw.add_aspect(base_objects.Area2DAspect())
+# scw.add_aspect(base_objects.Collision2DAspect())
+scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
+# scw.add_aspect(base_objects.Area2DAspect())
+scw.add_aspect(base_objects.Area2DRendererAspectDebug())
 scw.add_aspect(base_objects.ScriptAspect())
 scw.add_aspect(statesystem.StateHandlerAspect())
+
+# write a function to add a mage to the world at a random position
+def add_mage():
+    mage = scw.add_entity(mage.Mage())
+    mage.position += (random.randint(0, 100), random.randint(0, 100))
+    ph.add_collider(mage.rect)
+
 
 # push scene
 scene.SceneHandler.push_scene(sc)
