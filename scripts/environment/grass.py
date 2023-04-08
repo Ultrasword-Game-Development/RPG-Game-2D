@@ -66,7 +66,7 @@ class GrassHandler(physics.ParticleHandler):
     def on_ready(self):
         self.area = (self.world._options["chunkpixw"], self.world._options["chunkpixh"])
         super().on_ready()
-        for i in range(5000):
+        for i in range(1000):
             self.add_particle(self._create_func(self))
 
 

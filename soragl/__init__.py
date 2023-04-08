@@ -99,7 +99,7 @@ def update_global_clocks():
     for c in ACTIVE_CLOCKS:
         ALL_CLOCKS[c].update()
     for b in REMOVE_ARR:
-        ACTIVE_CLOCKS.remove(b)
+        if b in ACTIVE_CLOCKS: ACTIVE_CLOCKS.remove(b)
     ADD_ARR.clear()
     REMOVE_ARR.clear()
 

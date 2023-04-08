@@ -67,11 +67,11 @@ class Chunk:
     
     def add_entity(self, entity: "Entity"):
         """Add an entity to the chunk"""
-        self.aq.append(entity)
+        self.aq.append((entity, entity.z))
     
     def remove_entity(self, entity: "Entity"):
         """Remove an entity from the chunk"""
-        self.rq.append(entity)
+        self.rq.append((entity, entity.z))
 
     def __hash__(self):
         """Hash the chunk"""
@@ -91,7 +91,7 @@ class Chunk:
         self.aq.clear()
         self.rq.clear()
         # update all intrinstic entities
-        for entity in self._intrinstic_entities:
+        for entity, z in self._intrinstic_entities:
             self._world._scene._global_entities[entity].update()
 
 # ------------------------------ #
@@ -128,9 +128,9 @@ class Aspect:
             for entity in self._world._components[t]:
                 yield entity
 
+
 # ------------------------------ #
 # components
-
 
 class ComponentHandler:
     COMPONENTS = {}  # comp_hash: comp class

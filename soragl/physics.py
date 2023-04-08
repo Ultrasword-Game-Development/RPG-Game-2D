@@ -57,6 +57,7 @@ class Entity:
         self._projected_position = pgmath.Vector2()
         self._position = pgmath.Vector2()
         self._velocity = pgmath.Vector2()
+        self._z = 0
 
         # public
         self.c_chunk = [0, 0]
@@ -147,6 +148,16 @@ class Entity:
         """Set the velocity for the entity"""
         self._velocity.x = new_velocity[0]
         self._velocity.y = new_velocity[1]
+
+    @property
+    def z(self):
+        """Z property"""
+        return self._z
+
+    @z.setter
+    def z(self, new_z):
+        """Set the z for the entity"""
+        self._z = new_z
 
     #=== links -- between entiites
     @property
