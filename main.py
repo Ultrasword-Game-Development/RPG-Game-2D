@@ -104,10 +104,15 @@ _peasant = scw.add_entity(peasant.Peasant())
 _peasant.position += (150, 100)
 ph.add_collider(_peasant.rect)
 
-# grass
-_grass = grass.GrassHandler("assets/sprites/grass.json")
-scw.add_entity(_grass)
 
+# add grass sprites for chunks in range 1 --> 3
+for x in range(-1, 2):
+    for y in range(-1, 2):
+        # get the chunk
+        _chunk = scw.get_chunk(x, y)
+        _g_asset = grass.GrassHandler("assets/sprites/grass.json")
+        _g_asset.position = _chunk.rect.topleft
+        scw.add_entity(_g_asset)
 
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())
@@ -121,8 +126,6 @@ scw.add_aspect(statesystem.StateHandlerAspect())
 
 # push scene
 scene.SceneHandler.push_scene(sc)
-
-_g_asset = grass.GrassAssets.get_asset("assets/sprites/grass.json")
 
 
 # -------------------------------------------------------------- #

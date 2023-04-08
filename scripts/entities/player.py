@@ -20,8 +20,8 @@ animation.Category.load_category("assets/sprites/player.json")
 
 # -------------------------------------------------- #
 # statistics
-MS = 300
-LC = 0.1
+MS = 500
+LC = 0.3
 
 AREA = (10, 15)
 
