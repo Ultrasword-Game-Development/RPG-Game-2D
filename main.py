@@ -33,7 +33,6 @@ SORA.initialize(
         "fps": 30,
         "window_size": [1280, 720],
         "window_flags": pygame.RESIZABLE
-        | pygame.OPENGL
         | pygame.DOUBLEBUF
         | pygame.HWSURFACE
         | pygame.OPENGL
@@ -69,8 +68,7 @@ from scripts.entities import peasant
 
 # from scripts.entities import peasant, test
 from scripts.attacks import fireball, attacks, short_melee
-
-# from scripts.environment import grass, ambient, wind
+from scripts.environment import grass #, ambient, wind
 
 # -------------------------------------------------------------- #
 
@@ -106,6 +104,11 @@ _peasant = scw.add_entity(peasant.Peasant())
 _peasant.position += (150, 100)
 ph.add_collider(_peasant.rect)
 
+# grass
+_grass = grass.GrassHandler("assets/sprites/grass.json")
+scw.add_entity(_grass)
+
+
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
@@ -116,15 +119,11 @@ scw.add_aspect(base_objects.Area2DRendererAspectDebug())
 scw.add_aspect(base_objects.ScriptAspect())
 scw.add_aspect(statesystem.StateHandlerAspect())
 
-# write a function to add a mage to the world at a random position
-def add_mage():
-    mage = scw.add_entity(mage.Mage())
-    mage.position += (random.randint(0, 100), random.randint(0, 100))
-    ph.add_collider(mage.rect)
-
-
 # push scene
 scene.SceneHandler.push_scene(sc)
+
+_g_asset = grass.GrassAssets.get_asset("assets/sprites/grass.json")
+
 
 # -------------------------------------------------------------- #
 # game loop
@@ -140,6 +139,10 @@ while SORA.RUNNING:
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
 
+    # # render out frames from grasshandler assets
+    # for x, frame in enumerate(_g_asset._rsequence):
+    #     SORA.FRAMEBUFFER.blit(frame.frame, (x * 16, 100))
+
     # # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
     # for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):
     #     for x, frame in enumerate(anim.parent.sprite_sheet.frames):
@@ -154,6 +157,7 @@ while SORA.RUNNING:
     # for y, anim in enumerate(animation.Category.get_registries_for_all(short_melee.M_ANIM_CAT).values()):
     #     for x, frame in enumerate(anim.parent.sprite_sheet.frames):
     #         SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
+
 
     # update signals
     signal.handle_signals()

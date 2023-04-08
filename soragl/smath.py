@@ -52,6 +52,11 @@ def weighted_random_vec2(weight: float, desired: tuple, _error: float):
                    weighted_random(weight, desired[1], _error))
 
 
+def random_range_vec2(lmax: int, rmax: int):
+    """Return a random vector between two vectors"""
+    return Vector2(np.random.uniform(0, lmax), np.random.uniform(0, rmax))
+
+
 def rotate_point_about(point: "(x,y)", center: "(x,y)", angle: float) -> "(x,y)":
     """Rotate a point about another point"""
     s, c = math.sin(angle), math.cos(angle)

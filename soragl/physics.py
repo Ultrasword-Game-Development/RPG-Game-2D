@@ -295,11 +295,25 @@ class ParticleHandler(Entity):
     # class
 
     def __init__(self, args: dict = {}, max_particles: int = 100, create_func: str = None, update_func: str = None, create_timer_func: str = None, handler_type: str = None):
+        """
+        args: dict = {}
+        - contains a dict of arguments
+        - arguments are passed in the create function - as kwargs
+        """
         super().__init__()
         if handler_type:
             create_func = handler_type if handler_type in self.CREATE else self.DEFAULT_CREATE
             update_func = handler_type if handler_type in self.UPDATE else self.DEFAULT_UPDATE
             create_timer_func = handler_type if handler_type in self.TIMER_FUNC else self.DEFAULT_TIMER
+        else:
+            if not create_func:
+                create_func = self.DEFAULT_CREATE
+            if not update_func:
+                update_func = self.DEFAULT_UPDATE
+            if not create_timer_func:
+                create_timer_func = self.DEFAULT_TIMER
+        # print(create_func, update_func, create_timer_func)
+        # check if other variables are set
         # private
         self._create = True
         self._particles = {}
@@ -401,6 +415,10 @@ class ParticleHandler(Entity):
         """Enable particles"""
         self._create = True
 
+    def add_particle(self, particle):
+        """Add a particle"""
+        self._particles[particle[-1]] = particle
+
     # ------------------------------ #
     def update(self):
         """Update the Particle Handler"""
@@ -438,7 +456,7 @@ def _default_create(parent, **kwargs):
             parent.get_new_particle_id()]
 
 # update function
-def _default_update(parent, particle):
+def _default_update(parent, particle: list):
     """Default update function for particles"""
     # gravity
     particle[1] += World2D.GRAVITY * SORA.DELTA
