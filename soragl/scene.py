@@ -205,7 +205,7 @@ class World:
         # update active chunks
         self.set_center_chunk(0, 0)
 
-    # == entitiy
+    # == entity
     def get_entity(self, entity):
         """Get the entity -- from the GLOBAL entity handler"""
         return self.scene.get_entity(entity)
