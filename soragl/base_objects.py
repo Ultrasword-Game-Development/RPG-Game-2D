@@ -18,8 +18,17 @@ from pygame import transform as pgtrans
 """
 
 # ------------------------------------------------------------ #
-# errors
+# update order keywords
+# greater == first
 
+R_PHYSICS = 10
+R_POST_PHYSICS = 9
+R_SCRIPT = 8
+R_RENDER = 5
+
+
+# ------------------------------------------------------------ #
+# errors
 
 class MissingComponent(Exception):
     def __init__(self, *args):
@@ -158,51 +167,44 @@ class SpriteRenderer(scene.Component):
 class SpriteRendererAspect(scene.Aspect):
     def __init__(self):
         super().__init__(SpriteRenderer)
-        self.priority = 0
+        self.priority = R_RENDER
+    
+    def handle_entity(self, entity):
+        """Render a sprite entity"""
+        c_sprite = entity.get_component(SpriteRenderer)._sprite
+        if not c_sprite.sprite:
+            return
+        # get sprite
+        _sprite = c_sprite.sprite if not c_sprite.flip else pgtrans.flip(
+            c_sprite.sprite, True, False
+        )
+        # render the sprite
+        if c_sprite.scale_size:
+            SORA.FRAMEBUFFER.blit(
+                pgtrans.scale(_sprite, c_sprite.scale_size),
+                entity.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET,
+            )
+            return
+        SORA.FRAMEBUFFER.blit(
+            _sprite, entity.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET
+        )
+        # print(pos - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET)
 
     def handle(self):
         """Render the sprites"""
         for e in self.iterate_entities():
             # get the sprite
-            # print(e._components)
-            c_sprite = e.get_component(SpriteRenderer)._sprite
-            if not c_sprite.sprite:
-                continue
-            # get sprite
-            _sprite = c_sprite.sprite if not c_sprite.flip else pgtrans.flip(
-                c_sprite.sprite, True, False
-            )
-            # render the sprite
-            if c_sprite.scale_size:
-                SORA.FRAMEBUFFER.blit(
-                    pgtrans.scale(_sprite, c_sprite.scale_size),
-                    e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET,
-                )
-                continue
-            SORA.FRAMEBUFFER.blit(
-                _sprite, e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET
-            )
-            # print(pos - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET)
+            self.handle_entity(e)
 
 
-class SpriteRendererAspectDebug(scene.Aspect):
+class SpriteRendererAspectDebug(SpriteRendererAspect):
     def __init__(self):
-        super().__init__(SpriteRenderer)
-        self.priority = 0
+        super().__init__()
 
     def handle(self):
         """Render the sprites"""
         for e in self.iterate_entities():
-            # get the sprite
-            c_sprite = e.get_component(SpriteRenderer)._sprite
-            # print(c_sprite)
-            if not c_sprite or not c_sprite.sprite:
-                continue
-            # print(c_sprite)
-            # render the sprite
-            SORA.FRAMEBUFFER.blit(
-                c_sprite.sprite, e.position - (c_sprite.hwidth, c_sprite.hheight) - SORA.OFFSET
-            )
+            self.handle_entity(e)
             pgdraw.rect(
                 SORA.DEBUGBUFFER,
                 (0, 0, 255),
@@ -237,10 +239,9 @@ class Area2D(scene.Component):
 
 class Area2DAspect(scene.Aspect):
     def __init__(self):
-        super().__init__(Area2D)
+        super().__init__(Area2D, priority=R_POST_PHYSICS)
         # ensures runs after collsion2D aspect
         # since we want to use updated positions of entities in world -- for area2D detection
-        self.priority = 18
         self.a_collision2D = None
         self.overlapped = set()
 
@@ -354,8 +355,7 @@ class Collision2DComponent(scene.Component):
 
 class Collision2DAspect(scene.Aspect):
     def __init__(self):
-        super().__init__(Collision2DComponent)
-        self.priority = 19
+        super().__init__(Collision2DComponent, priority=R_PHYSICS)
         # private
         self._handler_aspect = (
             None  # to be set after in 'on_add' of the collision2dhandleraspect
@@ -469,8 +469,7 @@ class Script(scene.Component):
 
 class ScriptAspect(scene.Aspect):
     def __init__(self):
-        super().__init__(Script)
-        self.priority = 2
+        super().__init__(Script, priority=R_SCRIPT)
 
     def handle(self):
         for e in self.iterate_entities():
@@ -523,7 +522,7 @@ class TileMap(scene.Aspect):
     WORLD_KEY = "tilemap"
 
     def __init__(self):
-        super().__init__(None)
+        super().__init__(None, priority=R_RENDER)
         # private
         self._tsize = [0, 0]
         self._chunk_tile_area = [0, 0]
@@ -812,14 +811,15 @@ For use in opengl based applications / games! -- not pygame 2D
 
 
 # 2D camera
-class Camera2D(physics.Entity):
+class Camera2D(physics.Entity, scene.Component):
     def __init__(self):
         """
         Camera Constructor:
         contains:
         - position
         """
-        super().__init__()
+        super(physics.Entity, self).__init__(self)
+        print(dir(self))
         self.campos = pgmath.Vector2(0, 0)
         # ----------------------------------- #
         # viewport size
