@@ -55,7 +55,6 @@ if SORA.is_flag_active(pygame.OPENGL):
             "gc_mode": "context_gc",
             "clear_color": [0.0, 0.0, 0.0, 1.0],
             "shader": "assets/shaders/macdefault.glsl",
-            "backend":"egl"
         }
     )
 
