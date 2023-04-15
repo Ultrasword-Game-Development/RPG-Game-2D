@@ -51,6 +51,7 @@ class Entity:
         # private
         self._components = {}
         self._linked_entities = [] # links for linked entities
+        self._data = {}
         self._alive = True
         Entity.ENTITY_COUNT += 1
         self._entity_id = Entity.ENTITY_COUNT
@@ -93,11 +94,11 @@ class Entity:
             return self._components[comp_class_hash]
         return None
     
-    def get_component(self, comp_class):
+    def get_component(self, comp_class: int):
         """Get a component from the entity"""
         return self.get_component_from_hash(hash(comp_class))
 
-    def entity_has_component(self, comp_class):
+    def entity_has_component(self, comp_class: int):
         """Check if an entity has a component"""
         return hash(comp_class) in self._components
 
@@ -185,6 +186,13 @@ class Entity:
         """Overload the hash operator"""
         return self._entity_id
 
+    def __getitem__(self, key: "object"):
+        """Get an item from data dict"""
+        return self._data[key]
+    
+    def __setitem__(self, key: "object", value: "object"):
+        """Set a value wwithin the data dict"""
+        self._data[key] = value
 
 # ------------------------------------------------------------ #
 # SAT - check if colliding objects

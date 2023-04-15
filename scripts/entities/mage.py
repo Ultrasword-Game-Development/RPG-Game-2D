@@ -250,7 +250,7 @@ class Mage(physics.Entity):
         self.add_component(base_objects.SpriteRenderer())
         self.add_component(self.c_collision)
         self.add_component(self.c_statehandler)
-        self.add_component(base_objects.Script())
+        self.add_component(base_objects.Script(self.script))
 
     def update(self):
         # testing

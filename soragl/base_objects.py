@@ -457,14 +457,17 @@ class Collision2DRendererAspectDebug(Collision2DAspect):
 # renderable
 
 class Script(scene.Component):
-    def __init__(self):
+    def __init__(self, func: "function", args: "list" = None):
         super().__init__()
+        self._func = func
+        self._args = args if args else ()
 
     def on_add(self):
-        if not "script" in dir(self._entity):
-            raise NotImplementedError(
-                self._entity, "doesn't have `script` function"
-            )
+        # if not "script" in dir(self._entity):
+        #     raise NotImplementedError(
+        #         self._entity, "doesn't have `script` function"
+        #     )
+        pass
 
 
 class ScriptAspect(scene.Aspect):
@@ -473,8 +476,8 @@ class ScriptAspect(scene.Aspect):
 
     def handle(self):
         for e in self.iterate_entities():
-            e.script()
-
+            _sc = e.get_component(Script)
+            _sc._func(*_sc._args)
 
 # ------------------------------ #
 # 
@@ -811,53 +814,57 @@ For use in opengl based applications / games! -- not pygame 2D
 
 
 # 2D camera
-class Camera2D(physics.Entity, scene.Component):
+class Camera2D(scene.Component):
+
     def __init__(self):
         """
         Camera Constructor:
         contains:
         - position
         """
-        super(physics.Entity, self).__init__(self)
-        print(dir(self))
+        super().__init__()
+        self._position = pgmath.Vector2(0, 0)
+        self.c_chunk = [0, 0]
         self.campos = pgmath.Vector2(0, 0)
         # ----------------------------------- #
         # viewport size
         self.viewport = pgRect(0, 0, SORA.FSIZE[0], SORA.FSIZE[1])
-
         # target info + cache
         self.target = None
+        self._script = Script(self.update)
     
     def on_ready(self):
         """Called when the camera is ready"""
-        pass
+        self.add_component(self._script)
 
     def update(self):
         """Track an entity target and center them"""
         if not self.target: return
         # get world position
-        self.position = self.target._position.xy
-        self.viewport.center = tuple(map(int, self.position.xy))
+        self._position = self.target._position.xy
+        self.viewport.center = tuple(map(int, self._position.xy))
         # update eglob offset
-        SORA.set_offset(self.position.x - SORA.FHSIZE[0], self.position.y - SORA.FHSIZE[1])
+        SORA.set_offset(self._position.x - SORA.FHSIZE[0], self._position.y - SORA.FHSIZE[1])
         # update chunk position -- if moved to new chunk
         nchunk = [
-            int(self._position.x) // self.world._options["chunkpixw"],
-            int(self._position.y) // self.world._options["chunkpixh"],
+            int(self._position.x) // self._entity.world._options["chunkpixw"],
+            int(self._position.y) // self._entity.world._options["chunkpixh"],
         ]
         # update world center
         if nchunk != self.c_chunk:
-            self.world.update_entity_chunk(self, self.c_chunk, nchunk)
             self.c_chunk[0:2] = nchunk
-            self.world.set_center_chunk(self.c_chunk[0], self.c_chunk[1])
+            self._entity.world.set_center_chunk(self.c_chunk[0], self.c_chunk[1])
     
     def set_target(self, target):
         """Set a target"""
+        if self.target: self.target.remove_component(self._script)
         self.target = target
+        self.target.add_component(self._script)
 
     def get_target_rel_pos(self):
         """Get the raget relative position"""
         return -self.target.position + SORA.OFFSET
+
 
 
 # ortho

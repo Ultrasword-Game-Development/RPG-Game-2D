@@ -489,8 +489,9 @@ class Scene:
             # add components + etc
             # register components in world
             w = pack.world
-            for comp in pack.components:
-                w.add_component(entity, comp)
+            # for comp in pack.components:
+            #     print(comp)
+            #     w.add_component(pack, comp)
             # add to chunk
             c = w.get_chunk(
                 pack.position.x // w._options["chunkpixw"],

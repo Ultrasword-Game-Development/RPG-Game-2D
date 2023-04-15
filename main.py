@@ -87,8 +87,8 @@ ph.position += (100, 100)
 ph["interval"] = 1 / 15
 
 # === singletons
-singleton.CAMERA = scw.add_entity(base_objects.Camera2D())
-singleton.PLAYER = singleton.CAMERA.add_link(player.Player())
+singleton.PLAYER = scw.add_entity(player.Player())
+singleton.CAMERA = singleton.PLAYER.add_component(base_objects.Camera2D())
 # player
 singleton.PLAYER.position += (100, 100)
 ph.add_collider(singleton.PLAYER.rect)
