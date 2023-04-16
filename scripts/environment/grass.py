@@ -89,7 +89,7 @@ def _update_grass(parent, blade: list):
     # parent.assets.f = blade[G_VARIATION]
     # parent.assets._raregist.angle = blade[G_ANGLE]
     fdata = parent.assets._rsequence.get_frame_data(blade[G_VARIATION], blade[G_ANGLE])
-    SORA.FRAMEBUFFER.blit(fdata.get_frame(), blade[G_POSITION] - (fdata.area[0]/2, fdata.area[1]/2) - SORA.OFFSET)
+    SORA.FRAMEBUFFER.blit(fdata.get_frame(), blade[G_POSITION] - (fdata.area[0]/2, fdata.area[1]/2) - SORA.iOFFSET)
 
 def _create_timer_grass(parent, **kwargs):
     pass

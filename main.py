@@ -68,7 +68,7 @@ from scripts.entities import peasant
 
 # from scripts.entities import peasant, test
 from scripts.attacks import fireball, attacks, short_melee
-from scripts.environment import grass #, ambient, wind
+from scripts.environment import grass  # , ambient, wind
 
 # -------------------------------------------------------------- #
 
@@ -93,6 +93,7 @@ singleton.CAMERA = singleton.PLAYER.add_component(base_objects.Camera2D())
 singleton.PLAYER.position += (100, 100)
 ph.add_collider(singleton.PLAYER.rect)
 singleton.CAMERA.set_target(singleton.PLAYER)
+singleton.CAMERA.active = True
 
 # mage
 _mage = scw.add_entity(mage.Mage())
@@ -117,12 +118,13 @@ for x in range(-1, 2):
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())
 scw.add_aspect(base_objects.SpriteRendererAspect())
-# scw.add_aspect(base_objects.Collision2DAspect())
-scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
+scw.add_aspect(base_objects.Collision2DAspect())
+# scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
 # scw.add_aspect(base_objects.Area2DAspect())
 scw.add_aspect(base_objects.Area2DRendererAspectDebug())
 scw.add_aspect(base_objects.ScriptAspect())
 scw.add_aspect(statesystem.StateHandlerAspect())
+scw.add_aspect(base_objects.CameraAspect())
 
 # push scene
 scene.SceneHandler.push_scene(sc)
@@ -160,7 +162,6 @@ while SORA.RUNNING:
     # for y, anim in enumerate(animation.Category.get_registries_for_all(short_melee.M_ANIM_CAT).values()):
     #     for x, frame in enumerate(anim.parent.sprite_sheet.frames):
     #         SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
-
 
     # update signals
     signal.handle_signals()

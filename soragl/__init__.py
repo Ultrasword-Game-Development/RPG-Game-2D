@@ -39,7 +39,7 @@ ENGINE_START_TIME = 0
 
 START_TIME = 0
 END_TIME = 0
-DELTA = 0
+DELTA = 1
 
 
 def start_engine_time():
@@ -47,7 +47,6 @@ def start_engine_time():
     global ENGINE_START_TIME, START_TIME, END_TIME, DELTA
     ENGINE_START_TIME = time.time()
     START_TIME = ENGINE_START_TIME
-    update_time()
 
 
 def update_time():

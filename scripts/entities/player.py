@@ -20,8 +20,8 @@ animation.Category.load_category("assets/sprites/player.json")
 
 # -------------------------------------------------- #
 # statistics
-MS = 500
-LC = 0.3
+MS = 650
+LC = 0.7
 
 AREA = (10, 15)
 
@@ -59,7 +59,7 @@ class Player(physics.Entity):
 
     def update(self):
         self.aregist[self._current_anim].update()
-        self.velocity = smath.v2lerp(self.velocity, (0, 0), LC)
+        self.velocity = smath.v2lerp(self.velocity, (0, 0), LC / SORA.DELTA / 100)
         # movement
         if SORA.is_key_pressed(pygame.K_d):
             self.velocity.x += MS * SORA.DELTA
