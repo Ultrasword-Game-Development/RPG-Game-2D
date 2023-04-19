@@ -75,7 +75,7 @@ from scripts.environment import grass  # , ambient, wind
 sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
 sc._config["chunkpixw"] = 300
 sc._config["chunkpixh"] = 300
-sc._config["render_distance"] = 5
+sc._config["render_distance"] = 2
 scw = sc.make_layer(sc.get_config(), 1)
 # scw.get_chunk(0, 0)
 BG_COL = (153, 220, 80)

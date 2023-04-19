@@ -131,7 +131,8 @@ class Aspect:
         # print(self._world._components[self._target])
         for t in self._targets:
             for entity in self._world._components[t]:
-                yield entity
+                if entity in self._world._scene._global_entities:
+                    yield entity
 
 
 # ------------------------------ #
@@ -334,6 +335,7 @@ class World:
                 self._center_chunk[1] + self.render_distance + 1,
             ):
                 self._active_chunks.add(hash(self.get_chunk(i, j)))
+        print(len(self._active_chunks))
 
     def get_chunk(self, x: int, y: int):
         """Get the chunk"""
