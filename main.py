@@ -143,6 +143,10 @@ while SORA.RUNNING:
 
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
+    
+    if SORA.is_key_clicked(pygame.K_a):
+        # play test audio
+        SORA.play_audio("assets/audio/mage-power-up.wav", "main")
 
     # # render out frames from grasshandler assets
     # for x, frame in enumerate(_g_asset._rsequence):

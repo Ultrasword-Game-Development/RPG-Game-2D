@@ -125,6 +125,7 @@ MODERNGL = False
 def initialize(options: dict = {}) -> None:
     """Initialize Sora Engine with options"""
     global FPS, WSIZE, WFLAGS, WBITS, FFLAGS, FSIZE, FHSIZE, FBITS, MODERNGL, DEBUG
+    pygame.init()
     FPS = options["fps"] if "fps" in options else 60
     WSIZE = options["window_size"] if "window_size" in options else [1280, 720]
     WFLAGS = (
@@ -146,6 +147,10 @@ def initialize(options: dict = {}) -> None:
     MODERNGL = is_flag_active(pygame.OPENGL)
     if MODERNGL:
         from . import mgl
+    
+    # pygame mixer
+    make_channel("main")
+    make_channel("sfx")
 
 
 # check if certain flags are active
