@@ -37,7 +37,7 @@ class GrassAssets:
         # variations
         self.rotations = (self.rotation_range[1] - self.rotation_range[0]) // self.rotation_range[2]
         self.var_length = len(self._sequence)
-        print(self.var_length, self.rotations)
+        # print(self.var_length, self.rotations)
     
     def get_dimensions(self, image_set: int):
         """Get image dimensions for the i-th image set"""

@@ -60,7 +60,7 @@ class Chunk:
         cpw, cph = options["chunkpixw"], options["chunkpixh"]
         self.rect = pygame.Rect(x * cpw, y * cph, cpw, cph)
 
-    def _add_entity(self, entity: "Entity"):
+    def _add_entity(self, entity: ("Entity", int) ):
         """Add an entity to the chunk"""
         self._intrinstic_entities.add(entity)
 
@@ -223,7 +223,7 @@ class World:
         """Remove an entity from the world"""
         self._scene.remove_entity(entity)
 
-    def add_entity(self, entity):
+    def add_entity(self, entity: "Entity"):
         """Add an entity to the world"""
         entity.world = self
         self._scene.add_entity(entity)
@@ -241,10 +241,10 @@ class World:
         # update entity
         entity.c_chunk[0], entity.c_chunk[1] = new
 
-    def is_entity_active(self, entity):
+    def is_entity_active(self, entity: "Entity"):
         """Check if the entity is active"""
         for chunk in self._active_chunks:
-            if entity in self._chunks[chunk]._intrinstic_entities:
+            if (entity, 0) in self._chunks[chunk]._intrinstic_entities:
                 return True
         return False
 
@@ -335,7 +335,7 @@ class World:
                 self._center_chunk[1] + self.render_distance + 1,
             ):
                 self._active_chunks.add(hash(self.get_chunk(i, j)))
-        print(len(self._active_chunks))
+        # print(len(self._active_chunks))
 
     def get_chunk(self, x: int, y: int):
         """Get the chunk"""
@@ -493,7 +493,7 @@ class Scene:
         self._layers.sort(key=lambda x: x.priority, reverse=True)
         return layer
 
-    def add_entity(self, entity):
+    def add_entity(self, entity: "Entity"):
         """Add an entity to the scene"""
         entity.scene = self
         # IMPORTANT: added but should not be updatable!!
@@ -534,9 +534,6 @@ class Scene:
             # add components + etc
             # register components in world
             w = pack.world
-            # for comp in pack.components:
-            #     print(comp)
-            #     w.add_component(pack, comp)
             # add to chunk
             c = w.get_chunk(
                 pack.position.x // w._options["chunkpixw"],

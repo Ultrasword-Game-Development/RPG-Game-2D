@@ -40,6 +40,8 @@ PLAYER_DISTANCE_NVEC = "player_dis_normvec"
 PLAYER_DISTANCE = "player_dis"
 PARENT = "parent"
 
+CASTING_SFX = "assets/audio/mage-power-up.wav"
+
 # -------------------------------------------------- #
 # statistics
 MS = 150
@@ -140,6 +142,8 @@ class CastingState(statesystem.State):
         self.handler[PARENT].ph_magic.enable_particles()
         self.handler[PARENT].aregist[CASTING_ANIM].reset()
         self.handler[PARENT]._current_anim = CASTING_ANIM
+        # play audio
+        SORA.play_audio(CASTING_SFX)
 
     def update(self):
         # print(self.name, self.casting_cdr)
@@ -177,6 +181,8 @@ class PostcastState(statesystem.State):
         attack.position = self.handler[PARENT].position
         attack.velocity = self.handler[PLAYER_DISTANCE_NVEC] * 2
         self.handler[PARENT].world.add_entity(attack)
+        # attack.add_component(base_objects.Script(lambda e: print(e.position), (attack,)))
+
 
 class FlightState(statesystem.State):
     def __init__(self):

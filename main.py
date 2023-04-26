@@ -73,8 +73,8 @@ from scripts.environment import grass  # , ambient, wind
 # -------------------------------------------------------------- #
 
 sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
-sc._config["chunkpixw"] = 300
-sc._config["chunkpixh"] = 300
+sc._config["chunkpixw"] = 500
+sc._config["chunkpixh"] = 500
 sc._config["render_distance"] = 2
 scw = sc.make_layer(sc.get_config(), 1)
 # scw.get_chunk(0, 0)
@@ -111,7 +111,7 @@ for x in range(-1, 2):
     for y in range(-1, 2):
         # get the chunk
         _chunk = scw.get_chunk(x, y)
-        _g_asset = grass.GrassHandler("assets/sprites/grass.json")
+        _g_asset = grass.GrassHandler("assets/sprites/grass.json", grass_count=100)
         _g_asset.position = _chunk.rect.topleft
         scw.add_entity(_g_asset)
 
@@ -143,10 +143,6 @@ while SORA.RUNNING:
 
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
-    
-    if SORA.is_key_clicked(pygame.K_a):
-        # play test audio
-        SORA.play_audio("assets/audio/mage-power-up.wav", "main")
 
     # # render out frames from grasshandler assets
     # for x, frame in enumerate(_g_asset._rsequence):

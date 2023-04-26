@@ -409,7 +409,12 @@ def load_audio(path):
     return AUDIO[path]
 
 
-def play_audio(path, channel):
+def play_audio(path, loops: int = 0, maxtime: int = 0, fade_ms: int = 0):
+    """Plays audio."""
+    load_audio(path).play(loops, maxtime, fade_ms)
+
+
+def play_audio_in_channel(path, channel):
     """Plays audio on channel."""
     CHANNELS[channel].play(load_audio(path))
 
