@@ -66,7 +66,7 @@ class GrassHandler(physics.ParticleHandler):
     def on_ready(self):
         self.area = (self.world._options["chunkpixw"], self.world._options["chunkpixh"])
         super().on_ready()
-        for i in range(1000):
+        for i in range(self._max_particles):
             self.add_particle(self._create_func(self))
 
 
@@ -98,4 +98,3 @@ def _create_timer_grass(parent, **kwargs):
 physics.ParticleHandler.register_timer_function(GRASS_PARTICLE_HANDLER_SYSTEM, _create_timer_grass)
 physics.ParticleHandler.register_create_function(GRASS_PARTICLE_HANDLER_SYSTEM, _create_grass)
 physics.ParticleHandler.register_update_function(GRASS_PARTICLE_HANDLER_SYSTEM, _update_grass)
-

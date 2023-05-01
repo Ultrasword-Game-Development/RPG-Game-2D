@@ -129,6 +129,7 @@ scw.add_aspect(base_objects.CameraAspect())
 # push scene
 scene.SceneHandler.push_scene(sc)
 
+_g_asset = grass.GrassAssets("assets/sprites/grass.json")
 
 # -------------------------------------------------------------- #
 # game loop
@@ -144,9 +145,9 @@ while SORA.RUNNING:
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
 
-    # # render out frames from grasshandler assets
-    # for x, frame in enumerate(_g_asset._rsequence):
-    #     SORA.FRAMEBUFFER.blit(frame.frame, (x * 16, 100))
+    # render out frames from grasshandler assets
+    for x, frame in enumerate(_g_asset._rsequence):
+        SORA.FRAMEBUFFER.blit(frame.frame, (x * 16, 100))
 
     # # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
     # for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):
@@ -161,7 +162,7 @@ while SORA.RUNNING:
     # # render out frames from animation.Category.get_registries_for_all(short_melee.M_ANIM_CAT)
     # for y, anim in enumerate(animation.Category.get_registries_for_all(short_melee.M_ANIM_CAT).values()):
     #     for x, frame in enumerate(anim.parent.sprite_sheet.frames):
-    #         SORA.FRAMEBUFFER.blit(frame.get_frame(), (x * 16, y * 16))
+    #         SORA.FRAMEBUFFER.blit(frame.getc_frame(), (x * 16, y * 16))
 
     # update signals
     signal.handle_signals()
