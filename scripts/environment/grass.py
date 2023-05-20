@@ -4,6 +4,7 @@ import pygame.transform as pgtrans
 
 import soragl as SORA
 from soragl import animation, physics, misc, smath
+from soragl import mgl_ext, mgl
 
 # -------------------------------------------------- #
 # grass assets
@@ -62,12 +63,37 @@ class GrassHandler(physics.ParticleHandler):
         # add variables
         self["position"] = self.position
         self["area"] = self.area
+        # ------------------------------ #
+        # create moderngl objects
+        self._batch = mgl_ext.BatchRenderer("assets/shaders/grass.glsl", "f", object_count=grass_count, dynamic=False)
+        for i, img in enumerate(self.assets._raregist.iterate_sprites()):
+            self._batch._texhandler.add_texture(mgl.Texture.pg2gltex(img, f"{self.assets._file}-{i}"))
+
 
     def on_ready(self):
         self.area = (self.world._options["chunkpixw"], self.world._options["chunkpixh"])
+        # update data for batch renderer
+        self._batch._vao.add_attribute("3f", "vvert")
+        self._batch._vao.add_attribute("1f", "vscale")
+        self._batch._vao.add_attribute("1f", "vtex")
+        # create grass particles
         super().on_ready()
         for i in range(self._max_particles):
             self.add_particle(self._create_func(self))
+        # create the batch renderer
+        self._batch.create()
+
+# -------------------------------------------------- #
+
+# TODO __ LOOK AT THIS IPAHD PIWAPID HAWPIDH IPAWHD PAWH 
+# PADHJ APWDHJ PAHWDP HAWPD HAWP dh
+# ADD in SHADERS + CAMERA + ETC :((((
+
+# TODO -- get create_grass --> add to batch renderer
+# figure out how to update vertex buffer
+# rendering the buffers
+
+# -------------------------------------------------- #
 
 
 # particle handler functions

@@ -9,6 +9,8 @@ import pygame
 import soragl as SORA
 from soragl import scene, signal
 
+import numpy as np
+
 # ------------------------------------------------------------ #
 # misc functions!
 """
@@ -26,7 +28,6 @@ def fwrite(path, data: str):
     with open(path, 'w') as f:
         f.write(data)
 
-
 def recursive_retrieve_parent_classes(obj, level=0):
     """Recursively retrieve all parent classes of an object"""
     result = []
@@ -38,6 +39,19 @@ def recursive_retrieve_parent_classes(obj, level=0):
             result.append(base)
             result += recursive_retrieve_parent_classes(base, level + 1)
     return result
+
+
+# ------------------------------------------------------------ #
+# misc opengl functions
+
+def n_generate_index_iteration(o_count: int) -> np.ndarray:
+    """Generate the index iteration for a vertex count and object count"""
+    # TODO - find a way to generate for MULTIPLE vertices objects
+    v_count = 6
+    buf = np.zeros(o_count*v_count, dtype=np.int32)
+    for i in range(0, v_count * o_count, v_count):
+        buf[i:i+v_count] = [i, i+1, i+2, i+3, i, i+2]
+    return buf
 
 
 # ------------------------------------------------------------ #

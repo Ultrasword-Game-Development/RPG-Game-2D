@@ -80,40 +80,27 @@ scw = sc.make_layer(sc.get_config(), 1)
 # scw.get_chunk(0, 0)
 BG_COL = (153, 220, 80)
 
-# -- add entities
-# particle handler test
-ph = scw.add_entity(particle_scripts.GravityParticleHandler(color=(255, 0, 0), life=3))
-ph.position += (100, 100)
-ph["interval"] = 1 / 15
-
 # === singletons
 singleton.PLAYER = scw.add_entity(player.Player())
 singleton.CAMERA = singleton.PLAYER.add_component(base_objects.Camera2D())
 # player
 singleton.PLAYER.position += (100, 100)
-ph.add_collider(singleton.PLAYER.rect)
 singleton.CAMERA.set_target(singleton.PLAYER)
 singleton.CAMERA.active = True
 
-# mage
-_mage = scw.add_entity(mage.Mage())
-_mage.position += (200, 200)
-ph.add_collider(_mage.rect)
 
-# peasant
-_peasant = scw.add_entity(peasant.Peasant())
-_peasant.position += (150, 100)
-ph.add_collider(_peasant.rect)
+
+
+
+
 
 
 # add grass sprites for chunks in range 1 --> 3
-for x in range(-1, 2):
-    for y in range(-1, 2):
-        # get the chunk
-        _chunk = scw.get_chunk(x, y)
-        _g_asset = grass.GrassHandler("assets/sprites/grass.json", grass_count=100)
-        _g_asset.position = _chunk.rect.topleft
-        scw.add_entity(_g_asset)
+# get the chunk
+_chunk = scw.get_chunk(0, 0)
+_g_asset = grass.GrassHandler("assets/sprites/grass.json", grass_count=100)
+_g_asset.position = _chunk.rect.topleft
+scw.add_entity(_g_asset)
 
 # aspects
 scw.add_aspect(base_objects.TileMapDebug())
@@ -145,9 +132,9 @@ while SORA.RUNNING:
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
 
-    # render out frames from grasshandler assets
-    for x, frame in enumerate(_g_asset._rsequence):
-        SORA.FRAMEBUFFER.blit(frame.frame, (x * 16, 100))
+    # # render out frames from grasshandler assets
+    # for x, frame in enumerate(_g_asset._rsequence):
+    #     SORA.FRAMEBUFFER.blit(frame.frame, (x * 16, 100))
 
     # # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
     # for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):

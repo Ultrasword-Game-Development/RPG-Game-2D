@@ -12,6 +12,7 @@ import math
 from array import array
 import numpy as np
 
+import pygame
 import pygame.math as pgmath
 
 
@@ -136,7 +137,7 @@ class Texture:
         return cls.pg2gltex(surf, path)
 
     @classmethod
-    def pg2gltex(cls, surface, texname):
+    def pg2gltex(cls, surface: pygame.Surface, texname: str):
         """Converts pygame surface to moderngl texture."""
         c = 4
         if texname not in cls.TEXTURES:
@@ -148,7 +149,7 @@ class Texture:
         tdata = surface.get_view("1")
         cls.TEXTURES[texname].write(tdata)
         return cls.TEXTURES[texname]
-        return self.texture.height
+        # return self.texture.height
 
     # ------------------------------ #
     def __init__(self, texture):
@@ -175,7 +176,15 @@ class TextureHandler:
 
     def add_texture(self, texture):
         """Adds a texture to the handler"""
+        # check if Texture type
+        if not type(texture) == Texture and not type(texture) == moderngl.Texture:
+            raise Exception("Invalid texture type -- type provided: ", type(texture))
         self.textures.append(texture)
+    
+    def add_textures(self, textures: list):
+        """Adds a list of textures to the handler"""
+        for texture in textures:
+            self.add_texture(texture)
 
     def create_and_add_texture(self, path: str):
         """Create and add new texture"""
@@ -319,13 +328,16 @@ class Buffer:
     - handles buffers = vao, vbo, ibo, buffers!
     """
 
-    def __init__(self, parse: str, data: list, dynamic=False):
+    def __init__(self, parse: str, data: list, dynamic=False, create:bool=True):
         """Create a Buffer object"""
         self.rawbuf = data.copy()
         self.parse = parse
-        packed = struct.pack(parse, *self.rawbuf)
-        # create ctx buffer
-        self.buffer = ModernGL.CTX.buffer(packed, dynamic=dynamic)
+        if create: self.create()
+
+    def create(self):
+        """Create the buffer"""
+        packed = struct.pack(self.parse, *self.rawbuf)
+        self.buffer = ModernGL.CTX.buffer(packed)
 
     def get_buffer(self):
         """Get the buffer"""

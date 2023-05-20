@@ -345,6 +345,16 @@ class RotatedRegistry(SequenceRegistry):
     def angle(self, value):
         self._angle = value
 
+    # ------------------------------ #
+    def __iter__(self):
+        """Iterate over the frames in the sequence"""
+        return iter(self.parent)
+
+    def iterate_sprites(self):
+        """Iterate over the sprites in the sequence"""
+        for fdata in self.parent:
+            yield fdata.get_frame()
+
 
 class RotatedSequence(Sequence):
     @classmethod
@@ -389,6 +399,10 @@ class RotatedSequence(Sequence):
         """Get a sequence registry"""
         return RotatedRegistry(self, angle)
 
+    def __iter__(self):
+        """Iterate over the frames"""
+        return iter(self.sprite_sheet)
+    
     # ------------------------------ #
     def __len__(self):
         """Get the number of frames in the sequence"""
