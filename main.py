@@ -70,6 +70,8 @@ from scripts.entities import peasant
 from scripts.attacks import fireball, attacks, short_melee
 from scripts.environment import grass  # , ambient, wind
 
+from soragl.ui import ui
+
 # -------------------------------------------------------------- #
 
 sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
@@ -77,6 +79,7 @@ sc._config["chunkpixw"] = 500
 sc._config["chunkpixh"] = 500
 sc._config["render_distance"] = 2
 scw = sc.make_layer(sc.get_config(), 1)
+scui = ui.UI(sc.make_layer(sc.get_config(), 2))
 # scw.get_chunk(0, 0)
 BG_COL = (153, 220, 80)
 

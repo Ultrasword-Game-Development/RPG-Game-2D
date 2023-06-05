@@ -489,6 +489,10 @@ class Scene:
         """Add a layer to the scene"""
         layer = World(self, config, priority, **kwargs)
         layer.priority = priority
+        return self.add_layer(layer)
+
+    def add_layer(self, layer: World):
+        """Add a layer to the scene"""
         self._layers.append(layer)
         self._layers.sort(key=lambda x: x.priority, reverse=True)
         return layer
