@@ -96,7 +96,6 @@ class SpriteSheet:
 
     def __getitem__(self, index: int):
         """Get a frame at a specified index"""
-        # print(self.frames)
         return self.frames[index].get_frame()
 
     def __iter__(self):
@@ -357,7 +356,15 @@ class RotatedSequence(Sequence):
     def __init__(self, sequence: "Sequence", angle_range: tuple = (0, 360, 30)):
         super().__init__([], sequence._metadata)
         # angle range
-        self.angle_range = angle_range
+        self.angle_range = list(map(int, angle_range))
+        self._rcount = angle_range[1] // angle_range[2]
+        
+        # duration
+        self._o_size = len(sequence)
+        self._size = len(sequence) * self._rcount
+        self.duration = sequence.duration
+        # print(self._o_size, self._size, self._rcount, angle_range)
+
         # rotate frames - angles
         frames = sequence.sprite_sheet.frames
         for a in range(self.angle_range[0], self.angle_range[1], self.angle_range[2]):
@@ -366,9 +373,8 @@ class RotatedSequence(Sequence):
                 r_frame = pgtrans.rotate(frames[i].frame, a)
                 r_data = FrameData(r_frame, frames[i].duration, frames[i].order)
                 self.sprite_sheet.frames.append(r_data)
-        # duration
-        self.duration = sequence.duration
-        self._size = len(sequence)
+        
+        # print("frames", len(self.sprite_sheet.frames))
     
     # ------------------------------ #
     def get_frame_data(self, frame, angle: float=0):
@@ -376,14 +382,14 @@ class RotatedSequence(Sequence):
         # prob fix this 1:15am code
         offset = round(smath.__clamp__(angle % 360, 0, 360) / self.angle_range[2])
         # return super().get_frame_data(index * len(self) + offset)
-        return super().get_frame_data(offset * len(self) + frame)
+        return super().get_frame_data(offset * self._o_size + frame)
 
     def get_frame(self, frame: int, angle: float=0):
         """Get a frame at a specified index and angle"""
         # prob fix this 1:15am code
         offset = round(smath.__clamp__(angle % 360, 0, 360) / self.angle_range[2])
         # return super().get_frame(index + offset * len(self))
-        return super().get_frame(offset * len(self) + frame)
+        return super().get_frame(offset * self._o_size + frame)
 
     def get_registry(self, angle: float=0):
         """Get a sequence registry"""

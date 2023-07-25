@@ -28,8 +28,8 @@ class GrassAssets:
         # load animation
         self._animation = animation.Category.load_category(file)
         # original sequence
-        self._sequence = animation.Category.get_category_framedata(file) # get the first animation registry
-        self._sequence = list(self._sequence.values())[0]
+        # get the first animation registry
+        self._sequence = list(animation.Category.get_category_framedata(file).values())[0]
         # rotate the sequence
         self._rsequence = animation.RotatedSequence(self._sequence, self.rotation_range)
         self._raregist = self._rsequence.get_registry()

@@ -28,8 +28,7 @@ R_RENDER = 5
 
 
 # ------------------------------------------------------------ #
-# errors
-
+# errors  
 
 class MissingComponent(Exception):
     def __init__(self, *args):
@@ -54,7 +53,7 @@ class MissingSprite(Exception):
 
 class Sprite(scene.Component):
     def __init__(
-        self, width: int = 0, height: int = 0, sprite=None, scale_size: tuple = None
+        self, width: int = 0, height: int = 0, sprite=None, scale_size: tuple = None, flags: int = 0
     ):
         super().__init__()
         self.width = width
@@ -82,6 +81,7 @@ class Sprite(scene.Component):
 
         # flipping
         self._flip = False
+        self._flags = flags
 
     @property
     def flip(self):
@@ -92,6 +92,16 @@ class Sprite(scene.Component):
     def flip(self, value: bool):
         """Set flip"""
         self._flip = value
+
+    @property
+    def flags(self):
+        """Get flags"""
+        return self._flags
+    
+    @flags.setter
+    def flags(self, flags: int):
+        """Set the flags"""
+        self._flags = flags
 
     @property
     def sprite(self):
@@ -116,7 +126,7 @@ class Sprite(scene.Component):
                 f"The area {new_area} is not supported yet! {__file__} {__package__}"
             )
         self.width, self.height = new_area
-        self.sprite = SORA.scale_image(self.sprite, (self.width, self.height))
+        self.sprite = SORA.make_surface(self.width, self.height, flags=self._flags)
 
 
 class AnimatedSprite(Sprite):

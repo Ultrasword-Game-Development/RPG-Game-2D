@@ -16,6 +16,8 @@ from soragl import (
     statesystem,
 )
 
+from soragl.ui import ui
+
 # -------------------------------------------------------------- #
 # setup
 
@@ -28,6 +30,7 @@ FB_SIZE = [WW, int(WW / 16 * 9)]
 
 # ------------------------------ #
 # setup
+
 SORA.initialize(
     {
         "fps": 30,
@@ -70,7 +73,7 @@ from scripts.entities import peasant
 from scripts.attacks import fireball, attacks, short_melee
 from scripts.environment import grass  # , ambient, wind
 
-from soragl.ui import ui
+from scripts.ui import hotbar
 
 # -------------------------------------------------------------- #
 
@@ -78,10 +81,30 @@ sc = scene.Scene(config=scene.load_config(scene.Scene.DEFAULT_CONFIG))
 sc._config["chunkpixw"] = 500
 sc._config["chunkpixh"] = 500
 sc._config["render_distance"] = 2
-scw = sc.make_layer(sc.get_config(), 1)
-scui = ui.UI(sc.make_layer(sc.get_config(), 2))
+
+scw = sc.make_layer(sc.get_config(), 1, [
+    base_objects.TileMapDebug(),
+    base_objects.SpriteRendererAspect(),
+    base_objects.Collision2DAspect(),
+    # base_objects.Collision2DRendererAspectDebug(),
+    # base_objects.Area2DAspect(),
+    base_objects.Area2DRendererAspectDebug(),
+    base_objects.ScriptAspect(),
+    statesystem.StateHandlerAspect(),
+    base_objects.CameraAspect(),
+])
+
+scui = sc.make_layer(sc.get_config(), 0, [
+    ui.UIRendererAspect(),
+    base_objects.ScriptAspect(),
+], ui.UI)
+
+
 # scw.get_chunk(0, 0)
 BG_COL = (153, 220, 80)
+
+# -------------------------------- #
+# add to scw -- game world
 
 # -- add entities
 # particle handler test
@@ -92,6 +115,7 @@ ph["interval"] = 1 / 15
 # === singletons
 singleton.PLAYER = scw.add_entity(player.Player())
 singleton.CAMERA = singleton.PLAYER.add_component(base_objects.Camera2D())
+
 # player
 singleton.PLAYER.position += (100, 100)
 ph.add_collider(singleton.PLAYER.rect)
@@ -118,21 +142,21 @@ for x in range(-1, 2):
         _g_asset.position = _chunk.rect.topleft
         scw.add_entity(_g_asset)
 
-# aspects
-scw.add_aspect(base_objects.TileMapDebug())
-scw.add_aspect(base_objects.SpriteRendererAspect())
-scw.add_aspect(base_objects.Collision2DAspect())
-# scw.add_aspect(base_objects.Collision2DRendererAspectDebug())
-# scw.add_aspect(base_objects.Area2DAspect())
-scw.add_aspect(base_objects.Area2DRendererAspectDebug())
-scw.add_aspect(base_objects.ScriptAspect())
-scw.add_aspect(statesystem.StateHandlerAspect())
-scw.add_aspect(base_objects.CameraAspect())
 
+# -------------------------------- #
+# add to scui - ui layer
+
+ui_hot = scui.add_entity(hotbar.Hotbar())
+ui_hot.position += (200, 200)
+
+ui_icon = scui.add_entity(hotbar.UIIcon())
+
+
+# -------------------------------- #
 # push scene
 scene.SceneHandler.push_scene(sc)
 
-_g_asset = grass.GrassAssets("assets/sprites/grass.json")
+
 
 # -------------------------------------------------------------- #
 # game loop
@@ -147,10 +171,6 @@ while SORA.RUNNING:
 
     if SORA.is_key_clicked(pygame.K_d) and SORA.is_key_pressed(pygame.K_LSHIFT):
         SORA.DEBUG = not SORA.DEBUG
-
-    # render out frames from grasshandler assets
-    for x, frame in enumerate(_g_asset._rsequence):
-        SORA.FRAMEBUFFER.blit(frame.frame, (x * 16, 100))
 
     # # render out frames from animation.Category.get_registries_for_all(player.ANIM_CAT)
     # for y, anim in enumerate(animation.Category.get_registries_for_all(player.ANIM_CAT).values()):

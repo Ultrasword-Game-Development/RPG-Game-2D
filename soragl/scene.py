@@ -485,10 +485,13 @@ class Scene:
         self._new_entities = set()
         self._remove_entities = set()
 
-    def make_layer(self, config: dict, priority: int = 0, **kwargs):
+    def make_layer(self, config: dict, priority: int = 0, aspects: list = [], _type: "class" = World, **kwargs):
         """Add a layer to the scene"""
-        layer = World(self, config, priority, **kwargs)
+        layer = _type(self, config, priority, **kwargs)
         layer.priority = priority
+        # if aspects
+        for asp in aspects:
+            layer.add_aspect(asp)
         return self.add_layer(layer)
 
     def add_layer(self, layer: World):
