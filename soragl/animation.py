@@ -106,7 +106,7 @@ class SpriteSheet:
 # frame registry
 
 class SequenceRegistry:
-    def __init__(self, parent):
+    def __init__(self, parent: "Sequence"):
         """Allows access to animation sequence"""
         self.parent = parent
         self.findex = 0
@@ -301,7 +301,7 @@ class Category:
         }
         
     @classmethod
-    def get_category_framedata(cls, filename: str) -> {"Animatino Name": "Sequence"}:
+    def get_category_framedata(cls, filename: str) -> {"Animation Name": "Sequence"}:
         """Return the animation parsed framedata"""
         return cls.SEQUENCES[filename]["framedata"]
 
@@ -364,6 +364,8 @@ class RotatedSequence(Sequence):
         self._size = len(sequence) * self._rcount
         self.duration = sequence.duration
         # print(self._o_size, self._size, self._rcount, angle_range)
+        self.width = 0
+        self.height = 0
 
         # rotate frames - angles
         frames = sequence.sprite_sheet.frames
@@ -373,8 +375,13 @@ class RotatedSequence(Sequence):
                 r_frame = pgtrans.rotate(frames[i].frame, a)
                 r_data = FrameData(r_frame, frames[i].duration, frames[i].order)
                 self.sprite_sheet.frames.append(r_data)
+                # add to width // height
+                self.width += r_frame.get_width()
+                # print(r_frame)
+            self.height += r_frame.get_height()
         
         # print("frames", len(self.sprite_sheet.frames))
+        
     
     # ------------------------------ #
     def get_frame_data(self, frame, angle: float=0):
@@ -387,6 +394,7 @@ class RotatedSequence(Sequence):
     def get_frame(self, frame: int, angle: float=0):
         """Get a frame at a specified index and angle"""
         # prob fix this 1:15am code
+        # print(frame, angle, self._o_size)
         offset = round(smath.__clamp__(angle % 360, 0, 360) / self.angle_range[2])
         # return super().get_frame(index + offset * len(self))
         return super().get_frame(offset * self._o_size + frame)
@@ -398,5 +406,5 @@ class RotatedSequence(Sequence):
     # ------------------------------ #
     def __len__(self):
         """Get the number of frames in the sequence"""
-        return self._size
+        return self._o_size
 

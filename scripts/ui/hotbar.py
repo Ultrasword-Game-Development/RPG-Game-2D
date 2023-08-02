@@ -38,7 +38,7 @@ class Hotbar(ui.UIObject):
 class UIIcon(ui.UIObject):
     def __init__(self, name: str = "UIObject"):
         super().__init__(name)
-        self.c_sprite.area = (16 * 3, 16 * 8)
+        self.c_sprite.area = (fireball.F_ANIM_CACHE.height, fireball.F_ANIM_CACHE.width)
         for y in range(8):
             for x in range(3):
                 self.c_sprite.sprite.blit(fireball.F_ANIM_CACHE.get_frame(x, 45 * y), (x * 16, y * 16))
