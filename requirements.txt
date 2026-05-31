@@ -1,0 +1,12 @@
+# Recommended Python: 3.10–3.12 (pygame-ce supports 3.10+).
+# pygame-ce is a drop-in replacement for pygame — code still uses `import pygame`.
+# This project relies on the WINDOWRESIZED window event (pygame/pygame-ce 2.x).
+# Do not install both pygame and pygame-ce; they conflict.
+
+pygame-ce>=2.5.0
+PyOpenGL>=3.1.6
+numpy>=1.21
+
+# Optional: C extension that speeds up PyOpenGL. Needs a compiler to build on
+# some platforms/Python versions, so it is left out of the hard requirements.
+# PyOpenGL-accelerate>=3.1.6
